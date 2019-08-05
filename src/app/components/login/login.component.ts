@@ -16,7 +16,7 @@ export class LoginComponent implements OnInit {
   constructor(private http:HttpClient) { }
   
   login(){
-    this.http.post('http://192.168.0.2:8080/auth',{
+    this.http.post('52.15.193.254:8080/auth',{
          email:this.email,
          pass:this.password,
          nombre:'Diego'

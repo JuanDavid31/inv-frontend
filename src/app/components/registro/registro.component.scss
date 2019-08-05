@@ -1,18 +1,16 @@
-body,
 html {
   margin: 0;
   padding: 0;
   height: 100%;
-  background:  #0C5F97;
-  height: 100%;
-  min-width: 100%;
+  background: #F2F6F6;
+  background-image:url('https://storage.googleapis.com/efor-static/UIBG/Cloudkey%20estudiantes/bg-02.jpg')!important;
 }
 .user_card {
-  height: 400px!important;
-  width: 350px !important;
+  height: 500px !important;
+  width: 400px!important;
   margin-top: auto;
   margin-bottom: auto;
-  background: #B9CBD7 !important;
+  background: #CAD1D1;
   position: relative;
   display: flex;
   justify-content: center;
@@ -24,33 +22,13 @@ html {
   border-radius: 5px;
 
 }
-.brand_logo_container {
-  position: absolute;
-  height: 170px;
-  width: 170px;
-  top: -75px;
-  border-radius: 50%;
-  background: #0C5F97;
-  padding: 10px;
-  text-align: center;
-}
-.brand_logo {
-  height: 150px;
-  width: 150px;
-  border-radius: 50%;
-  border: 2px solid white;
-}
 .form_container {
-  margin-top: 100px;
+  margin-top: 40px !important;
 }
 .login_btn {
   width: 100%;
-  background: #05376c;
+  background: #05376c !important;
   color: white !important;
-}
-
-.login_btn:hover{
-  background-color: #0C5F97;
 }
 .login_btn:focus {
   box-shadow: none !important;
@@ -65,13 +43,11 @@ html {
   border: 0 !important;
   border-radius: 0.25rem 0 0 0.25rem !important;
 }
-.input_user,
+.input_text,
 .input_pass:focus {
-  background-color:white;
-  box-shadow: none !important;
-  outline: 0px !important;
+ background-color: white;
+ outline: 0px !important;
 }
-
 .custom-checkbox .custom-control-input:checked~.custom-control-label::before {
   background-color: #05376c !important;
 }
