@@ -4,7 +4,15 @@ body,
     padding: 0;
     height: 100%;
     background: #F2F6F6;
-    background-image:url('https://storage.googleapis.com/efor-static/UIBG/Cloudkey%20estudiantes/bg-02.jpg');
+  }
+
+  .container.h-100{
+    background-image: url(https://storage.googleapis.com/efor-static/UIBG/Cloudkey%20estudiantes/bg-02.jpg);
+    margin-left: 0px;
+    margin-right: 0px;
+    max-width: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
   }
   
   .user_card {
@@ -27,6 +35,25 @@ body,
   .form_container {
     margin-top: 40px !important;
   }
+
+  .form-control, .is-focused .form-control {
+    background-image: none;
+    padding: .375rem .75rem;
+  }
+  
+  .custom-checkbox.custom-control{
+      display: flex;
+      align-items: center;
+  }
+  
+  .custom-checkbox.custom-control .custom-control-label{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: black;
+  }
+
   .login_btn {
     width: 100%;
     background: #05376c !important;
@@ -40,7 +67,7 @@ body,
     padding: 0 2rem;
   }
   .input-group-text {
-    width: 100 !important;  
+    padding: 0px 15px 0px 15px;
     background: #05376c !important;
     color: white !important;
     border: 0 !important;

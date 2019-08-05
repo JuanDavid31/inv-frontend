@@ -22,22 +22,13 @@ legend {
 }
 
 a{
-  color: $link-color;
+  color: #007bff;
   &:hover,
   &:focus{
-      color: darken($link-color, 5%);
-      text-decoration: none;
+      color: #0056b3;
+      text-decoration: underline;
   }
 
-  &.text-info{
-      &:hover, &:focus{
-          color: darken($brand-info, 5%);
-      }
-  }
-
-  & .material-icons {
-    vertical-align: middle;
-  }
 }
 
 .form-check,

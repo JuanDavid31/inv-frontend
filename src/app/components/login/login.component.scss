@@ -72,6 +72,24 @@ html {
   outline: 0px !important;
 }
 
+.form-control, .is-focused .form-control {
+  background-image: none;
+  padding: .375rem .75rem;
+}
+
+.custom-checkbox.custom-control{
+    display: flex;
+    align-items: center;
+}
+
+.custom-checkbox.custom-control .custom-control-label{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: black;
+}
+
 .custom-checkbox .custom-control-input:checked~.custom-control-label::before {
   background-color: #05376c !important;
 }
