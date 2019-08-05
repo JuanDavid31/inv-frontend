@@ -63,6 +63,8 @@ html {
   width: 100%;
   background: #05376c !important;
   color: white !important;
+  text-transform: none;
+  font-size: 16px;
 }
 .login_btn:focus {
   box-shadow: none !important;
@@ -81,6 +83,7 @@ html {
 .input_pass:focus {
  background-color: white;
  outline: 0px !important;
+ font-size: 16px;
 }
 .custom-checkbox .custom-control-input:checked~.custom-control-label::before {
   background-color: #05376c !important;

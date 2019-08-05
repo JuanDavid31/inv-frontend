@@ -47,6 +47,8 @@ html {
   width: 100%;
   background: #05376c;
   color: white !important;
+  text-transform: none;
+  font-size: 16px;
 }
 
 .login_btn:hover{
@@ -70,6 +72,7 @@ html {
   background-color:white;
   box-shadow: none !important;
   outline: 0px !important;
+  font-size: 16px;
 }
 
 .form-control, .is-focused .form-control {
@@ -88,6 +91,7 @@ html {
     align-items: center;
     height: 100%;
     color: black;
+    font-size: 16px;
 }
 
 .custom-checkbox .custom-control-input:checked~.custom-control-label::before {
