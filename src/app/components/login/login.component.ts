@@ -22,11 +22,11 @@ export class LoginComponent implements OnInit {
          email:this.email,
          pass:this.password,
          
-    })/* .pipe(
+    }) .pipe(
        
       catchError(err => of([]))
 
-    ) */.subscribe((data:any) => {
+    ) .subscribe((data:any) => {
       
       console.log(data)
       this.router.navigate(["/dashboard"]);
