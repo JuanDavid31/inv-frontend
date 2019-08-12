@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { catchError} from 'rxjs/operators';
+import { of } from 'rxjs';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -13,15 +15,24 @@ export class LoginComponent implements OnInit {
   email:string;
   password:string;
 
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient,private router:Router) { }
   
   login(){
-    this.http.post('52.15.193.254:8080/auth',{
+    this.http.post('http://3.130.29.100:8080/auth',{
          email:this.email,
          pass:this.password,
-         nombre:'Diego'
-    }).subscribe((data:any) => {
+         
+    })/* .pipe(
+       
+      catchError(err => of([]))
+
+    ) */.subscribe((data:any) => {
+      
       console.log(data)
+      this.router.navigate(["/dashboard"]);
+
+     
+
     })
   }
 

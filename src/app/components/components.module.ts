@@ -17,8 +17,7 @@ import { RecuperarComponent } from './recuperar/recuperar.component';
     FooterComponent,
     NavbarComponent,
     SidebarComponent,
-    RegistroComponent,
-    RecuperarComponent
+   
   ],
   exports: [
     FooterComponent,

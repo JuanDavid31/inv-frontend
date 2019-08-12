@@ -24,6 +24,8 @@ import {
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './components/login/login.component';
 import { HttpClientModule } from '@angular/common/http';
+import { RegistroComponent } from './components/registro/registro.component';
+import { RecuperarComponent } from './components/recuperar/recuperar.component';
 
 @NgModule({
   imports: [
@@ -43,6 +45,9 @@ import { HttpClientModule } from '@angular/common/http';
     AppComponent,
     AdminLayoutComponent,
     LoginComponent,
+    RegistroComponent,
+    RecuperarComponent
+    
 
   ],
   providers: [],
