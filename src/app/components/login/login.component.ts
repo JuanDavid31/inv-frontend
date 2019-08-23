@@ -23,13 +23,13 @@ export class LoginComponent {
       pass: this.password
     }).pipe(catchError(err => of(err)))
       .subscribe((data: any) => {
-        console.log(data)
+        console.log(data.nombres)
         if (data.error) { //Si contiene error, contraseña o usuario incorrecto.
-
+          alert("Contraseña o usuario incorrectos")
         } else {
           //* Loggeo exitoso.
           //TODO: Guardar el TOKEN en el localstorage
-          this.router.navigateByUrl("/dashboard");
+          /*this.router.navigateByUrl("/dashboard");*/
         }
       })
   }

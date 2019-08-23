@@ -18,7 +18,9 @@ export class RecuperarComponent implements OnInit {
     this.http.post(`http://3.130.29.100:8080/auth/pass?email=${this.correo}`, {})
       .pipe(catchError(error => of(error)))
       .subscribe((data: any) => {
+        alert("El correo se envió exitosamente")
         console.log(data)
+        
         if (data.error) {
 
         } else {

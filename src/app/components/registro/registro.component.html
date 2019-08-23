@@ -10,26 +10,44 @@
       <div class="input-group-append">
         <span class="input-group-text"><i class="fas fa-user"></i></span>
       </div>
-      <input type="text" name="user" class="form-control input_text" value="" placeholder="Nombres " [(ngModel)]="nombres" >
+      <input type="text" name="user" id="user" #user="ngModel" class="form-control input_text" value="" placeholder="Nombres " [(ngModel)]="nombres" minlength="8"maxlength="40" required>
+      
     </div>
+    <div *ngIf="user.touched">
+      <div *ngIf="user?.errors.required">
+              <a>Nombres no puede estar vacio </a>
+      </div>
+    </div>
+    
     <div class="input-group mb-2">
       <div class="input-group-append">
         <span class="input-group-text"><i class="fas fa-user"></i></span>
       </div>
-      <input type="text" name="user" class="form-control input_text" value="" placeholder="Apellidos" [(ngModel)]="apellidos">
+      <input type="text" name="ape" #ape="ngModel" id="ape"  class="form-control input_text" value="" placeholder="Apellidos" [(ngModel)]="apellidos" minlength="8" maxlength="40" required>
+    </div>
+    <div *ngIf= "ape.touched">
+      <div *ngIf="ape?.errors.required" > Apellidos no puede estar vacio</div>
     </div>
     <div class="input-group mb-2">
       <div class="input-group-append">
         <span class="input-group-text"><i class="fas fa-envelope"></i></span >
       </div>
-      <input type="text" name="password" class="form-control input_text" value="" placeholder="Correo" [(ngModel)]="correo">
+      <input type="text" id="email" name="email" #email="ngModel" class="form-control input_text" value="" placeholder="Correo" [(ngModel)]="correo" minlength="8" maxlength="40" required>
+    </div>
+    
+    <div *ngIf= "email.touched">
+      <div *ngIf="email?.errors.required" > El correo no puede estar vacio</div>
     </div>
     
     <div class="input-group mb-2">
       <div class="input-group-append">
         <span class="input-group-text"><i class="fas fa-key"></i></span>
       </div>
-      <input type="password" name="password" class="form-control input_text" value="" placeholder="Contraseña" [(ngModel)]="password">
+      <input type="password" name="contra" #contra="ngModel" id= "contra" class="form-control input_text" value="" placeholder="Contraseña" [(ngModel)]="password" minlength="8" maxlength="40" required>
+    </div>
+    <div *ngIf= "contra.touched && !contra.valid">
+      <div *ngIf="contra?.errors.required" > Contraseña no puede estar vacio</div>
+      <div *ngIf="contra?.errors.minlength" > La contraseña debe tener minimo 8 caracteres</div>
     </div>
     <div class="input-group mb-2">
       <div class="input-group-append">

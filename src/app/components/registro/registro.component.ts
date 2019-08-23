@@ -25,12 +25,21 @@ export class RegistroComponent implements OnInit {
       pass: this.password,
     }).pipe(catchError(err => of(err)))
       .subscribe((data: any) => {
+
+        if(this.password!=this.password2){
+          alert("deben coincidar ambas contraseñas")
+        }
+        
+        
+        alert("Se ha registrado exitosamente")
         console.log(data)
         if (data.error) {
-
+           
         } else {
 
         }
+        
+        
       })
   }
 
