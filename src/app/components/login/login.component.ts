@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { LocalStorageService } from '../../services/localstorage/local-storage.service';
 
 
 @Component({
@@ -15,20 +16,22 @@ export class LoginComponent {
   email: string;
   password: string;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient,
+    private serviciosLocalStorage: LocalStorageService,
+    private router: Router) { }
 
   login() {
     this.http.post('http://3.130.29.100:8080/auth', {
       email: this.email,
       pass: this.password
     }).pipe(catchError(err => of(err)))
-      .subscribe((data: any) => {
-        console.log(data.nombres)
-        if (data.error) { //Si contiene error, contraseña o usuario incorrecto.
+      .subscribe((res: any) => {
+        if (res.error) { //Si contiene error, contraseña o usuario incorrecto.
           alert("Contraseña o usuario incorrectos")
         } else {
           //* Loggeo exitoso.
-          //TODO: Guardar el TOKEN en el localstorage
+
+          this.serviciosLocalStorage.guardarDatos(res);
           /*this.router.navigateByUrl("/dashboard");*/
         }
       })
