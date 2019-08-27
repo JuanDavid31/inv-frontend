@@ -58,13 +58,13 @@
           <form  >
               <div class="form-group">
                 <label for="nombreProblema">Nombre</label>
-                <input type="text" id="nombreProblema" class="form-control">
+                <input type="text" id="nombreProblema" class="form-control" [(ngModel)]="nombreX">
               </div>
               <div class="form-group">
                   <label for="descripcion">Descripción</label>
-                  <textarea id="Descripcion" cols="55" rows="5" class="form-control"></textarea>
+                  <textarea id="Descripcion" cols="55" rows="5" class="form-control" [(ngModel)]="descripcionX"></textarea>
                 </div>
-                <button tyle="button" class="btn btn-info" >Crear</button>
+                <button tyle="button" class="btn btn-info" (click)="crearProblematica()">Crear</button>
           </form>
         </div>
       </div>

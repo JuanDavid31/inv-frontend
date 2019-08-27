@@ -18,7 +18,11 @@ export class LoginComponent {
 
   constructor(private http: HttpClient,
     private serviciosLocalStorage: LocalStorageService,
-    private router: Router) { }
+    private router: Router) { 
+     
+
+
+    }
 
   login() {
     this.http.post('http://3.130.29.100:8080/auth', {
@@ -32,7 +36,8 @@ export class LoginComponent {
           //* Loggeo exitoso.
 
           this.serviciosLocalStorage.guardarDatos(res);
-          /*this.router.navigateByUrl("/dashboard");*/
+          console.log(this.serviciosLocalStorage.darEmail());
+          this.router.navigateByUrl("/dashboard");
         }
       })
   }

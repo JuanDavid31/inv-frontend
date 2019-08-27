@@ -1,5 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import * as Chartist from 'chartist';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { Http,Headers } from '@angular/http';
+import { of } from 'rxjs';
+import { LocalStorageService } from '../services/localstorage/local-storage.service';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -8,7 +14,33 @@ import * as Chartist from 'chartist';
 })
 export class DashboardComponent implements OnInit {
 
-  constructor() { }
+nombreX: string
+descripcionX: string
+headers= new HttpHeaders({'Content-Type': 'application/jason',});
+
+  constructor(private http: HttpClient,private serviciosLocalStorage: LocalStorageService,) { 
+
+  }
+
+  crearProblematica(){
+    const options ={
+      headers:this.headers
+    }
+    this.http.post('http://3.130.29.100:8080/personas/'+this.serviciosLocalStorage.darEmail()+'/problematicas', {
+      nombre: this.nombreX,
+      descripcion: this.descripcionX
+  },options).pipe(catchError(err => of(err)))
+  .subscribe((res: any) => {
+    if (res.error) { //Si contiene error, contraseña o usuario incorrecto.
+      alert("Hubo un error")
+    } else {
+      alert("Se ha creado correctamente")
+
+      
+      
+    }
+  })
+}
   startAnimationForLineChart(chart){
       let seq: any, delays: any, durations: any;
       seq = 0;
@@ -66,6 +98,10 @@ export class DashboardComponent implements OnInit {
       seq2 = 0;
   };
   ngOnInit() {
+
+    this.headers.append("Content-Type","aplication/jason");
+    this.headers.append("Authorization", this.serviciosLocalStorage.darToken());
+
       /* ----------==========     Daily Sales Chart initialization For Documentation    ==========---------- */
 
       const dataDailySalesChart: any = {
