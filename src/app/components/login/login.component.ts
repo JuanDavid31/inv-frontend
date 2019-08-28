@@ -18,11 +18,11 @@ export class LoginComponent {
 
   constructor(private http: HttpClient,
     private serviciosLocalStorage: LocalStorageService,
-    private router: Router) { 
-     
+    private router: Router) {
 
 
-    }
+
+  }
 
   login() {
     this.http.post('http://3.130.29.100:8080/auth', {
@@ -30,13 +30,10 @@ export class LoginComponent {
       pass: this.password
     }).pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
-        if (res.error) { //Si contiene error, contraseña o usuario incorrecto.
+        if (res.error) {
           alert("Contraseña o usuario incorrectos")
         } else {
-          //* Loggeo exitoso.
-
           this.serviciosLocalStorage.guardarDatos(res);
-          console.log(this.serviciosLocalStorage.darEmail());
           this.router.navigateByUrl("/dashboard");
         }
       })
