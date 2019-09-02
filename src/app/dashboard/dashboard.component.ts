@@ -14,6 +14,7 @@ import { LocalStorageService } from '../services/localstorage/local-storage.serv
 })
 export class DashboardComponent implements OnInit {
 
+  problematicas = [];
   nombreX: string
   descripcionX: string
 
@@ -22,8 +23,6 @@ export class DashboardComponent implements OnInit {
     private serviciosLocalStorage: LocalStorageService) { }
 
   ngOnInit() {
-
-
     this.cargarProblematicas();
   }
 
@@ -38,12 +37,10 @@ export class DashboardComponent implements OnInit {
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         console.log(res);
-
         if (res.error) {
           alert("Hubo un error");
         } else {
-          //* Llegaron las problematicas.
-          console.log(res);
+          this.problematicas = res;
         }
       })
   }
@@ -59,14 +56,13 @@ export class DashboardComponent implements OnInit {
       descripcion: this.descripcionX
     }, options).pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
+        console.log(res);
         if (res.error) { //Si contiene error, contraseña o usuario incorrecto.
           alert("Hubo un error")
         } else {
-          alert("Se ha creado correctamente")
-
+          this.problematicas.unshift(res);
+          //TODO: Cerrar modal.
         }
       })
   }
-
-
 }

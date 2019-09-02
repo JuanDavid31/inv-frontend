@@ -1,66 +1,48 @@
 <div class="main-content">
   <div class="container-fluid">
     <div class="row">
-
-      <div class="row">
-        <div class="col-md-4">
-
-          <div class="card card-chart">
-            <div class="card-header ">
-              <img src="./assets/img/mas-final.png" class="card-img-top img-fluid">
-              <div class="ct-chart" id=""></div>
-            </div>
-            <div class="card-body">
-              <a href="#problematica" class="btn btn-info" data-toggle="modal">Crear problematica</a>
-
-            </div>
-
-            <div class="card-footer">
-              <div class="stats">
-                <i class="material-icons">access_time</i> updated 4 minutes ago
-              </div>
+      <div class="col-md-4">
+        <div class="card card-chart">
+          <div class="card-header ">
+            <img src="./assets/img/mas-final.png" class="card-img-top img-fluid">
+            <div class="ct-chart" id=""></div>
+          </div>
+          <div class="card-body">
+            <a href="#problematica" class="btn btn-info" data-toggle="modal">Crear problematica</a>
+          </div>
+          <div class="card-footer">
+            <div class="stats">
+              <i class="material-icons">access_time</i> updated 4 minutes ago
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        </div>
+        <div *ngFor="let problematica of problematicas" class="col-md-4">
           <div class="card card-chart">
             <div class="card-header ">
               <img src="./assets/img/unibague.png" class="card-img-top img-fluid">
               <div class="ct-chart" id=""></div>
             </div>
             <div class="card-body">
-              <h4 class="card-title">Maneras de recorrer una finca</h4>
-              <p class="card-category">Creado por Ivan Hernandez</p>
+              <h4 class="card-title">{{problematica.nombre}}</h4>
+              <p class="card-category">{{problematica.descripcion}}</p>
             </div>
             <div class="card-footer">
               <div class="stats">
-                <i class="material-icons">access_time</i> campaign sent 2 days ago
+                <i class="material-icons">access_time</i>Fecha de creación {{problematica.fechaCreacion}}
               </div>
             </div>
           </div>
         </div>
-
-      </div>
-<<<<<<< HEAD
-      
-  </div>
-  <div class="modal fade" id="problematica" style="width: 600">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content" >
-=======
->>>>>>> 639d9056d43bc22d109a1104a57a9c2077299891
-
     </div>
     <div class="modal fade" id="problematica">
       <div class="modal-dialog">
         <div class="modal-content">
-
           <!-- contenido del titulo -->
           <div class="modal-header" style="color:white; background: #00bcd4 ">
             <h4 class="modal-tittle"> Crear problemática</h4>
             <button tyle="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           </div>
-
           <!-- contenido de la ventana-->
           <div class="modal-body">
             <form>
@@ -70,8 +52,7 @@
               </div>
               <div class="form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea id="Descripcion" cols="55" rows="5" class="form-control" [(ngModel)]="descripcionX"
-                  name="descripcionXInput"></textarea>
+                <textarea id="Descripcion" cols="55" rows="5" class="form-control" [(ngModel)]="descripcionX" name="descripcionXInput"></textarea>
               </div>
               <button tyle="button" class="btn btn-info" (click)="crearProblematica()">Crear</button>
             </form>
@@ -80,3 +61,4 @@
       </div>
     </div>
   </div>
+</div>
