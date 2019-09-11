@@ -15,8 +15,12 @@ import { LocalStorageService } from '../services/localstorage/local-storage.serv
 export class DashboardComponent implements OnInit {
 
   problematicas = [];
+  invitaciones=[];
   nombreX: string
   descripcionX: string
+  correoAInvitar:string;
+  esInter:boolean;
+  elId;
 
   constructor(
     private http: HttpClient,
@@ -44,6 +48,28 @@ export class DashboardComponent implements OnInit {
         }
       })
   }
+  
+  cargarInvitados(id){
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    this.http
+      .get('http://3.130.29.100:8080/problematicas/'+id +'/personas/'+ this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
+      .pipe(catchError(err => of(err)))
+      .subscribe(res => {
+        console.log(res);
+        if (res.error) {
+          alert("Hubo un error");
+        } else {
+          this.invitaciones = res;
+        }
+      })
+      this.elId=id;
+    
+    
+  }
 
   crearProblematica() {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
@@ -61,6 +87,67 @@ export class DashboardComponent implements OnInit {
           alert("Hubo un error")
         } else {
           this.problematicas.unshift(res);
+          //TODO: Cerrar modal.
+        }
+      })
+  }
+  
+  cambiarCorreoAInvitar(emailUsuarioAInvitar: string){
+    
+    this.correoAInvitar=emailUsuarioAInvitar;
+    
+  }
+  
+  prueba(){
+     this.correoAInvitar="diego.alejandro.pezapata@gmail.com";
+    
+  }
+  
+  
+  invitar(){
+    
+    console.log(this.correoAInvitar)
+    
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    this.http.post('http://3.130.29.100:8080/invitaciones', {
+      idProblematica: this.elId,
+      emailRemitente: this.serviciosLocalStorage.darEmail() ,
+      emailDestinatario:this.correoAInvitar,
+      paraInterventor:this.esInter
+    }).pipe(catchError(err => of(err)))
+      .subscribe((res: any) => {
+        if (res.error) {
+          alert("Pailas")
+        } else {
+         alert("Se ha invitado correctamente");
+          //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
+        
+        }
+      })
+  }
+  
+  usuariosBuscados = []
+  
+  buscarUsuarios(patron){
+    if(patron.length < 5)return;
+    
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    this.http.get(`http://3.130.29.100:8080/personas/${patron}?id-problematica=${this.elId}`, options)
+      .pipe(catchError(err => of(err)))
+      .subscribe((res: any) => {
+        console.log(res);
+        if (res.error) { //Si contiene error, contraseña o usuario incorrecto.
+          alert("Hubo un error")
+        } else {
+          this.usuariosBuscados = res
           //TODO: Cerrar modal.
         }
       })
