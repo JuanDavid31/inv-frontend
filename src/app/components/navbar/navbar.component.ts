@@ -2,6 +2,11 @@ import { Component, OnInit, ElementRef } from '@angular/core';
 import { ROUTES } from '../sidebar/sidebar.component';
 import {Location, LocationStrategy, PathLocationStrategy} from '@angular/common';
 import { Router } from '@angular/router';
+import * as Chartist from 'chartist';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { Http, Headers } from '@angular/http';
+import { of } from 'rxjs';
 import { LocalStorageService } from '../../services/localstorage/local-storage.service';
 
 @Component({
@@ -16,13 +21,18 @@ export class NavbarComponent implements OnInit {
     private toggleButton: any;
     private sidebarVisible: boolean;
     
+    invitaciones=[];
+    cantidad;
+    
 
-    constructor(location: Location,  private element: ElementRef,private serviciosLocalStorage: LocalStorageService, private router: Router) {
+    constructor(location: Location,  private element: ElementRef,private serviciosLocalStorage: LocalStorageService, private router: Router, private http: HttpClient) {
       this.location = location;
           this.sidebarVisible = false;
     }
 
     ngOnInit(){
+        this.cargarInvitaciones();
+        this.cantidad=this.invitaciones.length;
       this.listTitles = ROUTES.filter(listTitle => listTitle);
       const navbar: HTMLElement = this.element.nativeElement;
       this.toggleButton = navbar.getElementsByClassName('navbar-toggler')[0];
@@ -35,6 +45,29 @@ export class NavbarComponent implements OnInit {
          }
      });
     }
+    
+    cargarInvitaciones(){
+         const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    this.http
+      .get('http://3.130.29.100:8080/personas/'+ this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
+      .pipe(catchError(err => of(err)))
+      .subscribe(res => {
+        console.log(res);
+        if (res.error) {
+          alert("Hubo un error");
+        } else {
+          this.invitaciones = res;
+        this.cantidad+=this.invitaciones.length;
+          
+        }
+      })
+    }
+    
+    
 
     sidebarOpen() {
         const toggleButton = this.toggleButton;

@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
   correoAInvitar:string;
   esInter:boolean;
   elId;
+  elIdInvi:number;
 
   constructor(
     private http: HttpClient,
@@ -87,6 +88,7 @@ export class DashboardComponent implements OnInit {
           alert("Hubo un error")
         } else {
           this.problematicas.unshift(res);
+          alert("Se ha creado correctamente")
           //TODO: Cerrar modal.
         }
       })
@@ -98,11 +100,32 @@ export class DashboardComponent implements OnInit {
     
   }
   
-  prueba(){
-     this.correoAInvitar="diego.alejandro.pezapata@gmail.com";
+  prueba(id){
+    this.elIdInvi=id;
+     console.log(this.elIdInvi);
     
   }
   
+  eliminarInvitacion(id){
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+
+    const options = {
+      headers: headers
+    }
+    this.http.delete('http://3.130.29.100:8080/invitaciones/'+id, {
+      
+    }).pipe(catchError(err => of(err)))
+      .subscribe((res: any) => {
+        if (res.error) {
+          alert("no papi")
+        } else {
+         alert("Se ha eliminado correctamente");
+          //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
+          //TODO: Arreglar la persona invitada al array invitaciones
+        }
+      })
+  }
   
   invitar(){
     
@@ -125,7 +148,7 @@ export class DashboardComponent implements OnInit {
         } else {
          alert("Se ha invitado correctamente");
           //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
-        
+          //TODO: Arreglar la persona invitada al array invitaciones
         }
       })
   }
@@ -140,12 +163,16 @@ export class DashboardComponent implements OnInit {
     const options = {
       headers: headers
     }
-    this.http.get(`http://3.130.29.100:8080/personas/${patron}?id-problematica=${this.elId}`, options)
+    
+    const url = `http://3.130.29.100:8080/problematicas/${this.elId}/personas` +
+        `?email=${patron}&email-remitente=${this.serviciosLocalStorage.darEmail()}`;
+    
+    this.http.get(url, options)
       .pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
         console.log(res);
         if (res.error) { //Si contiene error, contraseña o usuario incorrecto.
-          alert("Hubo un error")
+          alert(res.error);
         } else {
           this.usuariosBuscados = res
           //TODO: Cerrar modal.
