@@ -95,7 +95,37 @@ export class NotificationsComponent implements OnInit {
       if (res.error) {
         alert("Error")
       } else {
-       alert("has aceptado la invirtacion");
+       alert("has aceptado la invitacion");
+        //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
+        //TODO: Arreglar la persona invitada al array invitaciones
+      }
+    })
+  }
+  
+  rechazarInvitacion(invitacion){
+    
+    this.decision=false;
+
+    const { idInvitacion, idProblematica, emailRemitente, emailDestinatario, paraInterventor } = invitacion;
+
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    
+    this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${this.decision}`, {
+      idProblematica,
+      emailRemitente,
+      emailDestinatario: this.serviciosLocalStorage.darEmail(),
+      paraInterventor
+    }, options).pipe(catchError(err => of(err)))
+      .subscribe((res: any) => {
+      console.log(res)
+      if (res.error) {
+        alert("Error")
+      } else {
+       alert("has rechazadoo la invitacion");
         //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
         //TODO: Arreglar la persona invitada al array invitaciones
       }

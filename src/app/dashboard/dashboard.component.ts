@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit {
   esInter:boolean;
   elId;
   elIdInvi:number;
+  nombreProblematica:string;
 
   constructor(
     private http: HttpClient,
@@ -30,6 +31,9 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.cargarProblematicas();
   }
+  
+  
+  
 
   cargarProblematicas() {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
@@ -50,7 +54,7 @@ export class DashboardComponent implements OnInit {
       })
   }
   
-  cargarInvitados(id){
+  cargarInvitados(id,nombre){
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
     const options = {
@@ -68,6 +72,9 @@ export class DashboardComponent implements OnInit {
         }
       })
       this.elId=id;
+      this.nombreProblematica=nombre;
+      
+      
     
     
   }
