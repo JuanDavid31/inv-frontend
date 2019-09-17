@@ -8,7 +8,8 @@
             <div class="ct-chart" id=""></div>
           </div>
           <div class="card-body">
-            <button type="button" class="btn" style="background:#0C5F97" data-toggle="modal" data-target="#problematica">Crear problematica</button>
+            <button type="button" class="btn" style="background:#0C5F97" data-toggle="modal"
+              data-target="#problematica">Crear problematica</button>
           </div>
           <div class="card-footer">
             <div class="stats">
@@ -26,11 +27,8 @@
           <div class="card-body">
             <h4 class="card-title">{{problematica.nombre}}</h4>
             <p class="card-category">{{problematica.descripcion}}</p>
-            <button class="btn" 
-              style="background:#0C5F97" 
-              (click)="cargarInvitados(problematica.id)"
-              *ngIf="problematica.esInterventor"
-              data-target="#invitaciones" data-toggle="modal">Invitar</button>
+            <button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica.id)"
+              *ngIf="problematica.esInterventor" data-target="#invitaciones" data-toggle="modal">Invitar</button>
           </div>
           <div class="card-footer">
             <div class="stats">
@@ -57,7 +55,8 @@
               </div>
               <div class="form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea id="Descripcion" cols="55" rows="5" class="form-control" [(ngModel)]="descripcionX" name="descripcionXInput"></textarea>
+                <textarea id="Descripcion" cols="55" rows="5" class="form-control" [(ngModel)]="descripcionX"
+                  name="descripcionXInput"></textarea>
               </div>
               <button tyle="button" class="btn btn-info" (click)="crearProblematica()">Crear</button>
             </form>
@@ -78,27 +77,35 @@
             <form>
               <div class="form-group">
                 <div class="input-group mb-2">
-                  <input type="text" class="form-control input_user" value="" placeholder="Invitar" style="text-align: center" readonly>
-                  <input type="text" class="form-control input_user" value="" placeholder="Invitados" style="text-align: center" readonly>
+                  <input type="text" class="form-control input_user" value="" placeholder="Invitar"
+                    style="text-align: center" readonly>
+                  <input type="text" class="form-control input_user" value="" placeholder="Invitados"
+                    style="text-align: center" readonly>
                 </div>
               </div>
               <div class="row">
                 <div class="col-lg-6">
-                  <input type="text" class="form-control input_user" #inputUsuariosAInvitar (keyup)="buscarUsuarios(inputUsuariosAInvitar.value)"  placeholder="Correo" style="text-align: center">
+                  <input type="text" class="form-control input_user" #inputUsuariosAInvitar
+                    (keyup)="buscarUsuarios(inputUsuariosAInvitar.value)" placeholder="Correo"
+                    style="text-align: center">
                   <ul>
-                    <li *ngFor="let usuarioBuscado of usuariosBuscados" (click)="cambiarCorreoAInvitar(usuarioBuscado.email)">
+                    <li *ngFor="let usuarioBuscado of usuariosBuscados"
+                      (click)="cambiarCorreoAInvitar(usuarioBuscado.email)">
                       Nombre: {{usuarioBuscado.nombres + ' ' + usuarioBuscado.apellidos}} <br>
                       Email: {{usuarioBuscado.email}}
                     </li>
                   </ul>
                   <input type="checkbox" id="esInterventor" [(ngModel)]="esInter" name="esInterventorInput">
+                  <input id="pac-input" placeholder="Look for someone!" autocomplete="off"
+                    class="controls form-control bootstrap-typeahead" type="text">
                   <label for="esInterventor">Interventor</label>
                 </div>
                 <div class="col-lg-6">
                   <div>
                     <ul>
                       <div *ngFor="let invitacion of invitaciones">
-                        <button tyle="button" class="close" (click)="eliminarInvitacion(invitacion.id)" aria-hidden="true">&times;</button>
+                        <button tyle="button" class="close" (click)="eliminarInvitacion(invitacion.id)"
+                          aria-hidden="true">&times;</button>
                         <li>{{invitacion.emailDestinatario}}</li>
                       </div>
                     </ul>
