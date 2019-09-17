@@ -7,3 +7,35 @@ body{
     height:  100%;
     min-height: 100%;
 }
+
+
+input.bootstrap-typeahead + .dropdown-menu{
+  
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    /* min-width: $dropdown-min-width;
+    padding: $dropdown-padding-y 0;
+    margin: $dropdown-spacer 0 0;
+    @include font-size($dropdown-font-size) ; */
+    /* color: $dropdown-color; */
+    text-align: left;
+    list-style: none;
+    /* background-color: $dropdown-bg; */
+    background-clip: padding-box;
+    /* border: $dropdown-border-width solid $dropdown-border-color; */
+    /* @include border-radius($dropdown-border-radius);
+    @include box-shadow($dropdown-box-shadow); */
+  
+  
+    opacity: initial;
+      -webkit-transform: initial;
+      transform: initial;
+      -webkit-transform-origin: initial;
+      transform-origin: initial;
+      will-change: initial;
+    
+  }
