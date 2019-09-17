@@ -22,25 +22,15 @@ export class DashboardComponent implements OnInit {
   esInter: boolean;
   elId;
   elIdInvi: number;
-
-  constructor(
-    private http: HttpClient,
-    private serviciosLocalStorage: LocalStorageService) { }
+  nombreProblematica: string;
 
   autoCompletadoUsuariosAInvitar: any;
   resultadosCb: any;
   usuarioAInvitarSeleccioando;
 
-  states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-    'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-    'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-    'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-    'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-    'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-    'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-    'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-  ];
+  constructor(
+    private http: HttpClient,
+    private serviciosLocalStorage: LocalStorageService) { }
 
   ngOnInit() {
     this.cargarProblematicas();
@@ -100,6 +90,9 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+
+
+
   cargarProblematicas() {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
@@ -119,7 +112,7 @@ export class DashboardComponent implements OnInit {
       })
   }
 
-  cargarInvitados(id) {
+  cargarInvitados(id, nombre) {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
     const options = {
@@ -137,6 +130,9 @@ export class DashboardComponent implements OnInit {
         }
       })
     this.elId = id;
+    this.nombreProblematica = nombre;
+
+
 
 
   }
