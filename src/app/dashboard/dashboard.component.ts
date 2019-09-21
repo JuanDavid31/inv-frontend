@@ -16,6 +16,7 @@ export class DashboardComponent implements OnInit {
 
   problematicas = [];
   invitaciones = [];
+  usuariosBuscados = []
   nombreX: string
   descripcionX: string
   correoAInvitar: string;
@@ -82,6 +83,7 @@ export class DashboardComponent implements OnInit {
     if (current) {
       if (current.name == this.autoCompletadoUsuariosAInvitar.val()) {
         this.usuarioAInvitarSeleccioando = current;
+        this.correoAInvitar=this.usuarioAInvitarSeleccioando.email;
       } else {
         this.usuarioAInvitarSeleccioando = {}
       }
@@ -131,7 +133,7 @@ export class DashboardComponent implements OnInit {
       })
     this.elId = id;
     this.nombreProblematica = nombre;
-
+ 
 
 
 
@@ -162,6 +164,7 @@ export class DashboardComponent implements OnInit {
   cambiarCorreoAInvitar(emailUsuarioAInvitar: string) {
 
     this.correoAInvitar = emailUsuarioAInvitar;
+    console.log(this.correoAInvitar);
 
   }
 
@@ -218,7 +221,6 @@ export class DashboardComponent implements OnInit {
       })
   }
 
-  usuariosBuscados = []
 
 
 }
