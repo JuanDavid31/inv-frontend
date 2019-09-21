@@ -1,10 +1,29 @@
-
 .form-control input_user::-webkit-input-placeholder {
-  text-align: center;
-  
+  text-align: center;  
 }
 
+div.main-content{
+  padding: 0px 15px 30px 15px;
+}
 
-.test{
+.card.card-chart{
+  margin:10px;
+}
 
+.card-title{
+  height: 50px;
+}
+
+.card-category{
+  height: 50px;
+
+  display: -webkit-box; 
+  -webkit-box-orient: 
+  vertical; 
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.card .btn{
+  width: 100%;
 }

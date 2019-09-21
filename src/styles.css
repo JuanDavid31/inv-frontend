@@ -10,7 +10,6 @@ body{
 
 
 input.bootstrap-typeahead + .dropdown-menu{
-  
     position: absolute;
     top: 100%;
     left: 0;
@@ -29,13 +28,10 @@ input.bootstrap-typeahead + .dropdown-menu{
     /* border: $dropdown-border-width solid $dropdown-border-color; */
     /* @include border-radius($dropdown-border-radius);
     @include box-shadow($dropdown-box-shadow); */
-  
-  
     opacity: initial;
-      -webkit-transform: initial;
-      transform: initial;
-      -webkit-transform-origin: initial;
-      transform-origin: initial;
-      will-change: initial;
-    
-  }
+    -webkit-transform: initial;
+    transform: initial;
+    -webkit-transform-origin: initial;
+    transform-origin: initial;
+    will-change: initial;
+}

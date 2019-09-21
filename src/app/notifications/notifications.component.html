@@ -11,7 +11,8 @@
             <div class="alert alert-info alert-with-icon" data-notify="container" style="background:#0C5F97">
               <i class="material-icons" data-notify="icon">add_alert</i>
               <span data-notify="message">
-                {{invitacion.nombreRemitente}} - {{invitacion.nombreProblematica}} - {{invitacion.descripcionProblematica}} 
+                {{invitacion.nombreRemitente}} - {{invitacion.nombreProblematica}} -
+                {{invitacion.descripcionProblematica}}
               </span>
             </div>
           </div>
@@ -21,12 +22,13 @@
                 <i class="material-icons">close</i>
               </button>
               <span>
-                <a  (click)="aceptarInvitacion(invitacion, true)"> Aceptar </a>  
-                <a (click)="rechazarInvitacion(invitacion)">     --     Rechazar </a> 
+                <a (click)="aceptarInvitacion(invitacion, true)"> Aceptar </a>
+                <a (click)="rechazarInvitacion(invitacion)"> -- Rechazar </a>
               </span>
             </div>
           </div>
         </div>
+        <span *ngIf="invitaciones.length === 0">No tienes notificaciones pendientes</span>
       </div>
     </div>
   </div>
