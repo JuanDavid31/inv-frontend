@@ -24,6 +24,8 @@ export class DashboardComponent implements OnInit {
   elId;
   elIdInvi: number;
   nombreProblematica: string;
+  descripcionProblema:string;
+  faseProblematica:string;
 
   autoCompletadoUsuariosAInvitar: any;
   resultadosCb: any;
@@ -114,7 +116,7 @@ export class DashboardComponent implements OnInit {
       })
   }
 
-  cargarInvitados(id, nombre) {
+  cargarInvitados(id, nombre, descripcion, fase) {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
     const options = {
@@ -133,7 +135,10 @@ export class DashboardComponent implements OnInit {
       })
     this.elId = id;
     this.nombreProblematica = nombre;
- 
+    this.descripcionProblema=descripcion;
+    this.faseProblematica=fase;
+     
+    
 
 
 

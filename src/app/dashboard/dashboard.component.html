@@ -20,10 +20,16 @@
           </div>
           <div class="card-body">
             <h4 class="card-title">{{problematica.nombre}}</h4>
-            <p class="card-category">{{problematica.descripcion}}</p>
             <button class="btn" style="background:#0C5F97"
               (click)="cargarInvitados(problematica.id,problematica.nombre)" *ngIf="problematica.esInterventor"
-              data-target="#invitaciones" data-toggle="modal">Invitar</button>
+              data-target="#invitaciones" data-toggle="modal">
+              Invitar
+            </button>
+            <button class="btn" style="background:#0C5F97"
+                (click)="cargarInvitados(problematica.id,problematica.nombre,problematica.descripcion,problematica.fase)" 
+                data-target="#informacion" data-toggle="modal">
+              Info
+            </button>
           </div>
           <div class="card-footer">
             <div class="stats">
@@ -108,5 +114,31 @@
         </div>
       </div>
     </div>
+    
+  <div class="modal fade" id="informacion">  
+   <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- contenido del titulo -->
+          <div class="modal-header" style="color:white;background:#0C5F97; ">
+            <h4 class="modal-tittle"> Información</h4>
+            <button style="color:#FFFFFF" tyle="button" class="close" data-dismiss="modal"
+              aria-hidden="true">&times;</button>
+          </div>
+  <div class="modal-body" >
+  <h5 style="font-weight: bold">Nombre</h5>
+  <p>{{nombreProblematica}}</p>
+  <hr>
+  <h5 style="font-weight: bold">Descripcion</h5>
+  <p> {{descripcionProblema}} </p>
+  <hr>
+  <h5 style="font-weight: bold">Fase:  <a class="tooltip-test">{{faseProblematica}}</a> </h5>
+</div>
+<div class="modal-footer">
+        
+        <button style="background:#0C5F97" type="button" class="btn btn-primary" >Avanzar fase</button>
+      </div>
+  </div>
+  </div>
+  </div>
   </div>
 </div>
