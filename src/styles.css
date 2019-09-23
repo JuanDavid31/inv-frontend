@@ -8,7 +8,6 @@ body{
     min-height: 100%;
 }
 
-
 input.bootstrap-typeahead + .dropdown-menu{
     position: absolute;
     top: 100%;
