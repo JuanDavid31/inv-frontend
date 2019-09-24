@@ -2,7 +2,7 @@
   text-align: center;  
 }
 
-div.main-content{
+main-content{
   padding: 0px 15px 30px 15px;
 }
 
@@ -11,7 +11,11 @@ div.main-content{
 }
 
 .card-title{
-  height: 50px;
+  height: 25px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
 }
 
 .card-category{

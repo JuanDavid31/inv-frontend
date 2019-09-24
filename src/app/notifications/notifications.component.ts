@@ -31,7 +31,7 @@ export class NotificationsComponent implements OnInit {
       headers: headers
     }
     this.http
-      .get('http://localhost:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
+      .get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         console.log(res);
@@ -41,6 +41,8 @@ export class NotificationsComponent implements OnInit {
           this.invitaciones = res;
         }
       })
+      
+      console.log(this.serviciosLocalStorage.darEmail())
   }
 
   aceptarInvitacion(invitacion, decision: boolean) {
@@ -54,7 +56,7 @@ export class NotificationsComponent implements OnInit {
       headers: headers
     }
 
-    this.http.put(`http://localhost:8080/invitaciones/${idInvitacion}?aceptar=${decision}`, {
+    this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${decision}`, {
       idProblematica,
       emailRemitente,
       emailDestinatario: this.serviciosLocalStorage.darEmail(),
@@ -85,7 +87,7 @@ export class NotificationsComponent implements OnInit {
       headers: headers
     }
 
-    this.http.put(`http://localhost:8080/invitaciones/${idInvitacion}?aceptar=${this.decision}`, {
+    this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${this.decision}`, {
       idProblematica,
       emailRemitente,
       emailDestinatario: this.serviciosLocalStorage.darEmail(),
