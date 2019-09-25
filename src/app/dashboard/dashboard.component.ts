@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
-import { ViewChild, ElementRef} from '@angular/core';
+import { ViewChild, ElementRef } from '@angular/core';
 
 declare var $;
 
@@ -27,18 +27,18 @@ export class DashboardComponent implements OnInit {
   elId;
   elIdInvi: number;
   nombreProblematica: string;
-  descripcionProblema:string;
-  faseProblematica:string;
-  elInter:boolean;
+  descripcionProblema: string;
+  faseProblematica: string;
+  elInter: boolean;
 
   autoCompletadoUsuariosAInvitar: any;
   resultadosCb: any;
   usuarioAInvitarSeleccioando;
-  
+
 
   constructor(
     private http: HttpClient,
-    private serviciosLocalStorage: LocalStorageService,private router: Router) { }
+    private serviciosLocalStorage: LocalStorageService, private router: Router) { }
 
   ngOnInit() {
     this.cargarProblematicas();
@@ -90,7 +90,7 @@ export class DashboardComponent implements OnInit {
     if (current) {
       if (current.name == this.autoCompletadoUsuariosAInvitar.val()) {
         this.usuarioAInvitarSeleccioando = current;
-        this.correoAInvitar=this.usuarioAInvitarSeleccioando.email;
+        this.correoAInvitar = this.usuarioAInvitarSeleccioando.email;
       } else {
         this.usuarioAInvitarSeleccioando = {}
       }
@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
       })
   }
 
-  cargarInvitados(id, nombre, descripcion, fase,inter:boolean) {
+  cargarInvitados(id, nombre, descripcion, fase, inter: boolean) {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
     const options = {
@@ -140,10 +140,10 @@ export class DashboardComponent implements OnInit {
       })
     this.elId = id;
     this.nombreProblematica = nombre;
-    this.descripcionProblema=descripcion;
-    this.faseProblematica=fase;
-    this.elInter=inter; 
-    
+    this.descripcionProblema = descripcion;
+    this.faseProblematica = fase;
+    this.elInter = inter;
+
 
 
 
@@ -231,14 +231,14 @@ export class DashboardComponent implements OnInit {
       })
   }
 
-   avanzarFase() {
+  avanzarFase() {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
     const options = {
       headers: headers
     }
     this.http
-      .post('http://3.130.29.100:8080/problematicas/' + this.elId+'?avanzar='+true, options)
+      .post('http://3.130.29.100:8080/problematicas/' + this.elId + '?avanzar=' + true, options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         console.log(res);
@@ -249,13 +249,8 @@ export class DashboardComponent implements OnInit {
         }
       })
   }
-  
-  participar(){
-    
-    this.router.navigateByUrl("/maps");
-    
+
+  participar() {
+    this.router.navigateByUrl("/fase-individual");
   }
-  
-
-
 }
