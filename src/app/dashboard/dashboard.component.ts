@@ -2,10 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import * as Chartist from 'chartist';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
-import { Http, Headers } from '@angular/http';
+import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
+import { ViewChild, ElementRef} from '@angular/core';
+
 declare var $;
+
 
 @Component({
   selector: 'app-dashboard',
@@ -26,14 +29,16 @@ export class DashboardComponent implements OnInit {
   nombreProblematica: string;
   descripcionProblema:string;
   faseProblematica:string;
+  elInter:boolean;
 
   autoCompletadoUsuariosAInvitar: any;
   resultadosCb: any;
   usuarioAInvitarSeleccioando;
+  
 
   constructor(
     private http: HttpClient,
-    private serviciosLocalStorage: LocalStorageService) { }
+    private serviciosLocalStorage: LocalStorageService,private router: Router) { }
 
   ngOnInit() {
     this.cargarProblematicas();
@@ -116,7 +121,7 @@ export class DashboardComponent implements OnInit {
       })
   }
 
-  cargarInvitados(id, nombre, descripcion, fase) {
+  cargarInvitados(id, nombre, descripcion, fase,inter:boolean) {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
     const options = {
@@ -137,7 +142,7 @@ export class DashboardComponent implements OnInit {
     this.nombreProblematica = nombre;
     this.descripcionProblema=descripcion;
     this.faseProblematica=fase;
-     
+    this.elInter=inter; 
     
 
 
@@ -226,6 +231,31 @@ export class DashboardComponent implements OnInit {
       })
   }
 
+   avanzarFase() {
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    this.http
+      .post('http://3.130.29.100:8080/problematicas/' + this.elId+'?avanzar='+true, options)
+      .pipe(catchError(err => of(err)))
+      .subscribe(res => {
+        console.log(res);
+        if (res.error) {
+          alert("Hubo un error");
+        } else {
+          alert("Se avanzo a la siguiente fase")
+        }
+      })
+  }
+  
+  participar(){
+    
+    this.router.navigateByUrl("/maps");
+    
+  }
+  
 
 
 }
