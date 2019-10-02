@@ -31,6 +31,14 @@ export class LocalStorageService {
     return localStorage.getItem('apellidos');
   }
 
+  guardarProblematicaActual(idProblematica) {
+    localStorage.setItem('problematica', idProblematica);
+  }
+
+  darProblematicaActual() {
+    return localStorage.getItem('problematica');
+  }
+
   eliminarDatos() {
     localStorage.removeItem('token');
     localStorage.removeItem('nombres');

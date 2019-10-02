@@ -1,1 +1,26 @@
-<div id="map"></div>
+<div class="main-content">
+    <div class="ctrl">
+        <label for="nombre">Nombre -> </label>
+        <input type="file" name="foto" id="input-foto">
+        <input type="text" name="nombreNodoInput" id="nombre" [(ngModel)]="nombreNodo">
+        <input type="submit" value="Agregar" (click)="agregar()">
+        <input type="submit" value="Reiniciar" (click)="reiniciar()">
+        <label>Conectar</label>
+        <label for="De">De</label>
+        <select name="De" id="De" [(ngModel)]="nodoDe">
+            <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                {{nodo.nombre}}
+            </option>
+        </select>
+        <label for="A">A</label>
+        <select name="A" id="A" [(ngModel)]="nodoA">
+            <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                {{nodo.nombre}}
+            </option>
+        </select>
+        <input type="submit" value="Conectar" (click)="conectar()">
+        Número de nodos {{nodos.length}}
+    </div>
+    <div id="cy">
+    </div>
+</div>

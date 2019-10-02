@@ -1,0 +1,14 @@
+.main-content{
+    display: flex;
+    flex-direction: column;
+}
+
+#ctrl{
+    width: 100%;
+}
+
+#cy{
+    background-color: white;
+    display: block;
+    flex-grow: 1;
+}
