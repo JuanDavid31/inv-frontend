@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import * as Chartist from 'chartist';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
-import { ViewChild, ElementRef } from '@angular/core';
 
 declare var $;
 
@@ -100,9 +98,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-
-
-
   cargarProblematicas() {
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
@@ -110,7 +105,7 @@ export class DashboardComponent implements OnInit {
       headers: headers
     }
     this.http
-      .get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
+      .get('http://localhost:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         console.log(res);
@@ -160,7 +155,6 @@ export class DashboardComponent implements OnInit {
     if(fase==4){
       this.faseProblematica="Elaborando escritos"
     }
-
   }
 
   crearProblematica() {
