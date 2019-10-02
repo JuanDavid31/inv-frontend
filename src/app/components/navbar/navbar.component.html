@@ -31,7 +31,7 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item"
-                            *ngFor="let invitacion of invitaciones">{{invitacion.nombreProblematica}}</a>
+                            *ngFor="let invitacion of invitaciones"  (click)="mandarANotificaciones()">{{invitacion.nombreProblematica}}</a>
                         <a class="dropdown-item" *ngIf="invitaciones.length === 0">No tienes notificaciones
                             pendientes</a>
                     </div>

@@ -4,7 +4,8 @@
       <div class="col-md-3">
         <div class="card card-chart" style="background:#FFFFFF">
           <div class="card-body">
-            <button type="button" class="btn" style="background:#0C5F97" data-toggle="modal" data-target="#problematica">Crear
+            <button type="button" class="btn" style="background:#0C5F97" data-toggle="modal" data-target="#problematica" 
+                  data-dismiss="modal" aria-label="Close">Crear
               problematica</button>
           </div>
         </div>
@@ -34,7 +35,7 @@
         </div>
       </div>
     </div>
-    <div class="modal fad}e" id="problematica">
+    <div class="modal fade" id="problematica">
       <div class="modal-dialog">
         <div class="modal-content">
           <!-- contenido del titulo -->
@@ -47,13 +48,33 @@
             <form>
               <div class="form-group">
                 <label for="nombreProblema">Nombre</label>
-                <input type="text" id="nombreProblema" class="form-control" [(ngModel)]="nombreX" name="nombreXInput">
+                <input type="text" id="nombreProblema" name="nombreProble" #nombreProble="ngModel" class="form-control" [(ngModel)]="nombreX" name="nombreXInput"
+                 minlength="10" maxlength="40" required>
+                 <div *ngIf= "nombreProble.touched">
+                <div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080"
+                    *ngIf="nombreProble?.errors.minlength">
+                <a >Debe tener minimo 10 caracteres</a>
+                 <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color:#FFFFFF">
+                  <span aria-hidden="true">&times;</span>
+                  </button>
+                 </div>
+                 </div>
               </div>
               <div class="form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea id="Descripcion" cols="55" rows="5" class="form-control" [(ngModel)]="descripcionX" name="descripcionXInput"></textarea>
+                <textarea id="descrip" name="descrip" cols="55" rows="5" #descrip="ngModel" class="form-control" [(ngModel)]="descripcionX" name="descripcionXInput"
+                minlength="20" maxlength="500" required></textarea>
+              <div *ngIf= "descrip.touched">
+              <div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080" *ngIf="descrip?.errors.minlength">
+                <a >Debe tener minimo 20 caracteres</a>
+                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"style="color:#FFFFFF">
+                   <span aria-hidden="true">&times;</span>
+                   </button>
+                 </div>
+                 </div>
               </div>
               <button tyle="button" style="background:#0C5F97" class="btn btn-info" (click)="crearProblematica()">Crear</button>
+              
             </form>
           </div>
         </div>
@@ -115,7 +136,8 @@
             <h5 style="font-weight: bold">Descripcion</h5>
             <p> {{descripcionProblema}} </p>
             <hr>
-            <h5 style="font-weight: bold">Fase: <a class="tooltip-test">{{faseProblematica}}</a> </h5>
+            <h5 style="font-weight: bold">Etapa</h5>
+            <p> {{faseProblematica}} </p>
           </div>
           <div class="modal-footer">
             <button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="participar()"data-dismiss="modal" aria-label="Close"> Participar</button>

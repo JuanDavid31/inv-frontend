@@ -174,4 +174,8 @@ export class NavbarComponent implements OnInit {
     this.serviciosLocalStorage.eliminarDatos();
     this.router.navigateByUrl("/login");
   }
+  
+  mandarANotificaciones(){
+    this.router.navigateByUrl("/notifications");
+  }
 }

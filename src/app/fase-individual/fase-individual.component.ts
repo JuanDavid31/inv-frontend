@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+declare var $;
+
 interface Marker {
     lat: number;
     lng: number;
@@ -16,10 +18,17 @@ interface Marker {
 
 export class FaseIndividualComponent implements OnInit {
 
+    toast:any;
+
     constructor() { }
 
     ngOnInit() {
-
+        this.toast = $(document.getElementById('alerta'));
     }
-
+    
+    abrirToast(){
+        this.toast.toast('show');
+    }
+    
+  
 }

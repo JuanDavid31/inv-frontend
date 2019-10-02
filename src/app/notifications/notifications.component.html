@@ -7,7 +7,7 @@
       <br>
       <div class="card-body">
         <div class="row" *ngFor="let invitacion of invitaciones">
-          <div class="col-md-9">
+          <div class="col-md-10">
             <div class="alert alert-info alert-with-icon" data-notify="container" style="background:#0C5F97">
               <i class="material-icons" data-notify="icon">add_alert</i>
               <span data-notify="message">
@@ -16,14 +16,16 @@
               </span>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="alert ">
-              <button mat-button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <i class="material-icons">close</i>
-              </button>
+          <div class="col-md-2">
+            
+            <div class="row ">
               <span>
-                <a (click)="aceptarInvitacion(invitacion, true)"> Aceptar </a>
-                <a (click)="rechazarInvitacion(invitacion)"> -- Rechazar </a>
+                 <a class="myButton" (click)="aceptarInvitacion(invitacion, true)"  >
+                   	<span class="input-group-text"><i class="	fa fa-check"></i></span>
+                 </a>
+                 <a  class="myButton" (click)="rechazarInvitacion(invitacion)" style="margin-left: 10px" >
+                   	<span class="input-group-text"><i class="fa fa-close"></i></span>
+                 </a>
               </span>
             </div>
           </div>

@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit {
   descripcionProblema: string;
   faseProblematica: string;
   elInter: boolean;
+  
 
   autoCompletadoUsuariosAInvitar: any;
   resultadosCb: any;
@@ -141,11 +142,24 @@ export class DashboardComponent implements OnInit {
     this.elId = id;
     this.nombreProblematica = nombre;
     this.descripcionProblema = descripcion;
-    this.faseProblematica = fase;
     this.elInter = inter;
 
 
-
+    if(fase==0){
+      this.faseProblematica="invitando participantes"
+    }
+    if(fase==1){
+      this.faseProblematica="Manipulando Nodos (Individual)"
+    }
+    if(fase==2){
+      this.faseProblematica="Manipulando Nodos (Grupal)"
+    }
+    if(fase==3){
+      this.faseProblematica="Reaccionando a nodos"
+    }
+    if(fase==4){
+      this.faseProblematica="Elaborando escritos"
+    }
 
   }
 
