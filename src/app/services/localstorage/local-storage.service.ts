@@ -38,11 +38,16 @@ export class LocalStorageService {
   darProblematicaActual() {
     return localStorage.getItem('problematica');
   }
+  
+  eliminarProblematicaActual(){
+    localStorage.removeItem('problematica');
+  }
 
   eliminarDatos() {
     localStorage.removeItem('token');
     localStorage.removeItem('nombres');
     localStorage.removeItem('apellidos');
     localStorage.removeItem('email');
+    localStorage.removeItem('problematica');
   }
 }

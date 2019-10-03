@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit {
       headers: headers
     }
     this.http
-      .get('http://localhost:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
+      .get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         console.log(res);
@@ -259,6 +259,7 @@ export class DashboardComponent implements OnInit {
   }
 
   participar() {
+    this.serviciosLocalStorage.guardarProblematicaActual(this.elId);
     this.router.navigateByUrl("/fase-individual");
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
@@ -21,7 +21,7 @@ interface Marker {
     styleUrls: ['./fase-individual.component.css']
 })
 
-export class FaseIndividualComponent implements OnInit {
+export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     esMenu1 = true;
     menuOb = {};
@@ -130,7 +130,7 @@ export class FaseIndividualComponent implements OnInit {
         const problematica = this.serviciosLocalStorage.darProblematicaActual();
 
         this.http
-            .get(`http://localhost:8080/personas/${email}/problematicas/${problematica}/nodos`, options)
+            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${problematica}/nodos`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -196,7 +196,7 @@ export class FaseIndividualComponent implements OnInit {
         const problematica = this.serviciosLocalStorage.darProblematicaActual();
 
         this.http
-            .post(`http://localhost:8080/problematicas/${problematica}/personas/${email}/nodos`, form, options)
+            .post(`http://3.130.29.100:8080/problematicas/${problematica}/personas/${email}/nodos`, form, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 console.log(res);
@@ -227,7 +227,7 @@ export class FaseIndividualComponent implements OnInit {
         }
 
         this.http
-            .delete(`http://localhost:8080/nodos/${id}`, options)
+            .delete(`http://3.130.29.100:8080/nodos/${id}`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 console.log(res);
@@ -260,7 +260,7 @@ export class FaseIndividualComponent implements OnInit {
             }
 
             this.http
-                .put(`http://localhost:8080/nodos/${id}?id-padre=${idPadre}&apadrinar=true`, options)
+                .put(`http://3.130.29.100:8080/nodos/${id}?id-padre=${idPadre}&apadrinar=true`, options)
                 .pipe(catchError(err => of(err)))
                 .subscribe(res => {
                     console.log(res);
@@ -304,7 +304,7 @@ export class FaseIndividualComponent implements OnInit {
         }
 
         this.http
-            .put(`http://localhost:8080/nodos/${idNodo}?id-padre=${idPadre}&apadrinar=false`, options)
+            .put(`http://3.130.29.100:8080/nodos/${idNodo}?id-padre=${idPadre}&apadrinar=false`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 console.log(res);
@@ -318,5 +318,9 @@ export class FaseIndividualComponent implements OnInit {
 
     atenderPUTDesapadrinar(id) {
         this.cy.getElementById(id).remove();
+    }
+    
+    ngOnDestroy(){
+        this.serviciosLocalStorage.eliminarProblematicaActual();
     }
 }
