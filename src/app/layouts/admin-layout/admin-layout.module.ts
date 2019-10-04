@@ -20,6 +20,7 @@ import {
   MatTooltipModule,
   MatSelectModule
 } from '@angular/material';
+import { ToastComponent } from 'app/toast/toast.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -41,7 +42,8 @@ import {
     IconsComponent,
     FaseIndividualComponent,
     NotificationsComponent,
-    UpgradeComponent
+    UpgradeComponent,
+    ToastComponent
   ]
 })
 

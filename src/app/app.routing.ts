@@ -8,7 +8,6 @@ import { LoginComponent } from './components/login/login.component';
 import { RegistroComponent } from './components/registro/registro.component';
 import { RecuperarComponent } from './components/recuperar/recuperar.component';
 
-
 import { PublicoGuard } from './guards/publico.guard';
 import { PrivadoGuard } from './guards/privado.guard';
 
@@ -29,7 +28,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [PublicoGuard] },
   { path: 'registro', component: RegistroComponent, canActivate: [PublicoGuard] },
   { path: 'recuperarcontraseña', component: RecuperarComponent, canActivate: [PublicoGuard] }
-  
+
 ];
 
 
