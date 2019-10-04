@@ -1,12 +1,13 @@
 <div class="main-content">
+  <app-toast></app-toast>
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-3">
         <div class="card card-chart" style="background:#FFFFFF">
           <div class="card-body">
-            <button type="button" class="btn" style="background:#0C5F97" data-toggle="modal" data-target="#problematica" 
-                  data-dismiss="modal" aria-label="Close">Crear
-              problematica</button>
+            <button type="button" class="btn" style="background:#0C5F97" aria-label="Close" (click)="abrirModal()">
+              Crear problematica
+            </button>
           </div>
         </div>
       </div>
@@ -20,10 +21,12 @@
           </div>
           <div class="card-body">
             <h4 class="card-title">{{problematica.nombre}}</h4>
-            <button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica.id,problematica.nombre)" *ngIf="problematica.esInterventor" data-target="#invitaciones" data-toggle="modal">
+            <button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica)"
+              *ngIf="problematica.esInterventor" data-target="#invitaciones" data-toggle="modal">
               Invitar
             </button>
-            <button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica.id,problematica.nombre,problematica.descripcion,problematica.fase,problematica.esInterventor)" data-target="#informacion" data-toggle="modal">
+            <button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica)"
+              data-target="#informacion" data-toggle="modal">
               Info
             </button>
           </div>
@@ -35,83 +38,97 @@
         </div>
       </div>
     </div>
-    <div class="modal fade" id="problematica">
+    <div id="mi-modal" class="modal fade">
       <div class="modal-dialog">
         <div class="modal-content">
           <!-- contenido del titulo -->
           <div class="modal-header" style="color:white; background:#0C5F97;">
             <h4 class="modal-tittle"> Crear problemática</h4>
-            <button tyle="button" style="color:#FFFFFF" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <button tyle="button" style="color:#FFFFFF" class="close" data-dismiss="modal"
+              aria-hidden="true">&times;</button>
           </div>
           <!-- contenido de la ventana-->
           <div class="modal-body">
             <form>
               <div class="form-group">
-                <label for="nombreProblema">Nombre</label>
-                <input type="text" id="nombreProblema" name="nombreProble" #nombreProble="ngModel" class="form-control" [(ngModel)]="nombreX" name="nombreXInput"
-                 minlength="10" maxlength="40" required>
-                 <div *ngIf= "nombreProble.touched">
-                <div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080"
-                    *ngIf="nombreProble?.errors.minlength">
-                <a >Debe tener minimo 10 caracteres</a>
-                 <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color:#FFFFFF">
-                  <span aria-hidden="true">&times;</span>
-                  </button>
-                 </div>
-                 </div>
+                <label for="nombre-problematica">Nombre</label>
+                <input type="text" id="nombre-problematica" name="nombreProble" #nombreProble="ngModel"
+                  class="form-control" [(ngModel)]="nombreNuevaProblematica" name="nombreNuevaProblematicaInput"
+                  minlength="10" maxlength="40" required>
+                <div *ngIf="nombreProble?.touched">
+                  <div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080"
+                    *ngIf="nombreProble?.errors?.minlength">
+                    <a>Debe tener minimo 10 caracteres</a>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color:#FFFFFF">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                </div>
               </div>
               <div class="form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea id="descrip" name="descrip" cols="55" rows="5" #descrip="ngModel" class="form-control" [(ngModel)]="descripcionX" name="descripcionXInput"
-                minlength="20" maxlength="500" required></textarea>
-              <div *ngIf= "descrip.touched">
-              <div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080" *ngIf="descrip?.errors.minlength">
-                <a >Debe tener minimo 20 caracteres</a>
-                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"style="color:#FFFFFF">
-                   <span aria-hidden="true">&times;</span>
-                   </button>
-                 </div>
-                 </div>
+                <textarea id="descrip" name="descrip" cols="55" rows="5" #descrip="ngModel" class="form-control"
+                  [(ngModel)]="descripcionNuevaProblematica" name="descripcionNuevaProblematicaInput" minlength="20"
+                  maxlength="500" required></textarea>
+                <div *ngIf="descrip?.touched">
+                  <div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080"
+                    *ngIf="descrip?.errors?.minlength">
+                    <a>Debe tener minimo 20 caracteres</a>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color:#FFFFFF">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button tyle="button" style="background:#0C5F97" class="btn btn-info" (click)="crearProblematica()">Crear</button>
-              
+              <button tyle="button" style="background:#0C5F97" class="btn btn-info"
+                (click)="crearProblematica()">Crear</button>
             </form>
           </div>
         </div>
       </div>
     </div>
-    <div class="modal fade" id="invitaciones">
+    <div id="" class="modal fade" id="invitaciones">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <!-- contenido del titulo -->
           <div class="modal-header" style="color:white;background:#0C5F97; ">
-            <h4 class="modal-tittle"> Invitaciones ( {{nombreProblematica}} )</h4>
-            <button style="color:#FFFFFF" tyle="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-tittle"> Invitaciones ( {{problematicaSeleccionada.nombre}} )</h4>
+            <button style="color:#FFFFFF" tyle="button" class="close" data-dismiss="modal"
+              aria-hidden="true">&times;</button>
           </div>
           <!-- contenido de la ventana-->
           <div class="modal-body">
             <form>
               <div class="form-group">
                 <div class="input-group mb-2">
-                  <input type="text" class="form-control input_user" value="" placeholder="Invitar" style="text-align: center" readonly>
-                  <input type="text" class="form-control input_user" value="" placeholder="Invitados" style="text-align: center" readonly>
+                  <input type="text" class="form-control input_user" value="" placeholder="Invitar"
+                    style="text-align: center" readonly>
+                  <input type="text" class="form-control input_user" value="" placeholder="Invitados"
+                    style="text-align: center" readonly>
                 </div>
               </div>
               <div class="row">
                 <div class="col-lg-6">
-                  <input id="pac-input" placeholder="Correo" autocomplete="off" class="controls form-control bootstrap-typeahead" type="text" [(ngModel)]="correoAInvitar" name="correoAInvitarInput">
-                  <input type="checkbox" id="esInterventor" [(ngModel)]="esInter" name="esInterventorInput">
+                  <input id="pac-input" placeholder="Correo" autocomplete="off"
+                    class="controls form-control bootstrap-typeahead" type="text" [(ngModel)]="correoAInvitar"
+                    name="correoAInvitarInput">
+                  <input type="checkbox" id="esInterventor" [(ngModel)]="invitacionParaInterventor"
+                    name="esInterventorInput">
                   <label for="esInterventor">Interventor</label>
                 </div>
                 <div class="col-lg-6">
-                  <div>
-                    <ul>
-                      <div *ngFor="let invitacion of invitaciones">
-                        <button tyle="button" class="close" (click)="eliminarInvitacion(invitacion.id)" aria-hidden="true">&times;</button>
-                        <li>{{invitacion.emailDestinatario}}</li>
-                      </div>
-                    </ul>
-                  </div>
+                  <ul>
+                    <div class="invitacion" *ngFor="let invitacion of invitaciones"
+                      [ngClass]="darClassEstado(invitacion.estaVigente, invitacion.rechazada)">
+                      <li>
+                        {{invitacion.emailDestinatario}}
+                      </li>
+                      <button tyle="button" class="close" (click)="eliminarInvitacion(invitacion.id)"
+                        *ngIf="invitacionBorrable(invitacion.estaVigente, invitacion.rechazada)"
+                        aria-hidden="true">&times;
+                      </button>
+                    </div>
+                  </ul>
                 </div>
               </div>
               <button style="background:#0C5F97" tyle="button" class="btn btn-info" (click)="invitar()">Invitar</button>
@@ -127,21 +144,24 @@
           <!-- contenido del titulo -->
           <div class="modal-header" style="color:white;background:#0C5F97; ">
             <h4 class="modal-tittle"> Información</h4>
-            <button style="color:#FFFFFF" tyle="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <button style="color:#FFFFFF" tyle="button" class="close" data-dismiss="modal"
+              aria-hidden="true">&times;</button>
           </div>
           <div class="modal-body">
             <h5 style="font-weight: bold">Nombre</h5>
-            <p>{{nombreProblematica}}</p>
+            <p>{{problematicaSeleccionada.nombre}}</p>
             <hr>
             <h5 style="font-weight: bold">Descripcion</h5>
-            <p> {{descripcionProblema}} </p>
+            <p> {{problematicaSeleccionada.descripcion}} </p>
             <hr>
             <h5 style="font-weight: bold">Etapa</h5>
-            <p> {{faseProblematica}} </p>
+            <p> {{darFaseProblematica()}} </p>
           </div>
           <div class="modal-footer">
-            <button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="participar()"data-dismiss="modal" aria-label="Close"> Participar</button>
-            <button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="avanzarFase()" *ngIf="elInter" > Avanzar fase</button>
+            <button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="participar()"
+              data-dismiss="modal" aria-label="Close"> Participar</button>
+            <button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="avanzarFase()"
+              *ngIf="problematicaSeleccionada.esInterventor"> Avanzar fase</button>
           </div>
         </div>
       </div>

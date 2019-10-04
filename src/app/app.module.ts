@@ -47,8 +47,6 @@ import { RecuperarComponent } from './components/recuperar/recuperar.component';
     LoginComponent,
     RegistroComponent,
     RecuperarComponent
-
-
   ],
   providers: [],
   bootstrap: [AppComponent]

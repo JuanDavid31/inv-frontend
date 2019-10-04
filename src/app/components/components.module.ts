@@ -16,8 +16,7 @@ import { RecuperarComponent } from './recuperar/recuperar.component';
   declarations: [
     FooterComponent,
     NavbarComponent,
-    SidebarComponent,
-   
+    SidebarComponent
   ],
   exports: [
     FooterComponent,
