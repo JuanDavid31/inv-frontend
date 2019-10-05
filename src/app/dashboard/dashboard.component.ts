@@ -47,7 +47,6 @@ export class DashboardComponent implements OnInit {
     this.cargarProblematicas();
     this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
       .typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
-
     this.modal = $('#mi-modal');
   }
 
