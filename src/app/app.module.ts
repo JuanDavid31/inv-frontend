@@ -26,6 +26,7 @@ import { LoginComponent } from './components/login/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { RegistroComponent } from './components/registro/registro.component';
 import { RecuperarComponent } from './components/recuperar/recuperar.component';
+import { ToastComponent } from './toast/toast.component';
 
 @NgModule({
   imports: [

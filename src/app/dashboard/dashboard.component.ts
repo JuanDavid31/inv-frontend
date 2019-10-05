@@ -4,7 +4,8 @@ import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
-import { ToastComponent } from 'app/toast/toast.component';
+import { serviciosToast } from 'app/toast/toast.component';
+import { ToastService } from 'app/services/toast/toast.service';
 declare var $;
 
 @Component({
@@ -35,12 +36,10 @@ export class DashboardComponent implements OnInit {
     RECHAZADA: 'Rechazada'
   }
 
-  @ViewChild(ToastComponent, { static: false })
-  private toastComponent: ToastComponent;
-
   constructor(
     private http: HttpClient,
     private serviciosLocalStorage: LocalStorageService,
+    private serviciosToast: ToastService,
     private router: Router) { }
 
   ngOnInit() {
@@ -71,7 +70,11 @@ export class DashboardComponent implements OnInit {
       .pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Ocurrió un error al buscar los usuarios, intentelo de nuevo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Ocurrió un error al buscar los usuarios, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
           this.prepareData(res);
         }
@@ -112,7 +115,11 @@ export class DashboardComponent implements OnInit {
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
           this.problematicas = res;
         }
@@ -133,7 +140,11 @@ export class DashboardComponent implements OnInit {
       .subscribe(res => {
         console.log(res);
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Ocurrió un error alcargar los invitados, intentelo de nuevo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Ocurrió un error alcargar los invitados, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
           this.invitaciones = res;
         }
@@ -158,11 +169,15 @@ export class DashboardComponent implements OnInit {
       .subscribe((res: any) => {
         console.log(res);
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Ocurrió un error al agregar la problematica, intentelo de nuevo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Ocurrió un error al agregar la problematica, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
           this.problematicas.unshift(res);
           this.modal.modal('toggle');
-          this.toastComponent.mostrarToast(undefined, 'Problematica agregada');
+          this.serviciosToast.mostrarToast({ cuerpo: 'Problematica agregada' });
         }
       })
   }
@@ -181,9 +196,13 @@ export class DashboardComponent implements OnInit {
     }, options).pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Ocurrió un error al invitar, intentelo de nuevo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Ocurrió un error al invitar, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
-          this.toastComponent.mostrarToast(undefined, 'Usuario invitado.');
+          this.serviciosToast.mostrarToast({ cuerpo: 'Usuario invitado.' });
           this.invitaciones.push(res);
           this.correoAInvitar = '';
         }
@@ -200,10 +219,13 @@ export class DashboardComponent implements OnInit {
       .pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Ocurrió un error al eliminar la invitación, intentelo de nuevo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Ocurrió un error al eliminar la invitación, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
-          this.toastComponent.mostrarToast(undefined, 'Invitación eliminada');
-          //TODO: Arreglar la persona invitada al array invitaciones
+          this.serviciosToast.mostrarToast({ cuerpo: 'Invitación eliminada' });
           this.invitaciones = this.invitaciones.filter(invitacion => invitacion.id !== id);
         }
       })
@@ -221,9 +243,13 @@ export class DashboardComponent implements OnInit {
       .subscribe(res => {
         console.log(res);
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Hubo un error al avanzar la fase, intentelo de nuevo', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Hubo un error al avanzar la fase, intentelo de nuevo',
+            esMensajeInfo: false
+          });
         } else {
-          this.toastComponent.mostrarToast(undefined, 'Se avanzo a la siguiente fase');
+          this.serviciosToast.mostrarToast({ cuerpo: 'Se avanzo a la siguiente fase' });
         }
       })
   }

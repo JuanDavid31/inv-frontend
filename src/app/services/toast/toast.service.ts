@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class NotificacionesService {
+export class ToastService {
 
   // Observable string sources
   private emitChangeSource = new Subject<any>();
@@ -15,7 +15,7 @@ export class NotificacionesService {
   changeEmitted$ = this.emitChangeSource.asObservable();
 
   // Service message commands
-  emitChange(change: any) {
+  mostrarToast(change: any) {
     this.emitChangeSource.next(change);
   }
 }

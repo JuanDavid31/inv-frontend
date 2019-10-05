@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ToastService } from '../services/toast/toast.service';
 
 @Component({
   selector: 'app-toast',
@@ -15,11 +16,12 @@ export class ToastComponent implements OnInit {
 
   private toast: any;
 
-  constructor() { }
+  constructor(private serviciosToast: ToastService) { }
 
   ngOnInit() {
     this.contador = 0;
     this.contenedorToasts = document.getElementById('toasts-container');
+    this.serviciosToast.changeEmitted$.subscribe(datos => this.mostrarToast(datos.titulo, datos.cuerpo, datos.esMensajeInfo));
   }
 
   mostrarToast(titulo = 'Información', cuerpo = 'Este es un mensaje de información', esMensajeInfo = true) {
@@ -45,7 +47,7 @@ export class ToastComponent implements OnInit {
 
     const nodo = this.htmlToElement(toastHtmlString);
     this.contenedorToasts.appendChild(nodo);
-    this.toast = $(`#toast${this.contador}`).toast({ delay: 3000 })
+    this.toast = (<any>$(`#toast${this.contador}`)).toast({ delay: 3000 })
     this.toast.toast('show')
 
     setTimeout(() => {

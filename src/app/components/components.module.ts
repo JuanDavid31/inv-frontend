@@ -7,6 +7,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { RegistroComponent } from './registro/registro.component';
 import { RecuperarComponent } from './recuperar/recuperar.component';
+import { ToastComponent } from 'app/toast/toast.component';
 
 @NgModule({
   imports: [
@@ -16,12 +17,14 @@ import { RecuperarComponent } from './recuperar/recuperar.component';
   declarations: [
     FooterComponent,
     NavbarComponent,
-    SidebarComponent
+    SidebarComponent,
+    ToastComponent
   ],
   exports: [
     FooterComponent,
     NavbarComponent,
-    SidebarComponent
+    SidebarComponent,
+    ToastComponent
   ]
 })
 export class ComponentsModule { }

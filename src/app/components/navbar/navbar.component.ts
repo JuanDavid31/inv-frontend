@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
 import { NotificacionesService } from '../../services/notificaciones/notificaciones.service';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../../services/localstorage/local-storage.service';
-import { ToastComponent } from 'app/toast/toast.component';
+import { ToastService } from 'app/services/toast/toast.service';
 
 @Component({
   selector: 'app-navbar',
@@ -24,12 +24,10 @@ export class NavbarComponent implements OnInit {
 
   invitaciones = [];
 
-  @ViewChild(ToastComponent, { static: false })
-  private toastComponent: ToastComponent;
-
   constructor(private element: ElementRef,
     private serviciosNotificaciones: NotificacionesService,
     private serviciosLocalStorage: LocalStorageService,
+    private serviciosToast: ToastService,
     private router: Router,
     private http: HttpClient,
     location: Location) {
@@ -73,8 +71,11 @@ export class NavbarComponent implements OnInit {
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         if (res.error) {
-          alert("Hubo un error");
-          this.toastComponent.mostrarToast('Error', 'Hubo un error al cargar las notificaciones, intentelo de nuveo.', false);
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Hubo un error al cargar las notificaciones, intentelo de nuveo.',
+            esMensajeInfo: false
+          });
         } else {
           this.invitaciones = res;
         }

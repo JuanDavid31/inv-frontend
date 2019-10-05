@@ -4,7 +4,7 @@ import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
-import { ToastComponent } from 'app/toast/toast.component';
+import { ToastService } from 'app/services/toast/toast.service';
 
 @Component({
   selector: 'app-notifications',
@@ -17,12 +17,10 @@ export class NotificationsComponent implements OnInit {
   decision: boolean;
   idProblematica;
 
-  @ViewChild(ToastComponent, { static: false })
-  private toastComponent: ToastComponent;
-
   constructor(private http: HttpClient,
     private serviciosLocalStorage: LocalStorageService,
-    private serviciosNotificaciones: NotificacionesService) { }
+    private serviciosNotificaciones: NotificacionesService,
+    private serviciosToast: ToastService) { }
 
   ngOnInit() {
     this.cargarInvitaciones();
@@ -36,12 +34,15 @@ export class NotificationsComponent implements OnInit {
     }
 
     this.http
-      .get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
+      .get(`http://3.130.29.100:8080/personas/${this.serviciosLocalStorage.darEmail()}/invitaciones`, options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
-        console.log(res);
         if (res.error) {
-          this.toastComponent.mostrarToast('Error', 'Hubo un error al cargar las invitaciones, intentelo de nuevo.');
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Hubo un error al cargar las invitaciones, intentelo de nuevo.',
+            esMensajeInfo: false
+          });
         } else {
           this.invitaciones = res;
         }
@@ -53,7 +54,7 @@ export class NotificationsComponent implements OnInit {
   aceptarInvitacion(invitacion, decision: boolean) {
     console.log(invitacion, decision);
 
-    const { idInvitacion, idProblematica, emailRemitente, emailDestinatario, paraInterventor } = invitacion;
+    const { idInvitacion, idProblematica, emailRemitente, paraInterventor } = invitacion;
 
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
@@ -70,9 +71,13 @@ export class NotificationsComponent implements OnInit {
       .subscribe(res => {
         console.log(res)
         if (res.error) {
-          alert("Error")
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Hubo un error al aceptar la invitación, intentelo de nuevo.',
+            esMensajeInfo: false
+          })
         } else {
-          alert("has aceptado la invitacion");
+          this.serviciosToast.mostrarToast({ cuerpo: 'Invitación aceptada' });
           //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
           //TODO: Arreglar la persona invitada al array invitaciones
           this.eliminarNotificacion(res.id);
@@ -101,9 +106,13 @@ export class NotificationsComponent implements OnInit {
       .subscribe((res: any) => {
         console.log(res)
         if (res.error) {
-          alert("Error")
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Hubo un error al rechazar la invitación, intentelo de nuevo.',
+            esMensajeInfo: false
+          })
         } else {
-          alert("has rechazadoo la invitacion");
+          this.serviciosToast.mostrarToast({ cuerpo: 'Rechazaste la invitación' })
           //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
           //TODO: Arreglar la persona invitada al array invitaciones
           this.eliminarNotificacion(res.id);

@@ -42,8 +42,7 @@ import { ToastComponent } from 'app/toast/toast.component';
     IconsComponent,
     FaseIndividualComponent,
     NotificationsComponent,
-    UpgradeComponent,
-    ToastComponent
+    UpgradeComponent
   ]
 })
 
