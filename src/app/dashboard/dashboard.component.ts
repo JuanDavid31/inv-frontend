@@ -43,19 +43,11 @@ export class DashboardComponent implements OnInit {
     private serviciosLocalStorage: LocalStorageService,
     private router: Router) { }
 
-  modal: any;
-
   ngOnInit() {
     this.cargarProblematicas();
     this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
       .typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
-<<<<<<< HEAD
-      
-    this.modal = $('#mi-modal').modal();
-=======
-
     this.modal = $('#mi-modal');
->>>>>>> 789fc480a54b65da14c3afcbaf0c1d56dc6ba9a7
   }
 
   activateAutoCompletadoUsuariosAInvitar(query: string, result) {

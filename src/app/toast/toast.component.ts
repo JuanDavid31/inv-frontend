@@ -45,7 +45,7 @@ export class ToastComponent implements OnInit {
 
     const nodo = this.htmlToElement(toastHtmlString);
     this.contenedorToasts.appendChild(nodo);
-    this.toast = $(`#toast${this.contador}`).toast({ delay: 2000 })
+    //this.toast = $(`#toast${this.contador}`).toast({ delay: 2000 })
     this.toast.toast('show')
 
     setTimeout(() => {
