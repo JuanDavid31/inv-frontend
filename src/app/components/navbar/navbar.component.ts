@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { ROUTES } from '../sidebar/sidebar.component';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { catchError } from 'rxjs/operators';
 import { NotificacionesService } from '../../services/notificaciones/notificaciones.service';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../../services/localstorage/local-storage.service';
+import { ToastComponent } from 'app/toast/toast.component';
 
 @Component({
   selector: 'app-navbar',
@@ -22,6 +23,9 @@ export class NavbarComponent implements OnInit {
   location: Location;
 
   invitaciones = [];
+
+  @ViewChild(ToastComponent, { static: false })
+  private toastComponent: ToastComponent;
 
   constructor(private element: ElementRef,
     private serviciosNotificaciones: NotificacionesService,
@@ -68,9 +72,9 @@ export class NavbarComponent implements OnInit {
       .get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
-        console.log(res);
         if (res.error) {
           alert("Hubo un error");
+          this.toastComponent.mostrarToast('Error', 'Hubo un error al cargar las notificaciones, intentelo de nuveo.', false);
         } else {
           this.invitaciones = res;
         }
@@ -174,8 +178,8 @@ export class NavbarComponent implements OnInit {
     this.serviciosLocalStorage.eliminarDatos();
     this.router.navigateByUrl("/login");
   }
-  
-  mandarANotificaciones(){
+
+  mandarANotificaciones() {
     this.router.navigateByUrl("/notifications");
   }
 }

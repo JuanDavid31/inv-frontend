@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
+import { ToastComponent } from 'app/toast/toast.component';
 
 @Component({
   selector: 'app-notifications',
@@ -15,6 +16,9 @@ export class NotificationsComponent implements OnInit {
   invitaciones = [];
   decision: boolean;
   idProblematica;
+
+  @ViewChild(ToastComponent, { static: false })
+  private toastComponent: ToastComponent;
 
   constructor(private http: HttpClient,
     private serviciosLocalStorage: LocalStorageService,
@@ -30,19 +34,20 @@ export class NotificationsComponent implements OnInit {
     const options = {
       headers: headers
     }
+
     this.http
       .get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
         console.log(res);
         if (res.error) {
-          alert("Hubo un error");
+          this.toastComponent.mostrarToast('Error', 'Hubo un error al cargar las invitaciones, intentelo de nuevo.');
         } else {
           this.invitaciones = res;
         }
       })
-      
-      console.log(this.serviciosLocalStorage.darEmail())
+
+    console.log(this.serviciosLocalStorage.darEmail())
   }
 
   aceptarInvitacion(invitacion, decision: boolean) {

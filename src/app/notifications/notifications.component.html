@@ -1,4 +1,5 @@
 <div class="main-content">
+  <app-toast></app-toast>
   <div class="container-fluid">
     <div class="card">
       <div class="card-header card-header" style="background:#CAC8C8">
@@ -17,15 +18,15 @@
             </div>
           </div>
           <div class="col-md-2">
-            
+
             <div class="row ">
               <span>
-                 <a class="myButton" (click)="aceptarInvitacion(invitacion, true)"  >
-                   	<span class="input-group-text"><i class="	fa fa-check"></i></span>
-                 </a>
-                 <a  class="myButton" (click)="rechazarInvitacion(invitacion)" style="margin-left: 10px" >
-                   	<span class="input-group-text"><i class="fa fa-close"></i></span>
-                 </a>
+                <a class="myButton" (click)="aceptarInvitacion(invitacion, true)">
+                  <span class="input-group-text"><i class="	fa fa-check"></i></span>
+                </a>
+                <a class="myButton" (click)="rechazarInvitacion(invitacion)" style="margin-left: 10px">
+                  <span class="input-group-text"><i class="fa fa-close"></i></span>
+                </a>
               </span>
             </div>
           </div>
