@@ -47,13 +47,9 @@ export class NotificationsComponent implements OnInit {
           this.invitaciones = res;
         }
       })
-
-    console.log(this.serviciosLocalStorage.darEmail())
   }
 
   aceptarInvitacion(invitacion, decision: boolean) {
-    console.log(invitacion, decision);
-
     const { idInvitacion, idProblematica, emailRemitente, paraInterventor } = invitacion;
 
     const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
@@ -69,7 +65,6 @@ export class NotificationsComponent implements OnInit {
       paraInterventor
     }, options).pipe(catchError(err => of(err)))
       .subscribe(res => {
-        console.log(res)
         if (res.error) {
           this.serviciosToast.mostrarToast({
             titulo: 'Error',
@@ -78,8 +73,7 @@ export class NotificationsComponent implements OnInit {
           })
         } else {
           this.serviciosToast.mostrarToast({ cuerpo: 'Invitación aceptada' });
-          //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
-          //TODO: Arreglar la persona invitada al array invitaciones
+          this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
           this.eliminarNotificacion(res.id);
         }
       })
@@ -104,7 +98,6 @@ export class NotificationsComponent implements OnInit {
       paraInterventor
     }, options).pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
-        console.log(res)
         if (res.error) {
           this.serviciosToast.mostrarToast({
             titulo: 'Error',
@@ -113,8 +106,7 @@ export class NotificationsComponent implements OnInit {
           })
         } else {
           this.serviciosToast.mostrarToast({ cuerpo: 'Rechazaste la invitación' })
-          //TODO: Eliminar del arreglo usuariosBuscados a la persona invitada.
-          //TODO: Arreglar la persona invitada al array invitaciones
+          this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
           this.eliminarNotificacion(res.id);
         }
       })

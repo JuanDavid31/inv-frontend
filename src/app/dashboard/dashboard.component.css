@@ -10,6 +10,10 @@ main-content{
   margin:10px;
 }
 
+.problematica-card{
+  min-height: 427px;
+}
+
 .card-title{
   height: 25px;
   display: -webkit-box;

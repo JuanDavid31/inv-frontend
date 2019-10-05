@@ -138,7 +138,6 @@ export class DashboardComponent implements OnInit {
       .get(`http://3.130.29.100:8080/problematicas/${id}/personas/${this.serviciosLocalStorage.darEmail()}/invitaciones`, options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
-        console.log(res);
         if (res.error) {
           this.serviciosToast.mostrarToast({
             titulo: 'Error',
@@ -167,7 +166,6 @@ export class DashboardComponent implements OnInit {
       descripcion: this.descripcionNuevaProblematica
     }, options).pipe(catchError(err => of(err)))
       .subscribe((res: any) => {
-        console.log(res);
         if (res.error) {
           this.serviciosToast.mostrarToast({
             titulo: 'Error',
@@ -241,7 +239,6 @@ export class DashboardComponent implements OnInit {
       .post(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?avanzar=${true}`, options)
       .pipe(catchError(err => of(err)))
       .subscribe(res => {
-        console.log(res);
         if (res.error) {
           this.serviciosToast.mostrarToast({
             titulo: 'Error',
