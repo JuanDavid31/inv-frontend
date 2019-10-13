@@ -15,7 +15,6 @@ html {
 }
 
 .user_card {
-  height: 500px !important;
   width: 400px!important;
   margin-top: auto;
   margin-bottom: auto;
@@ -29,10 +28,15 @@ html {
   -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   border-radius: 5px;
-
 }
+
+form{
+  margin-bottom: auto;
+  max-width: 287px;
+}
+
 .form_container {
-  margin-top: 40px !important;
+  margin-top: 10px !important;
 }
 
 .form-control, .is-focused .form-control {
@@ -57,6 +61,11 @@ html {
   font-size: 2.5rem;
     font-weight: 500;
     color: black;
+}
+
+.alert{
+  display: flex;
+  justify-content: space-between;
 }
 
 .login_btn {

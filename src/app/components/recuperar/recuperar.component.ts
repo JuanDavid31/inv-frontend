@@ -12,21 +12,30 @@ export class RecuperarComponent implements OnInit {
 
   correo: string;
 
+  botonBloqueado = false;
+  mensaje = '';
+  esMensajeExito = false;
+
   constructor(private http: HttpClient) { }
 
   recuperar() {
+    this.botonBloqueado = true;
     this.http.post(`http://3.130.29.100:8080/auth/pass?email=${this.correo}`, {})
       .pipe(catchError(error => of(error)))
       .subscribe((data: any) => {
-        alert("El correo se envió exitosamente")
-        console.log(data)
-        
+        this.botonBloqueado = false;
         if (data.error) {
-
+          this.mensaje = data.error.errors[0];
         } else {
-
+          this.esMensajeExito = true;
+          this.mensaje = 'Revisa tu correo electronico.';
         }
       })
+  }
+
+  cerrarAlert() {
+    this.mensaje = '';
+    this.esMensajeExito = false;
   }
 
   ngOnInit() {

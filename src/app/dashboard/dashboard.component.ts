@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
-import { serviciosToast } from 'app/toast/toast.component';
 import { ToastService } from 'app/services/toast/toast.service';
 declare var $;
 

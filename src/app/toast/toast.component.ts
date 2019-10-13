@@ -1,14 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ToastService } from '../services/toast/toast.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-toast',
   templateUrl: './toast.component.html',
   styleUrls: ['./toast.component.scss']
 })
-export class ToastComponent implements OnInit {
+export class ToastComponent implements OnInit, OnDestroy {
 
   private contenedorToasts: any;
+  private subscripcion: Subscription;
   private contador = 0;
   titulo = '';
   cuerpo = '';
@@ -21,7 +23,8 @@ export class ToastComponent implements OnInit {
   ngOnInit() {
     this.contador = 0;
     this.contenedorToasts = document.getElementById('toasts-container');
-    this.serviciosToast.changeEmitted$.subscribe(datos => this.mostrarToast(datos.titulo, datos.cuerpo, datos.esMensajeInfo));
+    this.subscripcion = this.serviciosToast.changeEmitted$
+      .subscribe(datos => this.mostrarToast(datos.titulo, datos.cuerpo, datos.esMensajeInfo));
   }
 
   mostrarToast(titulo = 'Información', cuerpo = 'Este es un mensaje de información', esMensajeInfo = true) {
@@ -64,11 +67,15 @@ export class ToastComponent implements OnInit {
    * @param {String} HTML representing a single element
    * @return {Element}
    */
-  htmlToElement(html) {
+  private htmlToElement(html) {
     var template = document.createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
     return template.content.firstChild;
+  }
+
+  ngOnDestroy() {
+    this.subscripcion.unsubscribe();
   }
 
 }

@@ -6,6 +6,10 @@ body,
     background: #F2F6F6;
   }
 
+  .input-group-append{
+    margin-left: 0px;
+  }
+
   .container.h-100{
     background-image: url(https://storage.googleapis.com/efor-static/UIBG/Cloudkey%20estudiantes/bg-02.jpg);
     margin-left: 0px;
@@ -16,7 +20,6 @@ body,
   }
   
   .user_card {
-    height: 300px!important;
     width: 400px!important;
     margin-top: auto;
     margin-bottom: auto;
@@ -32,8 +35,13 @@ body,
     border-radius: 5px;
 
   }
+
   .form_container {
     margin-top: 40px !important;
+  }
+
+  .alert{
+    margin: 0px 2rem;
   }
 
   .form-control, .is-focused .form-control {

@@ -27,7 +27,7 @@ const routes: Routes = [
   },
   { path: 'login', component: LoginComponent, canActivate: [PublicoGuard] },
   { path: 'registro', component: RegistroComponent, canActivate: [PublicoGuard] },
-  { path: 'recuperarcontraseña', component: RecuperarComponent, canActivate: [PublicoGuard] }
+  { path: 'recuperar', component: RecuperarComponent, canActivate: [PublicoGuard] }
 
 ];
 

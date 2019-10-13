@@ -1,74 +1,105 @@
-    <div class="container h-100">
-    <div class="d-flex justify-content-center h-100">
-      <div class="user_card">
-        <div class="d-flex justify-content-center">
-          <h1>Registro</h1>
-        </div>
-        <div class="d-flex justify-content-center form_container">
-          <form>
-      <div class="input-group mb-2">
-      <div class="input-group-append">
-        <span class="input-group-text"><i class="fas fa-user"></i></span>
-      </div>
-      <input type="text" name="user" id="user" #user="ngModel" class="form-control input_text" value="" placeholder="Nombres " [(ngModel)]="nombres" minlength="8"maxlength="40" required>
-      
-    </div>
-    <div *ngIf="user.touched">
-      <div *ngIf="user?.errors.required">
-              <a>Nombres no puede estar vacio </a>
-      </div>
-    </div>
-    
-    <div class="input-group mb-2">
-      <div class="input-group-append">
-        <span class="input-group-text"><i class="fas fa-user"></i></span>
-      </div>
-      <input type="text" name="ape" #ape="ngModel" id="ape"  class="form-control input_text" value="" placeholder="Apellidos" [(ngModel)]="apellidos" minlength="8" maxlength="40" required>
-    </div>
-    <div *ngIf= "ape.touched">
-      <div *ngIf="ape?.errors.required" > Apellidos no puede estar vacio</div>
-    </div>
-    <div class="input-group mb-2">
-      <div class="input-group-append">
-        <span class="input-group-text"><i class="fas fa-envelope"></i></span >
-      </div>
-      <input type="text" id="email" name="email" #email="ngModel" class="form-control input_text" value="" placeholder="Correo" [(ngModel)]="correo" minlength="8" maxlength="40" required>
-    </div>
-    
-    <div *ngIf= "email.touched">
-      <div *ngIf="email?.errors.required" > El correo no puede estar vacio</div>
-    </div>
-    
-    <div class="input-group mb-2">
-      <div class="input-group-append">
-        <span class="input-group-text"><i class="fas fa-key"></i></span>
-      </div>
-      <input type="password" name="contra" #contra="ngModel" id= "contra" class="form-control input_text" value="" placeholder="Contraseña" [(ngModel)]="password" minlength="8" maxlength="40" required>
-    </div>
-    <div *ngIf= "contra.touched && !contra.valid">
-      <div *ngIf="contra?.errors.required" > Contraseña no puede estar vacio</div>
-      <div *ngIf="contra?.errors.minlength" > La contraseña debe tener minimo 8 caracteres</div>
-    </div>
-    <div class="input-group mb-2">
-      <div class="input-group-append">
-        <span class="input-group-text"><i class="fas fa-key"></i></span>
-      </div>
-      <input type="password" name="password" class="form-control input_text" value="" placeholder="Validar contraseña" [(ngModel)]="password2">
-    </div>
-    </form>
-    </div>
-    <div class="d-flex justify-content-center mt-3 login_container">
-      <button type="button" name="button" class="btn login_btn" (click)="register()">Registrase</button>
-    </div>
-    <div class="mt-4">
-      <div class="d-flex justify-content-center links">
-        Ya tiene cuenta? <a routerLink="/login" >Iniciar sesión</a>
-      </div>
-    </div>
-  </div>
+<div class="container h-100">
+	<div class="d-flex justify-content-center h-100">
+		<div class="user_card">
+			<div class="d-flex justify-content-center">
+				<h1>Registro</h1>
+			</div>
+			<div class="d-flex justify-content-center form_container">
+				<form #registroForm="ngForm" novalidate autocomplete="off">
+					<div class="input-group mb-2">
+						<div class="input-group-append">
+							<span class="input-group-text"><i class="fas fa-user"></i></span>
+						</div>
+						<input type="text" name="nombresInput" id="nombres" class="form-control input_text"
+							#nombresInput="ngModel" autocomplete="new-password"
+							[ngClass]="{'is-invalid':nombresInput.invalid && nombresInput.dirty}" placeholder="Nombres"
+							[(ngModel)]="nombres" minlength="3" maxlength="40" required ngModel>
+						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.required">
+							<a>Nombres no puede estar vacio </a>
+						</div>
+						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.minlength">
+							<a>El nombre debe contener al menos 3 caracteres</a>
+						</div>
+					</div>
+					<div class="input-group mb-2">
+						<div class="input-group-append">
+							<span class="input-group-text"><i class="fas fa-user"></i></span>
+						</div>
+						<input type="text" name="apellidosInput" id="ape" class="form-control input_text"
+							#apellidosInput="ngModel" autocomplete="new-password"
+							[ngClass]="{'is-invalid':apellidosInput.invalid && apellidosInput.dirty}"
+							placeholder="Apellidos" [(ngModel)]="apellidos" minlength="3" maxlength="40" required
+							ngModel>
+						<div class="invalid-feedback" *ngIf="apellidosInput?.errors?.required">
+							<a>Los apellidos no pueden estar vacios</a>
+						</div>
+						<div class="invalid-feedback" *ngIf="apellidosInput?.errors?.minlength">
+							<a>Los apellidos deben tener al menos 3 caracteres</a>
+						</div>
+					</div>
+					<div class="input-group mb-2">
+						<div class="input-group-append">
+							<span class="input-group-text"><i class="fas fa-envelope"></i></span>
+						</div>
+						<input type="email" id="email" name="emailInput" #emailInput="ngModel"
+							class="form-control input_text"
+							[ngClass]="{'is-invalid':emailInput.invalid && emailInput.dirty}"
+							placeholder="Correo electronico" [(ngModel)]="correo" minlength="8" maxlength="40" required
+							ngModel>
+						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.required">
+							<a>El correo puede estar vacio </a>
+						</div>
+						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.minlength">
+							<a>El correo debe contener al menos 8 caracteres</a>
+						</div>
+					</div>
+					<div class="input-group mb-2">
+						<div class="input-group-append">
+							<span class="input-group-text"><i class="fas fa-key"></i></span>
+						</div>
+						<input type="password" name="pass" #passInput="ngModel" id="contra"
+							class="form-control input_text" autocomplete="new-password"
+							[ngClass]="{'is-invalid':passInput.invalid && passInput.dirty}" placeholder="Contraseña"
+							[(ngModel)]="password" minlength="8" maxlength="40" required ngModel>
+						<div class="invalid-feedback" *ngIf="passInput?.errors?.required">
+							<a>La contraseña no puede estar vacia</a>
+						</div>
+						<div class="invalid-feedback" *ngIf="passInput?.errors?.minlength">
+							<a>La contraseña debe tener al menos 8 caracteres</a>
+						</div>
+					</div>
+					<div class="input-group mb-2">
+						<div class="input-group-append">
+							<span class="input-group-text"><i class="fas fa-key"></i></span>
+						</div>
+						<input type="password" name="password2Input" id="password2" class="form-control input_text"
+							#password2Input="ngModel" autocomplete="new-password"
+							[ngClass]="{'is-invalid':password2Input.invalid && password2Input.dirty}"
+							placeholder="Verificar contraseña" [(ngModel)]="password2" minlength="3" maxlength="40"
+							required ngModel>
+						<div class="invalid-feedback">
+							Las contraseñas deben coincidir
+						</div>
+					</div>
+					<div class="alert alert-danger" role="alert" *ngIf="mensaje.length > 0">
+						{{mensaje}}
+						<button class="close" data-dismiss="alert" aria-label="Close" (click)="mensaje = ''">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<button type="submit" name="button" class="btn login_btn mt-3" (click)="register()"
+						[disabled]="botonBloqueado || registroForm.invalid || password != password2">
+						<span class="spinner-absoluto spinner-border spinner-border-sm" role="status" aria-hidden="true"
+							*ngIf="botonBloqueado"></span>
+						Registrarse
+					</button>
+				</form>
+			</div>
+			<div class="mt-4">
+				<div class="d-flex justify-content-center links noselect">
+					¿Ya tiene cuenta? &nbsp;<a routerLink="/login">Inicia sesión</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
-</div>
-
-
-
-  

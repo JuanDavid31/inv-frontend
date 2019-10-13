@@ -9,8 +9,8 @@ html {
 }
 
 .user_card {
-  height: 400px!important;
   width: 350px !important;
+  max-height: 450px;
   margin-top: auto;
   margin-bottom: auto;
   background: #B9CBD7 !important;
@@ -84,6 +84,10 @@ html {
 .custom-checkbox.custom-control{
     display: flex;
     align-items: center;
+}
+
+.custom-checkbox.custom-control * {
+  cursor: pointer;
 }
 
 .custom-checkbox.custom-control .custom-control-label{
