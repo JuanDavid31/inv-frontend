@@ -3,17 +3,10 @@ import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ToastService } from 'app/services/toast/toast.service';
 declare var cytoscape;
 
-
 declare var $;
-
-interface Marker {
-    lat: number;
-    lng: number;
-    label?: string;
-    draggable?: boolean;
-}
 
 @Component({
     selector: 'app-fase-individual',
@@ -32,14 +25,29 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     nombreNodo = '';
     cy: any = {};
 
+    fotoFileInput: HTMLInputElement;
+
     constructor(private serviciosLocalStorage: LocalStorageService,
+        private serviciosToast: ToastService,
         private http: HttpClient) { }
 
     ngOnInit() {
+        this.fotoFileInput = (<HTMLInputElement>document.getElementById('customFileLang'));
+        this.prepararOnChangeFileInput();
         this.iniciar();
     }
 
+    private prepararOnChangeFileInput() {
+        $('.custom-file-input').on('change', function () {
+            var fileName = (<HTMLInputElement>document.getElementById('customFileLang')).files[0].name;
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        })
+    }
+
     private iniciar() {
+        this.nodoDe = {};
+        this.nodoA = {};
+
         this.prepararCytoscape();
         this.prepararMenus();
         this.cargarNodos();
@@ -113,9 +121,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                 },
                 {
                     content: 'Nada',
-                    select: function (ele) {
-                        console.log(ele.position());
-                    }
+                    select: function (ele) { }
                 }
             ]
         });
@@ -134,7 +140,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
-                    this.atenderErr(res.err);
+                    this.atenderErr(res.error);
                 } else {
                     this.dibujarNodos(res);
                 }
@@ -171,17 +177,38 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     }
 
     private atenderErr(err) {
-        console.log(err);
+        this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: err.errros[0],
+            esMensajeInfo: false
+        });
     }
 
     agregar() {
-        if (!this.nombreNodo) return; //TODO: Mostrar un mensaje
+        if (!this.nombreNodo) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'El nodo necesita un nombre.',
+                esMensajeInfo: false
+            });
+            return;
+        }
 
-        let foto = (<HTMLInputElement>document.getElementById('input-foto')).files[0];
-        let arr = foto.name.split('.');
-        let extensionFoto = arr[arr.length - 1];
+        const foto = this.fotoFileInput.files[0];
 
-        let form = new FormData();
+        if (!foto) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'El nodo necesita una imagen.',
+                esMensajeInfo: false
+            });
+            return;
+        }
+
+        const arr = foto.name.split('.');
+        const extensionFoto = arr[arr.length - 1];
+
+        const form = new FormData();
         form.append('foto', foto);
         form.append('nombre', this.nombreNodo);
 
@@ -199,9 +226,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
             .post(`http://3.130.29.100:8080/problematicas/${problematica}/personas/${email}/nodos`, form, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
-                console.log(res);
                 if (res.error) {
-                    this.atenderErr(res.err);
+                    this.atenderErr(res.error);
                 } else {
                     this.atenderPOST(res);
                 }
@@ -209,6 +235,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     }
 
     atenderPOST(nodo) {
+        this.limpiarCamposNodo();
+
         this.nodos.push(nodo);
         this.cy.add({ data: { id: nodo.id, nombre: nodo.nombre }, position: { x: this.cy.width() / 2, y: this.cy.height() / 2 } });
         this.cy.style()
@@ -216,6 +244,12 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
             .css({
                 'background-image': nodo.urlFoto
             }).update();
+    }
+
+    private limpiarCamposNodo() {
+        this.fotoFileInput.value = '';
+        this.nombreNodo = '';
+        $('.custom-file-label').html('');
     }
 
     eliminarPorId(nodo) {
@@ -229,9 +263,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
             .delete(`http://3.130.29.100:8080/nodos/${id}`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
-                console.log(res);
                 if (res.error) {
-                    this.atenderErr(res.err);
+                    this.atenderErr(res.error);
                 } else {
                     this.atenderDELETE(nodo);
                 }
@@ -239,11 +272,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     }
 
     atenderDELETE(nodo) {
-        console.log(this.nodos.length);
-        console.log(nodo.id());
-
         this.nodos = this.nodos.filter(e => e.id !== +nodo.id());
-        console.log(this.nodos.length);
         nodo.remove();
     }
 
@@ -254,25 +283,40 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     conectar() {
         const idPadre = this.nodoDe.id;
         const id = this.nodoA.id;
-        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
-            console.log('Ya existe una relación');
-        } else {
-            const options = {
-                headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-            }
 
-            this.http
-                .put(`http://3.130.29.100:8080/nodos/${id}?id-padre=${idPadre}&apadrinar=true`, options)
-                .pipe(catchError(err => of(err)))
-                .subscribe(res => {
-                    console.log(res);
-                    if (res.error) {
-                        this.atenderErr(res.err);
-                    } else {
-                        this.atenderPUTApadrinar(res);
-                    }
-                });
+        if (!idPadre || !id) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Debe seleccionar 2 nodos diferente',
+                esMensajeInfo: false
+            })
+            return;
         }
+
+        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Ya existe una relación',
+                esMensajeInfo: false
+            })
+            return;
+        }
+
+        const options = {
+            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
+        }
+
+        this.http
+            .put(`http://3.130.29.100:8080/nodos/${id}?id-padre=${idPadre}&apadrinar=true`, options)
+            .pipe(catchError(err => of(err)))
+            .subscribe(res => {
+                if (res.error) {
+                    this.atenderErr(res.error);
+                } else {
+                    this.atenderPUTApadrinar(res);
+                }
+            });
+
     }
 
     esEdge(id) {
@@ -285,8 +329,11 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         let idA = this.nodoA.id;
         let ob = this.cy.getElementById(`${idDesde}${idA}`);
         if (ob.length > 0 && ob[0].isEdge()) {
-            console.log(`Es edge ${ob[0].isEdge()}`)
-            console.log('Ya existe la conexión');
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Ya existe la conexión',
+                esMensajeInfo: false
+            });
         } else {
             this.crearEdge(idA, idDesde);
         }
@@ -309,9 +356,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
             .put(`http://3.130.29.100:8080/nodos/${idNodo}?id-padre=${idPadre}&apadrinar=false`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
-                console.log(res);
                 if (res.error) {
-                    this.atenderErr(res.err);
+                    this.atenderErr(res.error);
                 } else {
                     this.atenderPUTDesapadrinar(idEdge);
                 }

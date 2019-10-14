@@ -61,3 +61,8 @@ main-content{
 td .btn{
   margin:0px;
 }
+
+input.form-control:focus{
+  border-color: none;
+  box-shadow: none;
+}

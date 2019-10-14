@@ -1,38 +1,51 @@
 <div class="main-content">
     <div class="ctrl" style="background:#DCE3E8">
         <div class="row">
-            <div class="col-md-6">
-                <input type="file" name="foto" id="input-foto">
+            <div class="col-md-6 div-archivo">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="customFileLang" lang="es">
+                    <label class="custom-file-label" for="customFileLang">Seleccionar Archivo</label>
+                </div>
             </div>
             <div class="col-md-6 d-flex form-group">
                 <input class="form-control mt-0" type="text" name="nombreNodoInput" placeholder="Dale un Nombre"
-                    id="nombre" [(ngModel)]="nombreNodo">
+                    minlength="1" maxlength="20" id="nombre" [(ngModel)]="nombreNodo">
                 <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Agregar" (click)="agregar()">
             </div>
-            <div class="col-md-6 d-flex align-items-center form-group">
-                <label for="De">De</label>
-                <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe"
-                    style="width:155px;margin-top:15px;margin-left:10px;margin-right:10px">
-                    <option value="" disabled selected>Selecciona un nodo</option>
-                    <option *ngFor="let nodo of nodos" [ngValue]="nodo">
-                        {{nodo.nombre}}
-                    </option>
-                </select>
-                <label for="A">A</label>
-                <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA"
-                    style="width:155px;margin-top:15px;margin-left:10px;margin-right:10px">
-                    <option value="" disabled selected>Selecciona un nodo</option>
-                    <option *ngFor="let nodo of nodos" [ngValue]="nodo">
-                        {{nodo.nombre}}
-                    </option>
-                </select>
+            <div class="col-md-6 d-flex align-items-center form-group div-conectar">
+                <div class="form-group ml-3 mr-3">
+                    <label class="mb-0" for="De">De</label>
+                    <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe">
+                        <option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+                        <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                            {{nodo.nombre}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group ml-3 mr-3">
+                    <label class="mb-0" for="A">A</label>
+                    <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA">
+                        <option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+                        <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                            {{nodo.nombre}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group ml-auto d-flex flex-column">
+                    <label class="invisible">A</label>
+                    <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()"
+                        style="height: 38px;">
+                </div>
             </div>
             <div class="col-md-6 d-flex align-items-center form-group">
-                <input class="btn btn-default btn-sm mt-0 mb-0 pl-0 pr-0" type="submit" value="Conectar"
-                    (click)="conectar()" style="width:90px;margin-top:15px;margin-right:10px">
-                <input class="btn btn-default btn-sm mt-0 mb-0 pl-0 pr-0" type="submit" value="Ordenar"
-                    (click)="reiniciar()" style="width:80px;margin-top:15px;margin-right:10px">
-                {{nodos.length}} nodos
+                <div class="form-group d-flex flex-column">
+                    <label class="invisible">A</label>
+                    <div>
+                        <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Ordenar"
+                            style="height: 38px;" (click)="reiniciar()">
+                        &nbsp; {{nodos.length}} nodos
+                    </div>
+                </div>
             </div>
         </div>
     </div>
