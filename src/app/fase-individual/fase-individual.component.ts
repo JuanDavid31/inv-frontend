@@ -206,7 +206,6 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                     this.atenderPOST(res);
                 }
             });
-
     }
 
     atenderPOST(nodo) {
@@ -234,15 +233,18 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                 if (res.error) {
                     this.atenderErr(res.err);
                 } else {
-                    this.atenderDELETE(res);
+                    this.atenderDELETE(nodo);
                 }
             });
     }
 
     atenderDELETE(nodo) {
-        this.nodos = this.nodos.filter(e => e.id !== nodo.id);
-        const nodoABorrar = this.cy.getElementById(nodo.id);
-        nodoABorrar.remove();
+        console.log(this.nodos.length);
+        console.log(nodo.id());
+
+        this.nodos = this.nodos.filter(e => e.id !== +nodo.id());
+        console.log(this.nodos.length);
+        nodo.remove();
     }
 
     reiniciar() {
@@ -319,8 +321,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     atenderPUTDesapadrinar(id) {
         this.cy.getElementById(id).remove();
     }
-    
-    ngOnDestroy(){
+
+    ngOnDestroy() {
         this.serviciosLocalStorage.eliminarProblematicaActual();
     }
 }

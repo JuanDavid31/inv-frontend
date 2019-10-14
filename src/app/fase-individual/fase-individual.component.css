@@ -12,3 +12,27 @@
     display: block;
     flex-grow: 1;
 }
+
+.custom-file{
+    height: calc(2.25rem + 2px);
+}
+
+.custom-file .custom-file-input{
+    height: calc(2.25rem + 2px);
+}
+
+.custom-file-label{
+    transition: inherit;
+    height: calc(2.25rem + 2px);
+    padding: .375rem .75rem;
+    font-weight: inherit;
+    line-height: 1.5;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    box-shadow: inherit;
+}
+
+input#nombre{
+    width: initial;
+}

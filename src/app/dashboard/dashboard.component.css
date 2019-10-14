@@ -36,9 +36,28 @@ main-content{
   width: 100%;
 }
 
+.acciones-al-invitar{
+  display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
 
 .invitacion{
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.checkbox-interventor{
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.checkbox-interventor label{
+  margin-bottom: 0px;
+}
+
+td .btn{
+  margin:0px;
 }

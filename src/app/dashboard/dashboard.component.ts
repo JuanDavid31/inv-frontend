@@ -185,6 +185,7 @@ export class DashboardComponent implements OnInit {
     const options = {
       headers: headers
     }
+
     this.http.post('http://3.130.29.100:8080/invitaciones', {
       idProblematica: this.problematicaSeleccionada.id,
       emailRemitente: this.serviciosLocalStorage.darEmail(),

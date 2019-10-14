@@ -2,40 +2,39 @@
     <div class="ctrl" style="background:#DCE3E8">
         <div class="row">
             <div class="col-md-6">
-       
-        <input type="file" name="foto" id="input-foto" style="margin-top:10px;margin-left:86px;font-size: 0.01 em;">
+                <input type="file" name="foto" id="input-foto">
             </div>
-            <div class="col-md-6">
-                <input type="text" name="nombreNodoInput" style="margin-top:10px;margin-right:10px" placeholder="Dale un Nombre" id="nombre" [(ngModel)]="nombreNodo">
-        <input  type="submit" value="Agregar" (click)="agregar()" style="margin-right:10px">
-        
+            <div class="col-md-6 d-flex form-group">
+                <input class="form-control mt-0" type="text" name="nombreNodoInput" placeholder="Dale un Nombre"
+                    id="nombre" [(ngModel)]="nombreNodo">
+                <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Agregar" (click)="agregar()">
+            </div>
+            <div class="col-md-6 d-flex align-items-center form-group">
+                <label for="De">De</label>
+                <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe"
+                    style="width:155px;margin-top:15px;margin-left:10px;margin-right:10px">
+                    <option value="" disabled selected>Selecciona un nodo</option>
+                    <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                        {{nodo.nombre}}
+                    </option>
+                </select>
+                <label for="A">A</label>
+                <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA"
+                    style="width:155px;margin-top:15px;margin-left:10px;margin-right:10px">
+                    <option value="" disabled selected>Selecciona un nodo</option>
+                    <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                        {{nodo.nombre}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-center form-group">
+                <input class="btn btn-default btn-sm mt-0 mb-0 pl-0 pr-0" type="submit" value="Conectar"
+                    (click)="conectar()" style="width:90px;margin-top:15px;margin-right:10px">
+                <input class="btn btn-default btn-sm mt-0 mb-0 pl-0 pr-0" type="submit" value="Ordenar"
+                    (click)="reiniciar()" style="width:80px;margin-top:15px;margin-right:10px">
+                {{nodos.length}} nodos
             </div>
         </div>
-        
-         <div class="row">
-            <div class="col-md-6">
-        
-        <label for="De">Conectar De</label>
-        <select  name="De" id="De" [(ngModel)]="nodoDe" style="width:155px;margin-top:15px;margin-left:10px;margin-right:10px">
-            <option *ngFor="let nodo of nodos" [ngValue]="nodo">
-                {{nodo.nombre}}
-            </option>
-        </select>
-        <label for="A">A</label>
-        <select name="A" id="A" [(ngModel)]="nodoA" style="width:155px;margin-top:15px;margin-left:10px;margin-right:10px">
-            <option *ngFor="let nodo of nodos" [ngValue]="nodo" >
-                {{nodo.nombre}}
-            </option>
-        </select>
-        
-           
-        </div>
-         <div class="col-md-6">
-       <input  type="submit" value="Conectar" (click)="conectar()" style="width:90px;margin-top:15px;margin-right:10px">
-       <input  type="submit" value="Ordenar" (click)="reiniciar()" style="width:80px;margin-top:15px;margin-right:10px">
-        Número de nodos {{nodos.length}}
-        </div>
-            </div>
     </div>
     <div id="cy">
     </div>
