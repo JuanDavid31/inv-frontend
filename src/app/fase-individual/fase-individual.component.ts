@@ -302,6 +302,15 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
             return;
         }
 
+        if (this.tieneOtroPadre(id)) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Un nodo no puede tener 2 padres.',
+                esMensajeInfo: false
+            });
+            return;
+        }
+
         const options = {
             headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
         }
@@ -322,6 +331,10 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     esEdge(id) {
         let posibleEdge = this.cy.getElementById(id);
         return posibleEdge.length > 0 && posibleEdge[0].isEdge();
+    }
+
+    tieneOtroPadre(idNodo) {
+        return this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
     }
 
     atenderPUTApadrinar(res) {
