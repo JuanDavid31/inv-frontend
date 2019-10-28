@@ -165,6 +165,8 @@ export class NavbarComponent implements OnInit {
     switch (titlee) {
       case '/fase-individual':
         return 'Fase individual';
+      case '/fase-grupal':
+        return 'Fase grupal';
     }
 
     for (var item = 0; item < this.listTitles.length; item++) {

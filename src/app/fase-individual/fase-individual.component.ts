@@ -284,32 +284,9 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         const idPadre = this.nodoDe.id;
         const id = this.nodoA.id;
 
-        if (!idPadre || !id) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Debe seleccionar 2 nodos diferente',
-                esMensajeInfo: false
-            })
-            return;
-        }
-
-        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Ya existe una relación',
-                esMensajeInfo: false
-            })
-            return;
-        }
-
-        if (this.tieneOtroPadre(id)) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Un nodo no puede tener 2 padres.',
-                esMensajeInfo: false
-            });
-            return;
-        }
+        if (!this.nodosValidos(idPadre, id)) return;
+        if (this.yaExisteRelacion(idPadre, id)) return;
+        if (this.tieneOtroPadre(id)) return;
 
         const options = {
             headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
@@ -328,13 +305,46 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     }
 
+    nodosValidos(idPadre, id) {
+        if (!idPadre || !id) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Debe seleccionar 2 nodos diferente',
+                esMensajeInfo: false
+            })
+            return false;
+        }
+        return true;
+    }
+
+    yaExisteRelacion(idPadre, id) {
+        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Ya existe una relación',
+                esMensajeInfo: false
+            })
+            return true;
+        }
+        return false;
+    }
+
     esEdge(id) {
         let posibleEdge = this.cy.getElementById(id);
         return posibleEdge.length > 0 && posibleEdge[0].isEdge();
     }
 
     tieneOtroPadre(idNodo) {
-        return this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
+        const tieneOtroPadre = this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
+        if (tieneOtroPadre) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Un nodo no puede tener 2 padres.',
+                esMensajeInfo: false
+            });
+            return true;
+        }
+        return false;
     }
 
     atenderPUTApadrinar(res) {
