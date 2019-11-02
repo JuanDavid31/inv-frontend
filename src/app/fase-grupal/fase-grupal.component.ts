@@ -11,6 +11,8 @@ declare var $;
 })
 export class FaseGrupalComponent implements OnInit {
 
+	idNodoAgarrado: any;
+
 	cy: any = {};
 	cdnd: any = {};
 
@@ -20,10 +22,25 @@ export class FaseGrupalComponent implements OnInit {
 
 	ngOnInit() {
 		this.prepararCytoscape();
-
 		this.socket = new WebSocket("ws://localhost:8080/colaboracion?idProblematica=1");
 		this.socket.onopen = this.onopenEvent.bind(this);
 		this.socket.onmessage = this.onmessageEvent.bind(this);
+
+		const cy = this.cy;
+
+		setTimeout(function () {
+			cy.add([{ data: { id: 'e', parent: 'h' } }, { data: { id: 'h' } }]);
+		}, 2000);
+
+		// const nodo = this.cy.getElementById('a');
+		// setTimeout(() => {
+		// 	nodo.data({ id: 'aa' });
+		// }, 2000);
+
+		// const nodo = this.cy.getElementById('p');
+		// setInterval(function () {
+		// 	nodo.position({ x: 0, y: 0 });
+		// }, 2000)
 	}
 
 	private onopenEvent(event) {
@@ -35,26 +52,82 @@ export class FaseGrupalComponent implements OnInit {
 	}
 
 	private onmessageEvent(event) {
-		console.log('Llego un mensaje');
+		console.log('Llego un mensaje - ' + event.data);
 		const json = JSON.parse(event.data);
 
 		switch (json.accion) {
 			case 'Conectarse':
 				this.alguienSeConecto(json);
+				break;
 			case 'Desconectarse':
 				this.alguienSeDesconecto(json);
+				break;
+			case 'Mover':
+				this.moverNodo(json);
+				break;
+			case 'Bloquear':
+				this.bloquearNodo(json);
+				break;
+			case 'Desbloquear':
+				this.desbloquearNodo(json);
+				break;
+			case 'Juntar nodos':
+				this.juntarNodos(json);
+				break;
+			default:
+				return;
 		}
 	}
 
 	private alguienSeConecto(datos) {
-		console.log('Alguien se desconecto')
+		console.log('Alguien se conecto');
 	}
 
 	private alguienSeDesconecto(datos) {
 		console.log('Alguien se desconecto');
 	}
 
-	prepararCytoscape() {
+	private moverNodo(datos) {
+		if (this.idNodoAgarrado === datos.nodo) return;
+		const nodoAMover = this.cy.getElementById(datos.nodo);
+		nodoAMover.position(datos.posicion);
+	}
+
+	private bloquearNodo(datos) {
+		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).ungrabify());
+	}
+
+	private desbloquearNodo(datos) {
+		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).grabify());
+	}
+
+	private juntarNodos(datos) {
+		const idNodoPadre = datos.nodoPadre;
+		const idNodo = datos.nodo;
+		const idNodoVecino = datos.nodoVecino;
+
+		const nodoPadre = this.cy.getElementById(idNodoPadre);
+		const nodo = this.cy.getElementById(idNodo);
+		const nodoVecino = this.cy.getElementById(idNodoVecino);
+
+		console.log(nodo.data());
+
+		if (nodoPadre.length !== 0) { //*nodoPadre ya existe
+			nodo.move({ parent: nodoPadre.id() }) //* Solo funciona si el padre ya existe
+		} else {
+			nodo.remove();
+
+			this.cy.add([
+				{ data: { id: idNodo, parent: idNodoPadre }, position: nodo.position() },
+				{ data: { id: idNodoPadre } }
+			]);
+
+			nodoVecino.move({ parent: idNodoPadre });
+		}
+		console.log(nodo.data());
+	}
+
+	private prepararCytoscape() {
 		this.cy = cytoscape({
 			container: document.getElementById('cy'),
 
@@ -68,7 +141,7 @@ export class FaseGrupalComponent implements OnInit {
 				{
 					selector: 'node:parent',
 					style: {
-						'label': ''
+						'label': 'data(id)' //*Estaba vacio
 					}
 				},
 				{
@@ -112,48 +185,93 @@ export class FaseGrupalComponent implements OnInit {
 			}
 		});
 
-		this.cdnd = this.cy.compoundDragAndDrop();
+		const options = {
+			grabbedNode: node => true, // filter function to specify which nodes are valid to grab and drop into other nodes
+			dropTarget: node => true, // filter function to specify which parent nodes are valid drop targets
+			dropSibling: node => true, // filter function to specify which orphan nodes are valid drop siblings
+			newParentNode: (grabbedNode, dropSibling) => ({}), // specifies element json for parent nodes added by dropping an orphan node on another orphan (a drop sibling)
+			overThreshold: 10, // make dragging over a drop target easier by expanding the hit area by this amount on all sides
+			outThreshold: 10 // make dragging out of a drop target a bit harder by expanding the hit area by this amount on all sides
+		};
 
-		// custom handler to remove parents with only 1 child on drop
-		this.cy.on('cdndout', this.cdndoutEvent.bind(this));
+		this.cdnd = this.cy.compoundDragAndDrop(options);
+		this.prepararEventos();
+	}
 
-		// custom handler to remove parents with only 1 child (on remove of drop target or drop sibling)
+	private prepararEventos() {
 		this.cy.on('remove', this.removeEvent.bind(this));
+		this.cy.on('grabon', this.grabonEvent.bind(this));
+		this.cy.on('free', this.freeEvent.bind(this));
+		this.cy.on('position', this.positionEvent.bind(this));
+		this.cy.on('cdndover', this.cdndoverEvent.bind(this));
+		this.cy.on('cdndout', this.cdndoutEvent.bind(this));
+	}
 
-		this.cy.on('lock', function (event) {
-			console.log('lock');
-		})
+	private cdndoverEvent(event, nodoPadre, dropSibling) {
 
-		this.cy.on('grabon', function (event) { //al agarrar multiples elementos
-			console.log('grabon');
-			console.log(event.target.id());
-		});
+		console.log(`cdndover -> ${nodoPadre.id()} - ${event.target.id()}`);
 
-		this.cy.on('free', function (event) { //Soltar multiples elementos
-			console.log('free');
-		});
-
-		// this.cy.on('grab', function (event) { //Al agarrar un elemento
-		// 	console.log('grab');
-		// });
-
-		// this.cy.on('drag', function (event) { //Al mover el elemento
-		// 	console.log('drag');
-		// })
-
-		// this.cy.on('position', function (event) {
-		// 	console.log('position');
-		// })
+		this.socket.send(JSON.stringify({
+			accion: 'Juntar nodos',
+			nodoPadre: nodoPadre.id(),
+			nodo: event.target.id(),
+			nodoVecino: dropSibling.id()
+		}));
 	}
 
 	private cdndoutEvent(event, dropTarget) {
+		console.log('cdndoout');
+
+
+
 		if (this.isParentOfOneChild(dropTarget)) {
 			this.removeParent(dropTarget);
 		}
 	}
 
 	private removeEvent(event) {
+		console.log('remove');
 		this.removeParentsOfOneChild();
+	}
+
+	private grabonEvent(event) {
+		console.log('grabon');
+
+		const nodo = event.target;
+		this.idNodoAgarrado = nodo.id();
+		const nodos = [event.target.id()];
+		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
+
+		this.socket.send(JSON.stringify({
+			accion: 'Bloquear',
+			nodos
+		}))
+	}
+
+	private freeEvent(event) {
+
+
+		const nodo = event.target;
+		const nodos = [event.target.id()];
+		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
+
+		this.socket.send(JSON.stringify({
+			accion: 'Desbloquear',
+			nodos
+		}))
+
+		this.idNodoAgarrado = '';
+	}
+
+	private positionEvent(event) {
+		const nodo = event.target;
+
+		if (this.idNodoAgarrado !== event.target.id()) return;
+		this.socket.send(JSON.stringify({
+			accion: 'Mover',
+			nodo: nodo.id(),
+			posicion: nodo.position()
+		}))
 	}
 
 	private isParentOfOneChild(node) {
