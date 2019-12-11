@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
   correoAInvitar: string;
   invitacionParaInterventor: boolean = false;
   problematicaSeleccionada: any = {};
+  datosProblematica: any = {};
 
   autoCompletadoUsuariosAInvitar: any;
   resultadosCb: any;
@@ -263,8 +264,10 @@ export class DashboardComponent implements OnInit {
         return "Reaccionando a nodos";
       case 4:
         return "Elaborando escritos";
+        case 5:
+        return "Terminada";
       default:
-        return '';
+        return 'esta mal';
     }
   }
 
@@ -303,4 +306,49 @@ export class DashboardComponent implements OnInit {
       return this.estadosInvitacion.ACEPTADA;
     }
   }
+  
+  darInfoAlAvanzar(){
+    const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+    const options = {
+      headers: headers
+    }
+    this.http
+      .get(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?estado=${true}`, options)
+      .pipe(catchError(err => of(err)))
+      .subscribe(res => {
+        if (res.error) {
+          this.serviciosToast.mostrarToast({
+            titulo: 'Error',
+            cuerpo: 'Hubo un error al avanzar la fase, intentelo de nuevo',
+            esMensajeInfo: false
+          });
+        } else {
+          this.datosProblematica=res;
+          console.log(this.datosProblematica)
+        }
+      })
+    
+  }
+  
+  estaEnFase0(){
+   switch (this.problematicaSeleccionada.fase) {
+      case 0:
+        return true;
+      
+      default:
+        return false;
+    }
+  }
+  estaEnFase1(){
+   switch (this.problematicaSeleccionada.fase) {
+      case 1:
+        return true;
+      
+      default:
+        return false;
+    }
+  }
+
+  
 }
