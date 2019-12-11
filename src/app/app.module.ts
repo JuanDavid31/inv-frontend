@@ -27,6 +27,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { RegistroComponent } from './components/registro/registro.component';
 import { RecuperarComponent } from './components/recuperar/recuperar.component';
 import { ToastComponent } from './toast/toast.component';
+import { FaseGrupalComponent } from './fase-grupal/fase-grupal.component';
 
 @NgModule({
   imports: [

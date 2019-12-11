@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
+import { ActivatedRoute, Router } from '@angular/router';
 declare var cytoscape;
 
 declare var $;
@@ -14,7 +15,7 @@ declare var $;
     styleUrls: ['./fase-individual.component.css']
 })
 
-export class FaseIndividualComponent implements OnInit, OnDestroy {
+export class FaseIndividualComponent implements OnInit {
 
     esMenu1 = true;
     menuOb = {};
@@ -25,11 +26,15 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     nombreNodo = '';
     cy: any = {};
 
+    problematicaActual: number;
+
     fotoFileInput: HTMLInputElement;
 
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
-        private http: HttpClient) { }
+        private http: HttpClient,
+        private router: Router,
+        private activatedRoute: ActivatedRoute) { }
 
     ngOnInit() {
         this.fotoFileInput = (<HTMLInputElement>document.getElementById('customFileLang'));
@@ -45,12 +50,20 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     }
 
     private iniciar() {
-        this.nodoDe = {};
-        this.nodoA = {};
+        this.activatedRoute
+            .paramMap
+            .pipe(map(() => window.history.state))
+            .subscribe(params => {
+                this.problematicaActual = params.idProblematica;
+                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard') }
 
-        this.prepararCytoscape();
-        this.prepararMenus();
-        this.cargarNodos();
+                this.nodoDe = {};
+                this.nodoA = {};
+
+                this.prepararCytoscape();
+                this.prepararMenus();
+                this.cargarNodos();
+            })
     }
 
     private prepararCytoscape() {
@@ -133,10 +146,9 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         }
 
         const email = this.serviciosLocalStorage.darEmail();
-        const problematica = this.serviciosLocalStorage.darProblematicaActual();
 
         this.http
-            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${problematica}/nodos`, options)
+            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/nodos`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -220,10 +232,9 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         }
 
         const email = this.serviciosLocalStorage.darEmail();
-        const problematica = this.serviciosLocalStorage.darProblematicaActual();
 
         this.http
-            .post(`http://3.130.29.100:8080/problematicas/${problematica}/personas/${email}/nodos`, form, options)
+            .post(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/nodos`, form, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -284,32 +295,9 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         const idPadre = this.nodoDe.id;
         const id = this.nodoA.id;
 
-        if (!idPadre || !id) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Debe seleccionar 2 nodos diferente',
-                esMensajeInfo: false
-            })
-            return;
-        }
-
-        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Ya existe una relación',
-                esMensajeInfo: false
-            })
-            return;
-        }
-
-        if (this.tieneOtroPadre(id)) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Un nodo no puede tener 2 padres.',
-                esMensajeInfo: false
-            });
-            return;
-        }
+        if (!this.nodosValidos(idPadre, id)) return;
+        if (this.yaExisteRelacion(idPadre, id)) return;
+        if (this.tieneOtroPadre(id)) return;
 
         const options = {
             headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
@@ -328,13 +316,46 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     }
 
+    nodosValidos(idPadre, id) {
+        if (!idPadre || !id) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Debe seleccionar 2 nodos diferente',
+                esMensajeInfo: false
+            })
+            return false;
+        }
+        return true;
+    }
+
+    yaExisteRelacion(idPadre, id) {
+        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Ya existe una relación',
+                esMensajeInfo: false
+            })
+            return true;
+        }
+        return false;
+    }
+
     esEdge(id) {
         let posibleEdge = this.cy.getElementById(id);
         return posibleEdge.length > 0 && posibleEdge[0].isEdge();
     }
 
     tieneOtroPadre(idNodo) {
-        return this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
+        const tieneOtroPadre = this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
+        if (tieneOtroPadre) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Un nodo no puede tener 2 padres.',
+                esMensajeInfo: false
+            });
+            return true;
+        }
+        return false;
     }
 
     atenderPUTApadrinar(res) {
@@ -379,9 +400,5 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     atenderPUTDesapadrinar(id) {
         this.cy.getElementById(id).remove();
-    }
-
-    ngOnDestroy() {
-        this.serviciosLocalStorage.eliminarProblematicaActual();
     }
 }

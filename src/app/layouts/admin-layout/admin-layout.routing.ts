@@ -6,6 +6,7 @@ import { TableListComponent } from '../../table-list/table-list.component';
 import { TypographyComponent } from '../../typography/typography.component';
 import { IconsComponent } from '../../icons/icons.component';
 import { FaseIndividualComponent } from '../../fase-individual/fase-individual.component';
+import { FaseGrupalComponent } from '../../fase-grupal/fase-grupal.component';
 import { NotificationsComponent } from '../../notifications/notifications.component';
 import { UpgradeComponent } from '../../upgrade/upgrade.component';
 
@@ -58,6 +59,7 @@ export const AdminLayoutRoutes: Routes = [
     { path: 'typography', component: TypographyComponent },
     { path: 'icons', component: IconsComponent },
     { path: 'fase-individual', component: FaseIndividualComponent },
+    { path: 'fase-grupal', component: FaseGrupalComponent },
     { path: 'notifications', component: NotificationsComponent },
     { path: 'upgrade', component: UpgradeComponent },
 ];
