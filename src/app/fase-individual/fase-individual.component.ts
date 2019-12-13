@@ -316,7 +316,7 @@ export class FaseIndividualComponent implements OnInit {
 
     }
 
-    nodosValidos(idPadre, id) {
+    private nodosValidos(idPadre, id) {
         if (!idPadre || !id) {
             this.serviciosToast.mostrarToast({
                 titulo: 'Error',
@@ -328,7 +328,7 @@ export class FaseIndividualComponent implements OnInit {
         return true;
     }
 
-    yaExisteRelacion(idPadre, id) {
+    private yaExisteRelacion(idPadre, id) {
         if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
             this.serviciosToast.mostrarToast({
                 titulo: 'Error',
@@ -340,12 +340,12 @@ export class FaseIndividualComponent implements OnInit {
         return false;
     }
 
-    esEdge(id) {
+    private esEdge(id) {
         let posibleEdge = this.cy.getElementById(id);
         return posibleEdge.length > 0 && posibleEdge[0].isEdge();
     }
 
-    tieneOtroPadre(idNodo) {
+    private tieneOtroPadre(idNodo) {
         const tieneOtroPadre = this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
         if (tieneOtroPadre) {
             this.serviciosToast.mostrarToast({
@@ -358,7 +358,7 @@ export class FaseIndividualComponent implements OnInit {
         return false;
     }
 
-    atenderPUTApadrinar(res) {
+    private atenderPUTApadrinar(res) {
         let idDesde = this.nodoDe.id;
         let idA = this.nodoA.id;
         let ob = this.cy.getElementById(`${idDesde}${idA}`);
@@ -373,7 +373,7 @@ export class FaseIndividualComponent implements OnInit {
         }
     }
 
-    crearEdge(idNodo, idPadre) {
+    private crearEdge(idNodo, idPadre) {
         this.cy.add({ data: { id: `${idPadre}${idNodo}`, source: `${idPadre}`, target: `${idNodo}` } })
     }
 
@@ -398,7 +398,7 @@ export class FaseIndividualComponent implements OnInit {
             });
     }
 
-    atenderPUTDesapadrinar(id) {
+    private atenderPUTDesapadrinar(id) {
         this.cy.getElementById(id).remove();
     }
 }

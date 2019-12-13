@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
 declare var cytoscape;
 
@@ -14,6 +15,11 @@ declare var $;
 export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	idNodoAgarrado: any;
+	
+	grupos: any[];
+	
+	grupoDe: any;
+	grupoA: any;
 
 	cy: any = {};
 	cdnd: any = {};
@@ -22,7 +28,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private activatedRoute: ActivatedRoute,
-		private router: Router) { }
+		private router: Router,
+		private serviciosToast: ToastService) { }
 
 	ngOnInit() {
 		this.activatedRoute
@@ -40,9 +47,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 			});
-
-
-
 
 		// const cy = this.cy;
 
@@ -84,9 +88,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Mover':
 				this.moverNodo(json);
 				break;
-			case 'Mover padre':
-				this.moverPadre(json);
-				break;
 			case 'Bloquear':
 				this.bloquearNodo(json);
 				break;
@@ -99,6 +100,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Separar nodos':
 				this.separarNodos(json);
 				break;
+			case 'Conectar':
+				this.conectarNodos(json);
+				break;
+			case 'Desconectar':
+				this.desconectarNodos(json);
 			default:
 				return;
 		}
@@ -109,6 +115,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cargarNodos(datos: any) {
+		this.grupos = datos.nodos.filter( nodo => nodo.data.esGrupo);
 		const nodos = this.cy.nodes();
 		this.cy.remove(nodos);
 		this.cy.add(datos.nodos);
@@ -129,15 +136,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const { nodo } = datos;
 		const nodoAMover = this.cy.getElementById(nodo.data.id);
 		nodoAMover.position(nodo.position);
-	}
-
-	private moverPadre(datos: any) {
-		// const { nodo, nodos } = datos;
-		// const nodoPadreGrafico = this.cy.getElementById(nodo.data.id);
-		// nodoPadreGrafico.position(nodo.position);
-		// nodos.forEach(nodoHijoGrafico => {
-		// 	this.cy.getElementById()
-		// });
 	}
 
 	private bloquearNodo(datos: any) {
@@ -168,6 +166,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			]);
 
 			nodoVecino.move({ parent: idNodoPadre });
+			
+			//TODO: Actualizando array de grupos
+			
+			this.grupos.push({ data: { id: idNodoPadre } });
 		}
 	}
 
@@ -179,6 +181,20 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		nodo.move({ parent: null });
 
 		this.removeParentsOfOneChild();
+	}
+	
+	private conectarNodos(datos: any){
+		const { edge } = datos;
+		
+		this.grupos.push(edge);
+		this.cy.add(edge);
+	}
+	
+	private desconectarNodos(datos: any){
+		const { edge } = datos;
+		
+		this.eliminar(edge.data.id);
+		this.cy.getElementById(edge.data.id).remove();
 	}
 
 	private prepararCytoscape() {
@@ -379,14 +395,124 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	};
 
 	private removeParent(parent) {
+		this.eliminar(parent.id())
 		parent.children().move({ parent: null });
 		parent.remove();
 	};
+	
+	/**
+	 * Eliminar del arreglo de grupos el elemento que coincida
+	 * con el id pasado por parametro.
+	 **/
+	private eliminar(id){
+		this.grupos
+			.filter(grupo => grupo.data.esGrupo)
+			.some((grupo, indice) => {
+				if(grupo.data.is === id){
+					this.grupos.splice(indice, 1)
+					return true;
+				}
+				return false;
+			})
+	}
 
 	private removeParentsOfOneChild() {
 		this.cy.nodes().filter(this.isParentOfOneChild).forEach(this.removeParent);
 	};
+	
+	//Adición y elimnación de edges
+	
+	conectar() {
+        const idPadre = this.grupoDe.id;
+        const id = this.grupoA.id;
 
+        if (!this.nodosValidos(idPadre, id)) return;
+        if (this.yaExisteRelacion(idPadre, id)) return;
+        if (this.tieneOtroPadre(id)) return;
+		if (this.esConexion(idPadre, id)) return;
+        
+        this.crearEdge(id, idPadre);
+    }
+
+    private nodosValidos(idPadre, id) {
+        if (!idPadre || !id) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Debe seleccionar 2 nodos diferente',
+                esMensajeInfo: false
+            })
+            return false;
+        }
+        return true;
+    }
+
+    private yaExisteRelacion(idPadre, id) {
+        if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Ya existe una relación',
+                esMensajeInfo: false
+            })
+            return true;
+        }
+        return false;
+    }
+
+    private esEdge(id) {
+        let posibleEdge = this.cy.getElementById(id);
+        return posibleEdge.length > 0 && posibleEdge[0].isEdge();
+    }
+
+    private tieneOtroPadre(idNodo) {
+        const tieneOtroPadre = this.grupos.find(grupo => this.esEdge(`${grupo.id}${idNodo}`)) !== undefined
+        if (tieneOtroPadre) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Un nodo no puede tener 2 padres.',
+                esMensajeInfo: false
+            });
+            return true;
+        }
+        return false;
+    }
+
+	private esConexion(idPadre, id){
+		let ob = this.cy.getElementById(`${idPadre}${id}`);
+        if (ob.length > 0 && ob[0].isEdge()) {
+            this.serviciosToast.mostrarToast({
+                titulo: 'Error',
+                cuerpo: 'Ya existe la conexión',
+                esMensajeInfo: false
+            });
+            return true;
+        }
+        return false;
+	}
+
+    private crearEdge(idNodo, idPadre) {
+    	const edge = { data: { id: `${idPadre}${idNodo}`, source: `${idPadre}`, target: `${idNodo}` } };
+        this.cy.add(edge);
+        
+        this.socket.send(JSON.stringify({
+			accion: 'Conectar grupos',
+			edge
+		}));
+    }
+
+    desconectar(edge) {
+        const idEdge = edge.id();
+
+        this.eliminar(edge.id());
+        this.cy.getElementById(edge.id()).remove();
+        
+        console.log(edge.data());
+        
+		this.socket.send(JSON.stringify({
+			accion: 'Desconectar grupos',
+			edge: { data: edge.data() }
+		}));
+    }
+    
 	ngOnDestroy() {
 		if (this.socket) {
 			this.socket.close();
