@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
 	correoAInvitar: string;
 	invitacionParaInterventor: boolean = false;
 	problematicaSeleccionada: any = {};
+	datosProblematica: any = {};
 
 	autoCompletadoUsuariosAInvitar: any;
 	resultadosCb: any;
@@ -324,6 +325,38 @@ export class DashboardComponent implements OnInit {
 	}
 
 	sePuedeInvitar(problematica) {
-		return problematica.esInterventor && problematica.fase === 0;
+		return problematica.fase === 0 && problematica.esInterventor;
+	}
+
+	estaEnFase0() {
+		const { fase } = this.problematicaSeleccionada;
+		return fase === 0;
+	}
+
+	estaEnFase1() {
+		const { fase } = this.problematicaSeleccionada;
+		return fase === 1;
+	}
+
+	darInfoAlAvanzar() {
+		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+		const options = {
+			headers: headers
+		}
+		this.http
+			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}`, options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast({
+						titulo: 'Error',
+						cuerpo: 'Hubo un error al cargar la información de la problematica, intentelo de nuevo',
+						esMensajeInfo: false
+					});
+				} else {
+					this.datosProblematica = res;
+				}
+			})
 	}
 }
