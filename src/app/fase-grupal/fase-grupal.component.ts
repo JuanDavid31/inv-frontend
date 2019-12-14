@@ -16,7 +16,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	idNodoAgarrado: any;
 
-	grupos: any[];
+	grupos: any[] = [];
 
 	grupoDe: any;
 	grupoA: any;
@@ -116,6 +116,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private cargarNodos(datos: any) {
 		this.grupos = datos.nodos.filter(nodo => nodo.data.esGrupo);
+		this.grupos.forEach(grupo => console.log(`${grupo.data.id} - ${grupo.data.urlFoto}`));
 		const nodos = this.cy.nodes();
 		this.cy.remove(nodos);
 		this.cy.add(datos.nodos);
@@ -280,7 +281,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			dropSibling: node => true, // filter function to specify which orphan nodes are valid drop siblings
 			newParentNode: (grabbedNode, dropSibling) => ({ data: { esGrupo: true, nombre: `Nombre - ${Math.ceil(Math.random() * 10000)}` } }), // specifies element json for parent nodes added by dropping an orphan node on another orphan (a drop sibling)
 			overThreshold: 10, // make dragging over a drop target easier by expanding the hit area by this amount on all sides
-			outThreshold: 10 // make dragging out of a drop target a bit harder by expanding the hit area by this amount on all sides
+			outThreshold: 30 // make dragging out of a drop target a bit harder by expanding the hit area by this amount on all sides
 		};
 
 		this.cdnd = this.cy.compoundDragAndDrop(options);
@@ -511,6 +512,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			accion: 'Desconectar grupos',
 			edge: { data: edge.data() }
 		}));
+	}
+
+	darGruposIterables() {
+		return this.grupos.length > 0 ? this.grupos.filter(grupo => grupo.data.esGrupo) : [];
 	}
 
 	ngOnDestroy() {
