@@ -1,4 +1,15 @@
 <div class="main-content">
+  
   <div id="cy">
   </div>
+		<div class="checkbox-interventor noselect">
+		<input type="checkbox" id="solicitarOrganizado"
+			[(ngModel)]="solicitandoOrganizacion" name="solicitarOrganizadoInput"
+			(change)="cambioSolicitud(event)">
+		<label for="solicitarOrganizado">¿Solicitar organizado?</label>
+	</div>
+	<span>
+	  Cantidad solicitantes {{ darCantidadSolicitantes() }}/
+	  {{this.solicitantes.length}}
+	</span>
 </div>

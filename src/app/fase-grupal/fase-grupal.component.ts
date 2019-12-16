@@ -23,6 +23,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	cy: any = {};
 	cdnd: any = {};
+	
+	solicitandoOrganizacion: boolean = false;
+	
+	solicitantes: any[] = [{
+		nombre:this.serviciosLocalStorage.darNombres() + this.serviciosLocalStorage.darApellidos,
+		email: this.serviciosLocalStorage.darEmail(),
+		solicitandoOrganizacion: false
+	}];
 
 	socket: WebSocket;
 
@@ -69,8 +77,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private onopenEvent(event) {
 		this.socket.send(JSON.stringify({
 			accion: 'Conectarse',
-			nombre: this.serviciosLocalStorage.darNombres(),
-			email: this.serviciosLocalStorage.darEmail()
+			nombre: this.serviciosLocalStorage.darNombres() + this.serviciosLocalStorage.darApellidos(),
+			email: this.serviciosLocalStorage.darEmail(),
+			solicitandoOrganizacion: this.solicitandoOrganizacion
 		}));
 	}
 
@@ -112,7 +121,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private alguienSeConecto(datos: any) {
-		console.log('Alguien se conecto');
+		const { nombre, email, solicitandoOrganizacion } = datos;
+		this.solicitantes.push({ nombre, email, solicitandoOrganizacion});
 	}
 
 	private cargarNodos(datos: any) {
@@ -120,6 +130,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const nodos = this.cy.nodes();
 		this.cy.remove(nodos);
 		this.cy.add(datos.nodos);
+
+		this.solicitantes.concat(datos.solicitantes);
 
 		this.cy.layout({
 			name: 'grid',
@@ -528,6 +540,34 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			accion: 'Desconectar grupos',
 			edge: { data: edge.data() }
 		}));
+	}
+	
+	cambioSolicitud(event){
+		console.log(event);
+		
+		this.solicitandoOrganizacion = !this.solicitandoOrganizacion;
+		
+		this.solicitantes.find(solicitante => {
+			return solicitante.email === this.serviciosLocalStorage.darEmail()
+		}).solicitandoOrganizacion = this.solicitandoOrganizacion;
+		
+		this.socket.send(JSON.stringify({
+			accion:'Cambio solicitud de organizacion',
+			email: this.serviciosLocalStorage.darEmail(),
+			solicitandoOrganizacion: this.solicitandoOrganizacion
+		}));
+	}
+	
+	atenderCambioDeSolicitud(datos){
+		this.solicitantes
+			.find(solicitante => solicitante.email === datos.email)
+			.solicitandoOrganizacion = datos.solicitandoOrganizacion;
+	}
+	
+	darCantidadSolicitantes(){
+		return this.solicitantes
+			.filter(solicitante => solicitante.solicitandoOrganizacion)
+			.length;
 	}
 
 	ngOnDestroy() {
