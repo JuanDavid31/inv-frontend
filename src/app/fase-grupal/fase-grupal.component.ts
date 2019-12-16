@@ -43,6 +43,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				}
 
 				this.prepararCytoscape();
+				this.prepararMenuEdges();
 				this.socket = new WebSocket(`ws://localhost:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
@@ -100,11 +101,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Separar nodos':
 				this.separarNodos(json);
 				break;
-			case 'Conectar':
-				this.conectarNodos(json);
+			case 'Conectar grupos':
+				this.conectarGrupos(json);
 				break;
-			case 'Desconectar':
-				this.desconectarNodos(json);
+			case 'Desconectar grupos':
+				this.desconectarGrupos(json);
 			default:
 				return;
 		}
@@ -182,15 +183,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.removeParentsOfOneChild();
 	}
-
-	private conectarNodos(datos: any) {
+	
+	private conectarGrupos(datos: any){
 		const { edge } = datos;
 
 		this.grupos.push(edge);
 		this.cy.add(edge);
 	}
-
-	private desconectarNodos(datos: any) {
+	
+	private desconectarGrupos(datos: any){
 		const { edge } = datos;
 
 		this.eliminar(edge.data.id);
@@ -373,6 +374,22 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			this.enviarMover(nodo);
 		}
 	}
+	
+	private prepararMenuEdges() {
+        this.cy.cxtmenu({
+            selector: 'edge',
+            commands: [
+                {
+                    content: '<span class="fa fa-trash fa-2x"></span>',
+                    select: this.desconectar.bind(this)
+                },
+                {
+                    content: 'Nada',
+                    select: function (ele) { }
+                }
+            ]
+        });
+    }
 
 	private enviarMoverPadre(nodo) {
 		const hijos = nodo.children();
