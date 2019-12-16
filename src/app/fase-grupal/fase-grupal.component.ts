@@ -23,6 +23,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	cy: any = {};
 	cdnd: any = {};
+	
+	solicitandoOrganizacion: boolean = false;
+	
+	solicitantes: any[] = [{
+		nombre:this.serviciosLocalStorage.darNombres() + this.serviciosLocalStorage.darApellidos,
+		email: this.serviciosLocalStorage.darEmail(),
+		solicitandoOrganizacion: false
+	}];
 
 	socket: WebSocket;
 
@@ -43,6 +51,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				}
 
 				this.prepararCytoscape();
+				this.prepararMenuEdges();
 				this.socket = new WebSocket(`ws://localhost:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
@@ -68,8 +77,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private onopenEvent(event) {
 		this.socket.send(JSON.stringify({
 			accion: 'Conectarse',
-			nombre: this.serviciosLocalStorage.darNombres(),
-			email: this.serviciosLocalStorage.darEmail()
+			nombre: this.serviciosLocalStorage.darNombres() + this.serviciosLocalStorage.darApellidos(),
+			email: this.serviciosLocalStorage.darEmail(),
+			solicitandoOrganizacion: this.solicitandoOrganizacion
 		}));
 	}
 
@@ -100,18 +110,19 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Separar nodos':
 				this.separarNodos(json);
 				break;
-			case 'Conectar':
-				this.conectarNodos(json);
+			case 'Conectar grupos':
+				this.conectarGrupos(json);
 				break;
-			case 'Desconectar':
-				this.desconectarNodos(json);
+			case 'Desconectar grupos':
+				this.desconectarGrupos(json);
 			default:
 				return;
 		}
 	}
 
 	private alguienSeConecto(datos: any) {
-		console.log('Alguien se conecto');
+		const { nombre, email, solicitandoOrganizacion } = datos;
+		this.solicitantes.push({ nombre, email, solicitandoOrganizacion});
 	}
 
 	private cargarNodos(datos: any) {
@@ -120,6 +131,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const nodos = this.cy.nodes();
 		this.cy.remove(nodos);
 		this.cy.add(datos.nodos);
+
+		this.solicitantes.concat(datos.solicitantes);
 
 		this.cy.layout({
 			name: 'grid',
@@ -183,15 +196,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.removeParentsOfOneChild();
 	}
-
-	private conectarNodos(datos: any) {
+	
+	private conectarGrupos(datos: any){
 		const { edge } = datos;
 
 		this.grupos.push(edge);
 		this.cy.add(edge);
 	}
-
-	private desconectarNodos(datos: any) {
+	
+	private desconectarGrupos(datos: any){
 		const { edge } = datos;
 
 		this.eliminar(edge.data.id);
@@ -374,6 +387,22 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			this.enviarMover(nodo);
 		}
 	}
+	
+	private prepararMenuEdges() {
+        this.cy.cxtmenu({
+            selector: 'edge',
+            commands: [
+                {
+                    content: '<span class="fa fa-trash fa-2x"></span>',
+                    select: this.desconectar.bind(this)
+                },
+                {
+                    content: 'Nada',
+                    select: function (ele) { }
+                }
+            ]
+        });
+    }
 
 	private enviarMoverPadre(nodo) {
 		const hijos = nodo.children();
@@ -512,6 +541,34 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			accion: 'Desconectar grupos',
 			edge: { data: edge.data() }
 		}));
+	}
+	
+	cambioSolicitud(event){
+		console.log(event);
+		
+		this.solicitandoOrganizacion = !this.solicitandoOrganizacion;
+		
+		this.solicitantes.find(solicitante => {
+			return solicitante.email === this.serviciosLocalStorage.darEmail()
+		}).solicitandoOrganizacion = this.solicitandoOrganizacion;
+		
+		this.socket.send(JSON.stringify({
+			accion:'Cambio solicitud de organizacion',
+			email: this.serviciosLocalStorage.darEmail(),
+			solicitandoOrganizacion: this.solicitandoOrganizacion
+		}));
+	}
+	
+	atenderCambioDeSolicitud(datos){
+		this.solicitantes
+			.find(solicitante => solicitante.email === datos.email)
+			.solicitandoOrganizacion = datos.solicitandoOrganizacion;
+	}
+	
+	darCantidadSolicitantes(){
+		return this.solicitantes
+			.filter(solicitante => solicitante.solicitandoOrganizacion)
+			.length;
 	}
 
 	darGruposIterables() {
