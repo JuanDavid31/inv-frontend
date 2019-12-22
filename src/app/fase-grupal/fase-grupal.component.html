@@ -1,43 +1,47 @@
 <div class="main-content">
-  <div class="ctrl" style="background:#DCE3E8">
-    <div class="row">
-      <div class="col-md-6 d-flex align-items-center form-group div-conectar">
-        <div class="form-group ml-3 mr-3">
-          <label class="mb-0" for="De">De</label>
-          <select class="form-control mt-0" name="De" id="De" [(ngModel)]="grupoDe">
-            <option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
-            <option *ngFor="let grupo of darGruposIterables()" [ngValue]="grupo.data">
-              {{grupo.data.nombre}}
-            </option>
-          </select>
-        </div>
-        <div class="form-group ml-3 mr-3">
-          <label class="mb-0" for="A">A</label>
-          <select class="form-control mt-0" name="A" id="A" [(ngModel)]="grupoA">
-            <option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
-            <option *ngFor="let grupo of darGruposIterables()" [ngValue]="grupo.data">
-              {{grupo.data.nombre}}
-            </option>
-          </select>
-        </div>
-        <div class="form-group ml-auto d-flex flex-column">
-          <label class="invisible">A</label>
-          <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()"
-            style="height: 38px;">
-        </div>
-      </div>
-      <!-- <div class="col-md-6 d-flex align-items-center form-group">
-                <div class="form-group d-flex flex-column">
-                    <label class="invisible">A</label>
-                    <div>
-                        <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Ordenar"
-                            style="height: 38px;" (click)="reiniciar()">
-                        &nbsp; {{nodos.length}} nodos
-                    </div>
-                </div>
-            </div> -->
-    </div>
-  </div>
-  <div id="cy">
-  </div>
+	<div class="ctrl" style="background:#DCE3E8">
+		<div class="row">
+			<div class="col-md-6 d-flex align-items-center form-group div-conectar">
+				<div class="form-group ml-3 mr-3">
+					<label class="mb-0" for="De">De</label>
+					<select class="form-control mt-0" name="De" id="De" [(ngModel)]="grupoDe">
+						<option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+						<option *ngFor="let grupo of darGruposIterables()" [ngValue]="grupo.data">
+							{{grupo.data.nombre}}
+						</option>
+					</select>
+				</div>
+				<div class="form-group ml-3 mr-3">
+					<label class="mb-0" for="A">A</label>
+					<select class="form-control mt-0" name="A" id="A" [(ngModel)]="grupoA">
+						<option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+						<option *ngFor="let grupo of darGruposIterables()" [ngValue]="grupo.data">
+							{{grupo.data.nombre}}
+						</option>
+					</select>
+				</div>
+				<div class="form-group ml-auto d-flex flex-column">
+					<label class="invisible">A</label>
+					<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()"
+						style="height: 38px;">
+				</div>
+				<div class="checkbox-interventor noselect">
+					<input type="checkbox" id="solicitarOrganizado" [(ngModel)]="solicitandoOrganizacion"
+						name="solicitarOrganizadoInput" (change)="cambioSolicitud(event)">
+					<label for="solicitarOrganizado">¿Solicitar organizado?</label>
+				</div>
+				<div>
+					Cantidad solicitantes {{ darCantidadSolicitantes() }}/
+					{{this.solicitantes.length}}
+				</div>
+				<div>
+					<span *ngFor="let usuario of solicitantes">
+						{{usuario.nombre}}
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="cy">
+	</div>
 </div>

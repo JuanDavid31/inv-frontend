@@ -24,6 +24,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	cy: any = {};
 	cdnd: any = {};
 
+	solicitandoOrganizacion: boolean = false;
+
+	solicitantes: any[] = [{
+		nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
+		email: this.serviciosLocalStorage.darEmail(),
+		solicitandoOrganizacion: false
+	}];
+
 	socket: WebSocket;
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
@@ -43,6 +51,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				}
 
 				this.prepararCytoscape();
+				this.prepararMenuEdges();
+				this.prepararMenuGrupos();
 				this.socket = new WebSocket(`ws://localhost:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
@@ -68,8 +78,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private onopenEvent(event) {
 		this.socket.send(JSON.stringify({
 			accion: 'Conectarse',
-			nombre: this.serviciosLocalStorage.darNombres(),
-			email: this.serviciosLocalStorage.darEmail()
+			nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()}`,
+			email: this.serviciosLocalStorage.darEmail(),
+			solicitandoOrganizacion: this.solicitandoOrganizacion
 		}));
 	}
 
@@ -100,18 +111,26 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Separar nodos':
 				this.separarNodos(json);
 				break;
-			case 'Conectar':
-				this.conectarNodos(json);
+			case 'Conectar grupos':
+				this.conectarGrupos(json);
 				break;
-			case 'Desconectar':
-				this.desconectarNodos(json);
+			case 'Desconectar grupos':
+				this.desconectarGrupos(json);
+				break;
+			case 'Iniciar reinicio':
+				this.iniciarReinicio(json);
+				break;
+			case 'Reiniciar solicitudes':
+				this.reiniciarSolicitudes(json);
+				break;
 			default:
 				return;
 		}
 	}
 
 	private alguienSeConecto(datos: any) {
-		console.log('Alguien se conecto');
+		const { nombre, email, solicitandoOrganizacion } = datos;
+		this.solicitantes.push({ nombre, email, solicitandoOrganizacion });
 	}
 
 	private cargarNodos(datos: any) {
@@ -126,11 +145,18 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			rows: 3,
 			cols: 3,
 			padding: 50
-		}).run()
+		}).run();
+
+		this.solicitantes.concat(datos.solicitantes);
 	}
 
 	private alguienSeDesconecto(datos: any) {
 		console.log('Alguien se desconecto');
+		const { email } = datos;
+
+		//Elimina el solicitante con el email dado.
+		this.solicitantes = this.solicitantes
+			.filter(solicitante => solicitante.email !== email);
 	}
 
 	private moverNodo(datos: any) {
@@ -140,11 +166,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private bloquearNodo(datos: any) {
-		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).ungrabify());
+		const { nodos, nombres } = datos;
+		nodos.forEach(idNodo => this.cy.getElementById(idNodo).ungrabify());
+		//TODO: Poner el nombre debajo del nodo padre.
 	}
 
 	private desbloquearNodo(datos: any) {
 		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).grabify());
+		//TODO: Quitar el nombre del nodo padre.
 	}
 
 	private juntarNodos(datos: any) {
@@ -168,7 +197,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 			nodoVecino.move({ parent: idNodoPadre });
 
-			//TODO: Actualizando array de grupos
+			//TODO: array de grupos
 
 			this.grupos.push({ data: { id: idNodoPadre } });
 		}
@@ -184,18 +213,43 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.removeParentsOfOneChild();
 	}
 
-	private conectarNodos(datos: any) {
+	private removeParentsOfOneChild() {
+		this.cy.nodes().filter(this.isParentOfOneChildAndIsNotAnEdge).forEach(this.removeParent);
+	};
+
+	private isParentOfOneChildAndIsNotAnEdge(node) {
+		return node.isParent() && node.children().length === 1 && !node.isEdge() && !node.data().esGrupo;
+	};
+
+	private removeParent(parent) {
+		this.eliminar(parent.id())
+		parent.children().move({ parent: null });
+		parent.remove();
+	};
+
+	private conectarGrupos(datos: any) {
 		const { edge } = datos;
 
 		this.grupos.push(edge);
 		this.cy.add(edge);
 	}
 
-	private desconectarNodos(datos: any) {
+	private desconectarGrupos(datos: any) {
 		const { edge } = datos;
 
 		this.eliminar(edge.data.id);
 		this.cy.getElementById(edge.data.id).remove();
+	}
+
+	private iniciarReinicio(datos) {
+		this.cy.reset();
+		this.solicitandoOrganizacion = false;
+		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+	}
+
+	private reiniciarSolicitudes(datos) {
+		this.solicitandoOrganizacion = false;
+		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
 	}
 
 	private prepararCytoscape() {
@@ -214,7 +268,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 						'border-color': '#2980b9',
 						'border-width': 3,
 						'border-opacity': 0.5,
-						'background-image': 'data(urlFoto)'
+						// 'background-image': 'data(urlFoto)' //TODO: arreglar
 					}
 				},
 				{
@@ -329,9 +383,12 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			nodoVecino
 		}))
 
-		if (this.isParentOfOneChild(dropTarget)) {
+		console.log(dropTarget.json());
+		if (this.isParentOfOneChildAndIsNotAnEdge(dropTarget)) {
 			this.removeParent(dropTarget);
 		}
+
+		this.removeParentsOfOneChild();
 	}
 
 	private removeEvent(event) {
@@ -346,7 +403,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
-			nodos
+			nodos,
+			nombre: this.serviciosLocalStorage.darNombres()
 		}))
 	}
 
@@ -376,6 +434,38 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}
 	}
 
+	private prepararMenuEdges() {
+		this.cy.cxtmenu({
+			selector: 'edge',
+			commands: [
+				{
+					content: '<span class="fa fa-trash fa-2x"></span>',
+					select: this.desconectar.bind(this)
+				},
+				{
+					content: 'Nada',
+					select: function (ele) { }
+				}
+			]
+		});
+	}
+
+	private prepararMenuGrupos() {
+		this.cy.cxtmenu({
+			selector: 'node',
+			commands: [
+				{
+					content: '<span class="fa fa-edit fa-2x"></span>',
+					select: this.cambiarNombreGrupo.bind(this)
+				},
+				{
+					content: 'Nada',
+					select: function (ele) { }
+				}
+			]
+		});
+	}
+
 	private enviarMoverPadre(nodo) {
 		const hijos = nodo.children();
 		this.socket.send(JSON.stringify({
@@ -392,16 +482,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}));
 	}
 
-	private isParentOfOneChild(node) {
-		return node.isParent() && node.children().length === 1;
-	};
-
-	private removeParent(parent) {
-		this.eliminar(parent.id())
-		parent.children().move({ parent: null });
-		parent.remove();
-	};
-
 	/**
 	 * Eliminar del arreglo de grupos el elemento que coincida
 	 * con el id pasado por parametro.
@@ -417,10 +497,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				return false;
 			})
 	}
-
-	private removeParentsOfOneChild() {
-		this.cy.nodes().filter(this.isParentOfOneChild).forEach(this.removeParent);
-	};
 
 	//Adición y elimnación de edges
 
@@ -513,6 +589,58 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			accion: 'Desconectar grupos',
 			edge: { data: edge.data() }
 		}));
+	}
+
+	cambioSolicitud(event) {
+		console.log(event);
+
+		this.solicitandoOrganizacion = !this.solicitandoOrganizacion;
+
+		this.solicitantes.find(solicitante => {
+			return solicitante.email === this.serviciosLocalStorage.darEmail()
+		}).solicitandoOrganizacion = this.solicitandoOrganizacion;
+
+		this.socket.send(JSON.stringify({
+			accion: 'Cambio solicitud de organizacion',
+			email: this.serviciosLocalStorage.darEmail(),
+			solicitandoOrganizacion: this.solicitandoOrganizacion
+		}));
+	}
+
+	cambiarNombreGrupo(id, nuevoNombre) {
+		this.grupos
+			.find(grupo => grupo.data.id === id)
+			.grupo.data.nombre = nuevoNombre;
+
+
+		this.socket.send(JSON.stringify({
+			accion: 'Cambiar nombre',
+			grupo: { data: { id, nombre: nuevoNombre } }
+		}));
+	}
+
+	atenderCambioDeSolicitud(datos) {
+		this.solicitantes
+			.find(solicitante => solicitante.email === datos.email)
+			.solicitandoOrganizacion = datos.solicitandoOrganizacion;
+	}
+
+	cambioUnNombre(datos) {
+		const { id, nombre } = datos.grupo.data;
+
+		this.grupos
+			.find(grupo => grupo.data.id === id)
+			.nombre = nombre;
+
+		const nodo = this.cy.getElementById(id);
+		//TODO: Cambiarle el nombre y actualizar el grafo		
+
+	}
+
+	darCantidadSolicitantes() {
+		return this.solicitantes
+			.filter(solicitante => solicitante.solicitandoOrganizacion)
+			.length;
 	}
 
 	darGruposIterables() {
