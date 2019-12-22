@@ -27,7 +27,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	solicitandoOrganizacion: boolean = false;
 	
 	solicitantes: any[] = [{
-		nombre:this.serviciosLocalStorage.darNombres() + this.serviciosLocalStorage.darApellidos,
+		nombre:`${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
 		email: this.serviciosLocalStorage.darEmail(),
 		solicitandoOrganizacion: false
 	}];
@@ -52,6 +52,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
+				this.prepararMenuGrupos();
 				this.socket = new WebSocket(`ws://localhost:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
@@ -77,7 +78,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private onopenEvent(event) {
 		this.socket.send(JSON.stringify({
 			accion: 'Conectarse',
-			nombre: this.serviciosLocalStorage.darNombres() + this.serviciosLocalStorage.darApellidos(),
+			nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()}`,
 			email: this.serviciosLocalStorage.darEmail(),
 			solicitandoOrganizacion: this.solicitandoOrganizacion
 		}));
@@ -115,6 +116,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				break;
 			case 'Desconectar grupos':
 				this.desconectarGrupos(json);
+				break;
+			case 'Iniciar reinicio':
+				this.iniciarReinicio(json);
+				break;
+			case 'Reiniciar solicitudes':
+				this.reiniciarSolicitudes(json);
+				break;
 			default:
 				return;
 		}
@@ -132,18 +140,23 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.cy.remove(nodos);
 		this.cy.add(datos.nodos);
 
-		this.solicitantes.concat(datos.solicitantes);
-
 		this.cy.layout({
 			name: 'grid',
 			rows: 3,
 			cols: 3,
 			padding: 50
-		}).run()
+		}).run();
+		
+		this.solicitantes.concat(datos.solicitantes);
 	}
 
 	private alguienSeDesconecto(datos: any) {
 		console.log('Alguien se desconecto');
+		const { email } = datos;
+		
+		//Elimina el solicitante con el email dado.
+		this.solicitantes = this.solicitantes
+				.filter(solicitante => solicitante.email !== email);
 	}
 
 	private moverNodo(datos: any) {
@@ -153,11 +166,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private bloquearNodo(datos: any) {
-		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).ungrabify());
+		const { nodos, nombres } =  datos;
+		nodos.forEach(idNodo => this.cy.getElementById(idNodo).ungrabify());
+		//TODO: Poner el nombre debajo del nodo padre.
 	}
 
 	private desbloquearNodo(datos: any) {
 		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).grabify());
+		//TODO: Quitar el nombre del nodo padre.
 	}
 
 	private juntarNodos(datos: any) {
@@ -181,7 +197,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 			nodoVecino.move({ parent: idNodoPadre });
 
-			//TODO: Actualizando array de grupos
+			//TODO: array de grupos
 
 			this.grupos.push({ data: { id: idNodoPadre } });
 		}
@@ -209,6 +225,17 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.eliminar(edge.data.id);
 		this.cy.getElementById(edge.data.id).remove();
+	}
+	
+	private iniciarReinicio(datos){
+		this.cy.reset();
+		this.solicitandoOrganizacion = false;
+		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+	}
+	
+	private reiniciarSolicitudes(datos){
+		this.solicitandoOrganizacion = false;
+		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
 	}
 
 	private prepararCytoscape() {
@@ -358,7 +385,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
-			nodos
+			nodos,
+			nombre: this.serviciosLocalStorage.darNombres()
 		}))
 	}
 
@@ -395,6 +423,22 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
                 {
                     content: '<span class="fa fa-trash fa-2x"></span>',
                     select: this.desconectar.bind(this)
+                },
+                {
+                    content: 'Nada',
+                    select: function (ele) { }
+                }
+            ]
+        });
+    }
+    
+    private prepararMenuGrupos(){
+    	this.cy.cxtmenu({
+            selector: 'nodes',
+            commands: [
+                {
+                    content: '<span class="fa fa-edit fa-2x"></span>',
+                    select: this.cambiarNombreGrupo.bind(this)
                 },
                 {
                     content: 'Nada',
@@ -559,10 +603,34 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}));
 	}
 	
+	cambiarNombreGrupo(id, nuevoNombre){
+		this.grupos
+		.find(grupo => grupo.data.id === id)
+		.grupo.data.nombre = nuevoNombre;
+		
+		
+		this.socket.send(JSON.stringify({
+			accion: 'Cambiar nombre',
+			grupo: {data: {id, nombre: nuevoNombre}}
+		}));
+	}
+	
 	atenderCambioDeSolicitud(datos){
 		this.solicitantes
 			.find(solicitante => solicitante.email === datos.email)
 			.solicitandoOrganizacion = datos.solicitandoOrganizacion;
+	}
+	
+	cambioUnNombre(datos){
+		const { id, nombre } = datos.grupo.data;
+		
+		this.grupos
+			.find(grupo => grupo.data.id === id)
+			.nombre = nombre;
+			
+		const nodo = this.cy.getElementById(id);
+		//TODO: Cambiarle el nombre y actualizar el grafo		
+		
 	}
 	
 	darCantidadSolicitantes(){

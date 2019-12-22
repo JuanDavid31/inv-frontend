@@ -36,6 +36,11 @@
 				  Cantidad solicitantes {{ darCantidadSolicitantes() }}/
 				  {{this.solicitantes.length}}
 				</div>
+				<div>
+					<span *ngFor="let usuario of solicitantes">
+						{{usuario.nombre}}
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
