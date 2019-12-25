@@ -35,6 +35,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		solicitandoOrganizacion: false
 	}];
 
+	enviandoMensaje: boolean = false;
+
 	socket: WebSocket;
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
@@ -175,11 +177,34 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.cy.on('position', this.positionEvent.bind(this));
 		this.cy.on('cdndover', this.cdndoverEvent.bind(this));
 		this.cy.on('cdndout', this.cdndoutEvent.bind(this));
+		this.cy.on('move', elemento => {
+			console.log('Move event')
+			console.log(elemento.target.data().id);
+		})
+		this.cy.on('data', elemento => {
+			console.log('Data event')
+			console.log(elemento.target.data());
+		})
 	}
 
 	private removeEvent(event) {
-		const nodo = event.target;
-		console.log('Remove event - ' + nodo.data().id);
+		console.log('Remove event - ' + event.target.data().id);
+		const elemento = event.target;
+		this.eliminar(elemento.id())
+
+		if (this.enviandoMensaje) {
+			if (elemento.data().esGrupo) {
+
+			} else {
+				this.socket.send(JSON.stringify({
+					accion: 'Desconectar grupos',
+					edge: { data: elemento.data() }
+				}));
+			}
+			this.enviandoMensaje = false;
+		} else {
+
+		}
 		this.removeParentsOfOneChild();
 	}
 
@@ -194,7 +219,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	};
 
 	private removeParent(parent) {
-		this.eliminar(parent.id());
 		parent.children().move({ parent: null });
 		parent.remove();
 	};
@@ -286,6 +310,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
+		console.log('Salir nodo event');
 		const nodosHijos = dropTarget.children();
 		let nodoVecino;
 		switch (nodosHijos.length) {
@@ -491,7 +516,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private desconectarGrupos(datos: any) {
 		const { edge } = datos;
 
-		this.eliminar(edge.data.id);
 		this.cy.getElementById(edge.data.id).remove();
 	}
 
@@ -586,13 +610,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	desconectar(edge) {
-		this.eliminar(edge.id());
+		this.enviandoMensaje = true;
 		this.cy.getElementById(edge.id()).remove();
-
-		this.socket.send(JSON.stringify({
-			accion: 'Desconectar grupos',
-			edge: { data: edge.data() }
-		}));
 	}
 
 	cambioSolicitud(event) {
