@@ -29,13 +29,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	solicitandoOrganizacion: boolean = false;
 
+	ejecucionEnMensajeRecibido: boolean = false;
+
 	solicitantes: any[] = [{
 		nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
 		email: this.serviciosLocalStorage.darEmail(),
 		solicitandoOrganizacion: false
 	}];
-
-	enviandoMensaje: boolean = false;
 
 	socket: WebSocket;
 
@@ -171,20 +171,60 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private prepararEventos() {
+		this.cy.on('add', this.addEvent.bind(this));
+		this.cy.on('move', this.moveEvent.bind(this))
 		this.cy.on('remove', this.removeEvent.bind(this));
 		this.cy.on('grabon', this.grabonEvent.bind(this));
 		this.cy.on('free', this.freeEvent.bind(this));
 		this.cy.on('position', this.positionEvent.bind(this));
 		this.cy.on('cdndover', this.cdndoverEvent.bind(this));
 		this.cy.on('cdndout', this.cdndoutEvent.bind(this));
-		this.cy.on('move', elemento => {
-			console.log('Move event')
-			console.log(elemento.target.data().id);
-		})
+
 		this.cy.on('data', elemento => {
 			console.log('Data event')
 			console.log(elemento.target.data());
 		})
+	}
+
+	private addEvent(event) {
+		console.log('Add event - ' + event.target.data().id);
+		const elemento = event.target;
+		this.agregarAGruposYEdges(elemento);
+
+		if (this.bloqueo) {
+			this.bloqueo = false;
+			return;
+		}
+
+		this.socket.send(JSON.stringify({
+			accion: 'Agregar elemento',
+			elemento: { data: elemento.data() }
+		}));
+	}
+
+	private eventosPendientes: number = 0;
+
+	private moveEvent(event) {
+		console.log('Move event');
+
+		if (this.bloqueo) {
+			this.bloqueo = false;
+			return;
+		}
+
+		const elemento = event.target;
+
+		this.socket.send(JSON.stringify({
+			accion: 'Mover elemento',
+			elemento: { data: elemento.data() }
+		}));
+
+		this.removeParentsOfOneChild();
+
+	}
+
+	private areThereParentsWithOneChild() {
+		return this.cy.nodes().find(this.isParentOfOneChildAndIsNotAnEdge);
 	}
 
 	private removeEvent(event) {
@@ -192,20 +232,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const elemento = event.target;
 		this.eliminar(elemento.id())
 
-		if (this.enviandoMensaje) {
-			if (elemento.data().esGrupo) {
-
-			} else {
-				this.socket.send(JSON.stringify({
-					accion: 'Desconectar grupos',
-					edge: { data: elemento.data() }
-				}));
-			}
-			this.enviandoMensaje = false;
-		} else {
-
+		if (this.bloqueo) {
+			this.bloqueo = false;
+			return;
 		}
-		this.removeParentsOfOneChild();
+
+		this.socket.send(JSON.stringify({
+			accion: 'Agregar elemento',
+			edge: { data: elemento.data() }
+		}));
 	}
 
 	private removeParentsOfOneChild() {
@@ -293,16 +328,12 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoverEvent(event, nodoPadre, dropSibling) {
-		this.socket.send(JSON.stringify({
-			accion: 'Juntar nodos',
-			nodoPadre: { data: nodoPadre.data() },
-			nodo: { data: event.target.data() },
-			nodoVecino: { data: dropSibling.data(), position: dropSibling.position() }
-		}));
-
-		this.agregarAGruposYEdges(nodoPadre);
+		console.log('Entrar nodo event');
 	}
 
+	/**
+	 * Recibe un objeto tipo nodo o edge de cytoscape.
+	 */
 	private agregarAGruposYEdges(grupoOEdge) {
 		const elementoEncontrado = this.gruposYEdges.find(nodo => nodo.data.id === grupoOEdge.data().id);
 		if (elementoEncontrado) return;
@@ -310,30 +341,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
-		console.log('Salir nodo event');
-		const nodosHijos = dropTarget.children();
-		let nodoVecino;
-		switch (nodosHijos.length) {
-			case 0:
-				nodoVecino = { data: { id: dropSibling.data().id, parent: dropTarget.id() } };
-				break;
-			case 1:
-				nodoVecino = { data: { id: dropTarget.children()['0'].id(), parent: dropTarget.id() } };
-				break;
-			default:
-				nodoVecino = {};
-				break;
-		}
-
-		this.socket.send(JSON.stringify({
-			accion: 'Separar nodos',
-			nodo: { data: event.target.data() },
-			nodoVecino
-		}))
-
-		if (this.isParentOfOneChildAndIsNotAnEdge(dropTarget)) {
-			this.removeParent(dropTarget);
-		}
+		console.log('Salie nodo event');
 	}
 
 	private prepararMenuEdges() {
@@ -392,23 +400,17 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Mover':
 				this.moverNodo(json);
 				break;
+			case 'Agregar elemento':
+				this.agregarElemento(json);
+			case 'Mover elemento':
+				this.moverElemento(json);
+			case 'Eliminar elemento':
+				this.eliminarElemento(json);
 			case 'Bloquear':
 				this.bloquearNodo(json);
 				break;
 			case 'Desbloquear':
 				this.desbloquearNodo(json);
-				break;
-			case 'Juntar nodos':
-				this.juntarNodos(json);
-				break;
-			case 'Separar nodos':
-				this.separarNodos(json);
-				break;
-			case 'Conectar grupos':
-				this.conectarGrupos(json);
-				break;
-			case 'Desconectar grupos':
-				this.desconectarGrupos(json);
 				break;
 			case 'Iniciar reinicio':
 				this.iniciarReinicio(json);
@@ -421,6 +423,24 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}
 	}
 
+	bloqueo = false;
+
+	private agregarElemento(json) {
+		this.bloqueo = true;
+		this.cy.add(json.elemento);
+	}
+
+	private moverElemento(json) {
+		console.log('Moviendo elemento');
+		this.bloqueo = true;
+		this.cy.getElementById(json.data.id).move({ parent: json.data.parent ? json.data.parent : null })
+	}
+
+	private eliminarElemento(json) {
+		this.bloqueo = true;
+		this.cy.getElementById(json.data.id).remove();
+	}
+
 	private alguienSeConecto(datos: any) {
 		const { nombre, email, solicitandoOrganizacion } = datos;
 		this.solicitantes.push({ nombre, email, solicitandoOrganizacion });
@@ -429,11 +449,22 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private cargarNodos(datos: any) {
 		this.gruposYEdges = datos.nodos.filter(nodo => nodo.data.esGrupo);
 		const nodos = this.cy.nodes();
-		this.cy.remove(nodos);
-		this.cy.add(datos.nodos);
 
-		this.gruposYEdges.forEach(grupo => console.log(grupo.data));
-		datos.nodos.forEach(nodo => console.log(nodo.data));
+		this.bloqueo = true;
+		this.cy.remove(nodos);
+
+		datos.nodos.forEach(nodo => {
+			this.bloqueo = true;
+
+			this.cy.add(nodo);
+
+			if (nodo.data.esGrupo) return;
+			this.cy.style()
+				.selector(`#${nodo.id}`)
+				.css({
+					'background-image': `${nodo.urlFoto}`
+				}).update();
+		});
 
 		this.cy.layout({
 			name: 'grid',
@@ -469,54 +500,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private desbloquearNodo(datos: any) {
 		datos.nodos.forEach(idNodo => this.cy.getElementById(idNodo).grabify());
 		//TODO: Quitar el nombre debajo del nodo padre.
-	}
-
-	private juntarNodos(datos: any) {
-		const idNodoPadre = datos.nodoPadre.data.id;
-		const idNodo = datos.nodo.data.id;
-		const idNodoVecino = datos.nodoVecino.data ? datos.nodoVecino.data.id : -1;
-
-		const nodoPadre = this.cy.getElementById(idNodoPadre);
-		const nodo = this.cy.getElementById(idNodo);
-		const nodoVecino = this.cy.getElementById(idNodoVecino);
-
-		if (nodoPadre.isNode()) { //*nodoPadre ya existe
-			nodo.move({ parent: nodoPadre.id() }) //* Solo funciona si el padre ya existe
-		} else {
-			nodo.remove();
-
-			this.cy.add([
-				{ data: { id: idNodo, parent: idNodoPadre, nombre: datos.nodo.data.nombre }, position: nodo.position() },
-				{ data: { id: idNodoPadre, nombre: datos.nodoPadre.data.nombre, esGrupo: true } }
-			]);
-
-			nodoVecino.move({ parent: idNodoPadre });
-
-			this.gruposYEdges.push({ data: { id: idNodoPadre, nombre: datos.nodoPadre.data.nombre, esGrupo: true } });
-		}
-	}
-
-	private separarNodos(datos: any) {
-		const idNodo = datos.nodo.data.id;
-
-		const nodo = this.cy.getElementById(idNodo);
-
-		nodo.move({ parent: null });
-
-		this.removeParentsOfOneChild();
-	}
-
-	private conectarGrupos(datos: any) {
-		const { edge } = datos;
-
-		this.gruposYEdges.push(edge);
-		this.cy.add(edge);
-	}
-
-	private desconectarGrupos(datos: any) {
-		const { edge } = datos;
-
-		this.cy.getElementById(edge.data.id).remove();
 	}
 
 	private iniciarReinicio(datos) {
@@ -602,15 +585,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private crearEdge(idNodo, idPadre) {
 		const edge = { data: { id: `${idPadre}${idNodo}`, source: `${idPadre}`, target: `${idNodo}` } };
 		this.cy.add(edge);
-
-		this.socket.send(JSON.stringify({
-			accion: 'Conectar grupos',
-			edge
-		}));
 	}
 
 	desconectar(edge) {
-		this.enviandoMensaje = true;
 		this.cy.getElementById(edge.id()).remove();
 	}
 
