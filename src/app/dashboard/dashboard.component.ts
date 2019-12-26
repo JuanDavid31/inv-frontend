@@ -31,6 +31,8 @@ export class DashboardComponent implements OnInit {
 
 	modal: any;
 	ventanaMensajes: any;
+	
+	servidor:any;
 
 	estadosInvitacion = {
 		PENDIENTE: 'Pendiente',
@@ -49,6 +51,31 @@ export class DashboardComponent implements OnInit {
 		this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
 			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
+		
+		this.servidor = new EventSource('http://localhost:8080/sse')
+		this.servidor.onmessage = this.recibirEvento.bind(this);
+	}
+	
+	cargarProblematicas() {
+		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+		const options = {
+			headers: headers
+		}
+		this.http
+			.get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast({
+						titulo: 'Error',
+						cuerpo: 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.',
+						esMensajeInfo: false
+					});
+				} else {
+					this.problematicas = res;
+				}
+			})
 	}
 
 	activateAutoCompletadoUsuariosAInvitar(query: string, result) {
@@ -105,27 +132,26 @@ export class DashboardComponent implements OnInit {
 			this.usuarioAInvitarSeleccioando = {};
 		}
 	}
-
-	cargarProblematicas() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
+	
+	private recibirEvento(datos){
+		const json = JSON.parse(datos);
+		switch(json.accion){
+			case 'Cambio fase problematica':
+				this.cambioFaseProblematica(json);
+				break;
+			default:
+				break;
 		}
-		this.http
-			.get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
-			.pipe(catchError(err => of(err)))
-			.subscribe(res => {
-				if (res.error) {
-					this.serviciosToast.mostrarToast({
-						titulo: 'Error',
-						cuerpo: 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.',
-						esMensajeInfo: false
-					});
-				} else {
-					this.problematicas = res;
-				}
-			})
+	}
+	
+	private cambioFaseProblematica(datos){
+		const {idProblematica, nuevaFase} = datos;
+		
+		const problematica = this.problematicas.find(problematica => problematica.id === idProblematica);
+		
+		problematica.fase = nuevaFase;
+		
+		this.serviciosToast.mostrarToast({ cuerpo: `La problematica  "${problematica.nombre}" avanzo su fase.` });
 	}
 
 	cargarInvitados(problematica) {
