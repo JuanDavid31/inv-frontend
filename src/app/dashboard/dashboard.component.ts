@@ -149,9 +149,10 @@ export class DashboardComponent implements OnInit {
 		
 		const problematica = this.problematicas.find(problematica => problematica.id === idProblematica);
 		
-		problematica.fase = nuevaFase;
-		
-		this.serviciosToast.mostrarToast({ cuerpo: `La problematica  "${problematica.nombre}" avanzo su fase.` });
+		if(problematica){
+			problematica.fase = nuevaFase;
+			this.serviciosToast.mostrarToast({ cuerpo: `La problematica  "${problematica.nombre}" avanzo su fase.` });	
+		}
 	}
 
 	cargarInvitados(problematica) {
