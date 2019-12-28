@@ -284,7 +284,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
 			nodos,
-			nombre: this.serviciosLocalStorage.darNombres()
+			nombreUsuario: this.serviciosLocalStorage.darNombres()
 		}))
 	}
 
@@ -396,14 +396,17 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.cargarNodos(json);
 				break;
 			case 'Mover':
-				this.moverNodo(json.elemento);
+				this.moverNodo(json);
 				break;
 			case 'Agregar elemento':
-				this.agregarElemento(json.elemento);
+				this.agregarElemento(json);
+				break;
 			case 'Mover elemento':
-				this.moverElemento(json.elemento);
+				this.moverElemento(json);
+				break;
 			case 'Eliminar elemento':
-				this.eliminarElemento(json.elemento);
+				this.eliminarElemento(json);
+				break;
 			case 'Bloquear':
 				this.bloquearNodo(json);
 				break;
@@ -451,7 +454,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			.forEach(nodo => {
 				this.bloqueo = true;
 
-				this.cy.add(nodo);
+				this.cy.add({ data: nodo.data, position: nodo.position });
 
 				this.cy.style()
 					.selector(`#${nodo.data.id}`)
@@ -460,11 +463,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 					}).update();
 			});
 
+		console.log(this.cy.nodes());
+
 		this.cy.layout({
-			name: 'grid',
+			name: 'cose',
 			rows: 3,
 			cols: 3,
-			padding: 50
+			padding: 20,
+			boundingBox: { x1: 0, y1: 0, w: 500, h: 1500 }
 		}).run();
 
 		this.solicitantes.concat(datos.solicitantes);
@@ -476,26 +482,30 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moverElemento(json) {
-		console.log(json);
 		console.log('Moviendo elemento');
+		const { elemento } = json
 		this.bloqueo = true;
-		this.cy.getElementById(json.data.id).move({ parent: json.data.parent ? json.data.parent : null })
+		this.cy.getElementById(elemento.data.id)
+			.move({
+				parent: elemento.data.parent ? elemento.data.parent : null
+			})
 	}
 
 	private eliminarElemento(json) {
+		const { elemento } = json;
 		this.bloqueo = true;
-		this.cy.getElementById(json.data.id).remove();
+		this.cy.getElementById(elemento.data.id).remove();
 	}
 
 	private moverNodo(datos: any) {
-		const { nodo } = datos;
-		const nodoAMover = this.cy.getElementById(nodo.data.id);
+		const { elemento } = datos;
+		const nodoAMover = this.cy.getElementById(elemento.data.id);
 		this.bloqueo = true;
-		nodoAMover.position(nodo.position);
+		nodoAMover.position(elemento.position);
 	}
 
 	private bloquearNodo(datos: any) {
-		const { nodos, nombres } = datos;
+		const { nodos, nombreUsuario } = datos;
 		nodos.forEach(idNodo => {
 			this.bloqueo = true;
 			this.cy.getElementById(idNodo).ungrabify()
