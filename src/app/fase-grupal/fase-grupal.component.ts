@@ -218,24 +218,22 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			elemento: { data: elemento.data() }
 		}));
 
-		this.removeParentsOfOneChild();
-
 	}
 
 	private areThereParentsWithOneChild() { //?TODO: Borrar
 		return this.cy.nodes().find(this.isParentOfOneChildAndIsNotAnEdge);
 	}
-	
+
 	private isParentOfOneChildAndIsNotAnEdge(node) {
 		//Los grupos recien creados que no han sido soltados, tienen 0 hijos aunque no sea así.
 		//El <= asegura que los nodos recien creados sin haber sido soltados sean tratados de manera correcta y no causen bugs.
 		return node.data().esGrupo && node.children().length <= 1;
 	};
-	
+
 	private removeParentsOfOneChild() {
 		this.cy.nodes().filter(this.isParentOfOneChildAndIsNotAnEdge).forEach(this.removeParent.bind(this));
 	};
-	
+
 	private removeParent(parent) {
 		parent.children().move({ parent: null });
 		parent.remove();
@@ -252,8 +250,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}
 
 		this.socket.send(JSON.stringify({
-			accion: 'Agregar elemento',
-			edge: { data: elemento.data() }
+			accion: 'Eliminar elemento',
+			elemento: { data: elemento.data() }
 		}));
 	}
 
@@ -263,7 +261,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	 **/
 	private eliminar(id) {
 		this.gruposYEdges
-			.filter(grupo => grupo.data.esGrupo)
 			.some((grupo, indice) => { //ForEach que si retorna true entonces termina.
 				if (grupo.data.id === id) {
 					this.gruposYEdges.splice(indice, 1)
@@ -278,8 +275,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.idNodoAgarrado = nodo.id();
 		const nodos = [event.target.id()];
 		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
-		
-		if(this.bloqueo){
+
+		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
@@ -287,7 +284,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
 			nodos,
-			nombre: this.serviciosLocalStorage.darNombres()
+			nombreUsuario: this.serviciosLocalStorage.darNombres()
 		}))
 	}
 
@@ -296,7 +293,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const nodos = [event.target.id()];
 		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
 
-		if(this.bloqueo){
+		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
@@ -312,7 +309,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private positionEvent(event) {
 		const nodo = event.target;
 		if (this.idNodoAgarrado !== event.target.id()) return;
-		if(this.bloqueo){
+		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
@@ -327,7 +324,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const hijos = nodo.children();
 		this.socket.send(JSON.stringify({
 			accion: 'Mover padre',
-			nodo: { data: nodo.data(), position: nodo.position() },
+			elemento: { data: nodo.data(), position: nodo.position() },
 			nodosHijos: hijos.jsons()
 		}))
 	}
@@ -335,7 +332,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private enviarMover(nodo) {
 		this.socket.send(JSON.stringify({
 			accion: 'Mover',
-			nodo: { data: nodo.data(), position: nodo.position() }
+			elemento: { data: nodo.data(), position: nodo.position() }
 		}));
 	}
 
@@ -345,6 +342,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
 		console.log('Salie nodo event');
+		this.removeParentsOfOneChild();
 	}
 
 	private prepararMenuEdges() {
@@ -402,10 +400,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				break;
 			case 'Agregar elemento':
 				this.agregarElemento(json);
+				break;
 			case 'Mover elemento':
 				this.moverElemento(json);
+				break;
 			case 'Eliminar elemento':
 				this.eliminarElemento(json);
+				break;
 			case 'Bloquear':
 				this.bloquearNodo(json);
 				break;
@@ -432,7 +433,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const { nombre, email, solicitandoOrganizacion } = datos;
 		this.solicitantes.push({ nombre, email, solicitandoOrganizacion });
 	}
-	
+
 	private cargarNodos(datos: any) {
 		this.gruposYEdges = datos.nodos.filter(nodo => nodo.data.esGrupo);
 		const nodos = this.cy.nodes();
@@ -440,27 +441,36 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.bloqueo = true;
 		this.cy.remove(nodos);
 
-		datos.nodos.forEach(nodo => {
-			this.bloqueo = true;
+		datos.nodos
+			.filter(nodo => nodo.data.esGrupo)
+			.forEach(grupo => {
+				this.bloqueo = true;
 
-			this.cy.add(nodo);
+				this.cy.add(grupo);
+			})
 
-			if (nodo.data.esGrupo) return;
-			this.cy.style()
-				.selector(`#${nodo.id}`)
-				.css({
-					'background-image': `${nodo.urlFoto}`
-				}).update();
-		});
-		
-		console.log(datos.nodos);
-		console.log(this.cy.nodes().jsons());
+		datos.nodos
+			.filter(nodo => !nodo.data.esGrupo)
+			.forEach(nodo => {
+				this.bloqueo = true;
+
+				this.cy.add({ data: nodo.data, position: nodo.position });
+
+				this.cy.style()
+					.selector(`#${nodo.data.id}`)
+					.css({
+						'background-image': `${nodo.data.urlFoto}`
+					}).update();
+			});
+
+		console.log(this.cy.nodes());
 
 		this.cy.layout({
-			name: 'grid',
+			name: 'cose',
 			rows: 3,
 			cols: 3,
-			padding: 50
+			padding: 20,
+			boundingBox: { x1: 0, y1: 0, w: 500, h: 1500 }
 		}).run();
 
 		this.solicitantes.concat(datos.solicitantes);
@@ -473,24 +483,29 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private moverElemento(json) {
 		console.log('Moviendo elemento');
+		const { elemento } = json
 		this.bloqueo = true;
-		this.cy.getElementById(json.data.id).move({ parent: json.data.parent ? json.data.parent : null })
+		this.cy.getElementById(elemento.data.id)
+			.move({
+				parent: elemento.data.parent ? elemento.data.parent : null
+			})
 	}
 
 	private eliminarElemento(json) {
+		const { elemento } = json;
 		this.bloqueo = true;
-		this.cy.getElementById(json.data.id).remove();
+		this.cy.getElementById(elemento.data.id).remove();
 	}
 
 	private moverNodo(datos: any) {
-		const { nodo } = datos;
-		const nodoAMover = this.cy.getElementById(nodo.data.id);
+		const { elemento } = datos;
+		const nodoAMover = this.cy.getElementById(elemento.data.id);
 		this.bloqueo = true;
-		nodoAMover.position(nodo.position);
+		nodoAMover.position(elemento.position);
 	}
 
 	private bloquearNodo(datos: any) {
-		const { nodos, nombres } = datos;
+		const { nodos, nombreUsuario } = datos;
 		nodos.forEach(idNodo => {
 			this.bloqueo = true;
 			this.cy.getElementById(idNodo).ungrabify()
@@ -516,7 +531,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.solicitandoOrganizacion = false;
 		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
 	}
-	
+
 	private alguienSeDesconecto(datos: any) {
 		console.log('Alguien se desconecto');
 		const { email } = datos;
@@ -622,9 +637,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
 			.grupo.data.nombre = nuevoNombre;
-			
-			this.cy.getElementById(id).data({nombre: nuevoNombre});
-			
+
+		this.cy.getElementById(id).data({ nombre: nuevoNombre });
+
 		//Esto puede ir aquí o en un dataEvent.
 		this.socket.send(JSON.stringify({
 			accion: 'Cambiar nombre',
@@ -646,7 +661,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			.nombre = nombre;
 
 		const nodo = this.cy.getElementById(id);
-		nodo.data({nombre});
+		nodo.data({ nombre });
 	}
 
 	darCantidadSolicitantes() {
@@ -658,7 +673,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	darGruposIterables() {
 		return this.gruposYEdges.length > 0 ? this.gruposYEdges.filter(grupo => grupo.data.esGrupo) : [];
 	}
-	
+
 	/**
 	 * Recibe un objeto tipo nodo o edge de cytoscape.
 	 */
