@@ -4,9 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
 declare var cytoscape;
+declare var tippy;
 
 declare var $;
-
+//TODO: 1 - Etiquetas del nombre del usuario que tiene el nodo en su poder.
+//TODO: 2 - Establecer unas posiciones iniciales.
+//TODO: 5 - Añadir funcionalidad de reinicio de posiciones.
+//TODO: 6 - Arreglo estilos visual.
 @Component({
 	selector: 'app-fase-grupal',
 	templateUrl: './fase-grupal.component.html',
@@ -24,6 +28,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	grupoDe: any;
 	grupoA: any;
 
+	nodoSeleccionado: any;
+
+	grupoSeleccionado: any;
+	nuevoNombreGrupo: String = '';
+
 	cy: any = {};
 	cdnd: any = {};
 
@@ -38,6 +47,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}];
 
 	socket: WebSocket;
+
+	modalCambioNombreGrupo: any
+	modalVisualizacionImagenNodo: any;
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private activatedRoute: ActivatedRoute,
@@ -58,10 +70,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
-				this.socket = new WebSocket(`ws://localhost:8080/colaboracion?idProblematica=${idProblematica}`);
+				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 			});
+
+		this.modalCambioNombreGrupo = $('#modal-cambio-nombre');
+		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 
 		// const cy = this.cy;
 
@@ -88,14 +103,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				{
 					selector: 'node',
 					style: {
-						'label': 'data(nombre)',
 						'font-size': '40',
 						'height': 200,
 						'width': 200,
 						'background-fit': 'cover',
 						'border-color': '#2980b9',
 						'border-width': 3,
-						'border-opacity': 0.5
+						'border-opacity': 0.5,
+						'label': 'data(id)'
 					}
 				},
 				{
@@ -142,19 +157,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 					}
 				}
 			]
-			// ,
-			// elements: {
-			// 	nodes: [
-			// 		{ data: { id: 'a' } },
-			// 		{ data: { id: 'b' } },
-			// 		{ data: { id: 'c' } },
-			// 		{ data: { id: 'd' } }
-			// 	],
-			// 	edges: [
-
-			// 	]
-			// }
 		});
+
 
 		const options = {
 			grabbedNode: node => true, // filter function to specify which nodes are valid to grab and drop into other nodes
@@ -178,15 +182,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.cy.on('position', this.positionEvent.bind(this));
 		this.cy.on('cdndover', this.cdndoverEvent.bind(this));
 		this.cy.on('cdndout', this.cdndoutEvent.bind(this));
-
-		this.cy.on('data', elemento => {
-			console.log('Data event')
-			console.log(elemento.target.data());
-		})
 	}
 
 	private addEvent(event) {
-		console.log('Add event - ' + event.target.data().id);
 		const elemento = event.target;
 		this.agregarAGruposYEdges(elemento);
 
@@ -201,11 +199,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}));
 	}
 
-	private eventosPendientes: number = 0;
-
 	private moveEvent(event) {
-		console.log('Move event');
-
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -240,7 +234,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	};
 
 	private removeEvent(event) {
-		console.log('Remove event - ' + event.target.data().id);
 		const elemento = event.target;
 		this.eliminar(elemento.id())
 
@@ -337,11 +330,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoverEvent(event, nodoPadre, dropSibling) {
-		console.log('Entrar nodo event');
+
 	}
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
-		console.log('Salie nodo event');
 		this.removeParentsOfOneChild();
 	}
 
@@ -367,7 +359,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			commands: [
 				{
 					content: '<span class="fa fa-edit fa-2x"></span>',
-					select: this.cambiarNombreGrupo.bind(this)
+					select: this.abrirModalCambioNombreGrupo.bind(this)
+				},
+				{
+					content: '<span class="fa fa-eye fa-2x"></span>',
+					select: this.abrirModalImagenNodo.bind(this) //this.cambiarNombreGrupo.bind(this)
 				},
 				{
 					content: 'Nada',
@@ -406,6 +402,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				break;
 			case 'Eliminar elemento':
 				this.eliminarElemento(json);
+				break;
+			case 'Cambiar nombre':
+				this.cambioUnNombre(json);
 				break;
 			case 'Bloquear':
 				this.bloquearNodo(json);
@@ -447,7 +446,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.bloqueo = true;
 
 				this.cy.add(grupo);
-			})
+			});
 
 		datos.nodos
 			.filter(nodo => !nodo.data.esGrupo)
@@ -462,8 +461,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 						'background-image': `${nodo.data.urlFoto}`
 					}).update();
 			});
-
-		console.log(this.cy.nodes());
 
 		this.cy.layout({
 			name: 'cose',
@@ -482,7 +479,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moverElemento(json) {
-		console.log('Moviendo elemento');
 		const { elemento } = json
 		this.bloqueo = true;
 		this.cy.getElementById(elemento.data.id)
@@ -533,7 +529,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private alguienSeDesconecto(datos: any) {
-		console.log('Alguien se desconecto');
 		const { email } = datos;
 
 		//Elimina el solicitante con el email dado.
@@ -636,9 +631,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	cambiarNombreGrupo(id, nuevoNombre) {
 		this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
-			.grupo.data.nombre = nuevoNombre;
+			.data.nombre = nuevoNombre;
 
 		this.cy.getElementById(id).data({ nombre: nuevoNombre });
+
+		this.modalCambioNombreGrupo.modal('toggle');
 
 		//Esto puede ir aquí o en un dataEvent.
 		this.socket.send(JSON.stringify({
@@ -658,7 +655,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
-			.nombre = nombre;
+			.data.nombre = nombre;
 
 		const nodo = this.cy.getElementById(id);
 		nodo.data({ nombre });
@@ -681,6 +678,32 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const elementoEncontrado = this.gruposYEdges.find(nodo => nodo.data.id === grupoOEdge.data().id);
 		if (elementoEncontrado) return;
 		this.gruposYEdges.push({ data: grupoOEdge.data() });
+	}
+
+	private abrirModalCambioNombreGrupo(elemento) {
+		if (!elemento.data().esGrupo) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'El cambio de nombre es solo para grupos.',
+				esMensajeInfo: false
+			})
+			return;
+		}
+		this.grupoSeleccionado = elemento.data();
+		this.modalCambioNombreGrupo.modal('toggle');
+	}
+
+	private abrirModalImagenNodo(elemento) {
+		if (elemento.data().esGrupo || !elemento.isNode()) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Solo se pueden visualizar las imagenes de los nodos o individuales.',
+				esMensajeInfo: false
+			})
+			return;
+		}
+		this.nodoSeleccionado = elemento.data();
+		this.modalVisualizacionImagenNodo.modal('toggle');
 	}
 
 	ngOnDestroy() {

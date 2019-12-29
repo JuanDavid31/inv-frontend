@@ -18,3 +18,16 @@ h1{
 	font-size: 1em;
 	font-weight: bold;
 }
+	
+#modal-visualizacion-imagen-nodo .modal-body{
+	width: 498px;
+    height: 450px;
+}
+
+
+#modal-visualizacion-imagen-nodo .modal-body img{
+	width: 100%;
+    height: 95%;
+    object-fit: contain;
+    object-position: center;
+}

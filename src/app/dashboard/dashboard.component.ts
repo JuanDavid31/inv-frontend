@@ -31,8 +31,8 @@ export class DashboardComponent implements OnInit {
 
 	modal: any;
 	ventanaMensajes: any;
-	
-	servidor:any;
+
+	servidor: any;
 
 	estadosInvitacion = {
 		PENDIENTE: 'Pendiente',
@@ -51,11 +51,11 @@ export class DashboardComponent implements OnInit {
 		this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
 			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
-		
-		this.servidor = new EventSource('http://localhost:8080/sse')
-		this.servidor.onmessage = this.recibirEvento.bind(this);
+
+		// this.servidor = new EventSource('http://localhost:8080/sse')
+		// this.servidor.onmessage = this.recibirEvento.bind(this);
 	}
-	
+
 	cargarProblematicas() {
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
@@ -132,10 +132,10 @@ export class DashboardComponent implements OnInit {
 			this.usuarioAInvitarSeleccioando = {};
 		}
 	}
-	
-	private recibirEvento(datos){
+
+	private recibirEvento(datos) {
 		const json = JSON.parse(datos);
-		switch(json.accion){
+		switch (json.accion) {
 			case 'Cambio fase problematica':
 				this.cambioFaseProblematica(json);
 				break;
@@ -143,15 +143,15 @@ export class DashboardComponent implements OnInit {
 				break;
 		}
 	}
-	
-	private cambioFaseProblematica(datos){
-		const {idProblematica, nuevaFase} = datos;
-		
+
+	private cambioFaseProblematica(datos) {
+		const { idProblematica, nuevaFase } = datos;
+
 		const problematica = this.problematicas.find(problematica => problematica.id === idProblematica);
-		
-		if(problematica){
+
+		if (problematica) {
 			problematica.fase = nuevaFase;
-			this.serviciosToast.mostrarToast({ cuerpo: `La problematica  "${problematica.nombre}" avanzo su fase.` });	
+			this.serviciosToast.mostrarToast({ cuerpo: `La problematica  "${problematica.nombre}" avanzo su fase.` });
 		}
 	}
 
