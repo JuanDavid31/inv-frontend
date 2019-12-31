@@ -7,8 +7,6 @@ declare var cytoscape;
 declare var tippy;
 
 declare var $;
-//TODO: 1 - Etiquetas del nombre del usuario que tiene el nodo en su poder.
-//TODO: 2 - Establecer unas posiciones iniciales.
 //TODO: 5 - Añadir funcionalidad de reinicio de posiciones.
 //TODO: 6 - Arreglo estilos visual.
 @Component({
@@ -70,7 +68,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
-				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematica}`);
+				this.socket = new WebSocket(`ws:localhost:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 			});
@@ -264,32 +262,32 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private grabonEvent(event) {
-		const nodo = event.target;
-		this.idNodoAgarrado = nodo.id();
-		const nodos = [event.target.id()];
-		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
-
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
+
+		const nodo = event.target;
+		this.idNodoAgarrado = nodo.id();
+		const nodos = [{ id: event.target.id(), esHijo: false }];
+		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
 
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
 			nodos,
-			nombreUsuario: this.serviciosLocalStorage.darNombres()
+			nombreUsuario: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()}`
 		}))
 	}
 
 	private freeEvent(event) {
-		const nodo = event.target;
-		const nodos = [event.target.id()];
-		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
-
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
+
+		const nodo = event.target;
+		const nodos = [{ id: event.target.id(), esHijo: false }];
+		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
 
 		this.socket.send(JSON.stringify({
 			accion: 'Desbloquear',
@@ -428,49 +426,116 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	bloqueo = false;
 
-	private alguienSeConecto(datos: any) {
-		const { nombre, email, solicitandoOrganizacion } = datos;
+	private alguienSeConecto({ nombre, email, solicitandoOrganizacion }) {
 		this.solicitantes.push({ nombre, email, solicitandoOrganizacion });
 	}
 
-	private cargarNodos(datos: any) {
-		this.gruposYEdges = datos.nodos.filter(nodo => nodo.data.esGrupo);
-		const nodos = this.cy.nodes();
+	/**
+	 * @param {any[]} solicitantes usuarios que contienen a este mismo usuario.
+	 */
+	private cargarNodos({ nodos, solicitantes }) {
+		this.gruposYEdges = nodos.filter(nodo => nodo.data.esGrupo);
+		const nodosCytoscape = this.cy.nodes();
 
 		this.bloqueo = true;
-		this.cy.remove(nodos);
+		this.cy.remove(nodosCytoscape);
 
-		datos.nodos
-			.filter(nodo => nodo.data.esGrupo)
+		this.cargarNodosPadre(nodos);
+		this.cargarNodosHijos(nodos);
+		this.bloquearNodosSiLosHay(nodos);
+
+		if (solicitantes.length === 1) {
+			this.activarLayoutCose();
+		} else {
+			this.activarLayoutPreset();
+		}
+
+		this.validarUsuarioActual(solicitantes);
+	}
+
+	private cargarNodosPadre(nodos) {
+		nodos.filter(nodo => nodo.data.esGrupo)
 			.forEach(grupo => {
 				this.bloqueo = true;
-
 				this.cy.add(grupo);
 			});
+	}
 
-		datos.nodos
-			.filter(nodo => !nodo.data.esGrupo)
+	private cargarNodosHijos(nodos) {
+		nodos.filter(nodo => !nodo.data.esGrupo)
 			.forEach(nodo => {
 				this.bloqueo = true;
-
-				this.cy.add({ data: nodo.data, position: nodo.position });
-
+				this.cy.add(nodo);
 				this.cy.style()
 					.selector(`#${nodo.data.id}`)
-					.css({
-						'background-image': `${nodo.data.urlFoto}`
-					}).update();
+					.css({ 'background-image': `${nodo.data.urlFoto}` })
+					.update();
 			});
+	}
 
+	private bloquearNodosSiLosHay(nodos) {
+		nodos.filter(nodo => nodo.data.bloqueado)
+			.forEach(nodo => {
+				const nodoCy = this.cy.getElementById(nodo.data.id);
+				nodoCy.ungrabify();
+				nodoCy.style({
+					'border-color': 'purple',
+					'border-width': 10
+				});
+			})
+	}
+
+	/**
+	 * El layout cose asigna posiciones a nodos normales y compuestos
+	 */
+	private activarLayoutCose() {
 		this.cy.layout({
 			name: 'cose',
-			rows: 3,
-			cols: 3,
-			padding: 20,
-			boundingBox: { x1: 0, y1: 0, w: 500, h: 1500 }
+			nodeOverlap: 1,
+			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run();
+		this.enviarActualizacionDePosiciones()
+	}
 
-		this.solicitantes.concat(datos.solicitantes);
+	private enviarActualizacionDePosiciones() {
+		const nodos = this.cy.nodes();
+		//el setTimeout espera a que el layout este listo antes de
+		//pedir las posiciones.
+		const that = this;
+		setTimeout(() => {
+			that.socket.send(JSON.stringify({
+				accion: 'Actualizar posiciones',
+				nodos: nodos.jsons()
+			}));
+		}, 0);
+	}
+
+	/**
+	 * El layout preset permite agregar nodos con posiciones definidas de manera manual.
+	 */
+	private activarLayoutPreset() {
+		this.cy.layout({
+			name: 'preset'
+		}).run();
+	}
+
+	private validarUsuarioActual(solicitantes) {
+		const conexionesDeEsteUsuario = solicitantes
+			.filter(solicitante => solicitante.email === this.serviciosLocalStorage.darEmail())
+			.length;
+
+		if (conexionesDeEsteUsuario === 2) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Ya estas conectado desde otro pestaña o navegador.',
+				esMensajeInfo: false
+			})
+			this.router.navigateByUrl('/dashboard');
+		} else {
+			solicitantes = solicitantes
+				.filter(solicitante => solicitante.email != this.serviciosLocalStorage.darEmail());
+			this.solicitantes.concat(solicitantes);
+		}
 	}
 
 	private agregarElemento(json) {
@@ -500,21 +565,58 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		nodoAMover.position(elemento.position);
 	}
 
-	private bloquearNodo(datos: any) {
-		const { nodos, nombreUsuario } = datos;
-		nodos.forEach(idNodo => {
-			this.bloqueo = true;
-			this.cy.getElementById(idNodo).ungrabify()
-		});
-		//TODO: Poner el nombre debajo del nodo padre.
+	private bloquearNodo({ nodos, nombreUsuario }) {
+		//Hijos si tiene
+		nodos.filter(nodo => nodo.esHijo)
+			.forEach((nodo) => {
+				this.bloqueo = true;
+				const nodoBloqueado = this.cy.getElementById(nodo.id);
+				nodoBloqueado.ungrabify()
+				nodoBloqueado.style({
+					'border-color': 'purple',
+					'border-width': 10
+				});
+			})
+
+		//Padre
+		nodos.filter(nodo => !nodo.esHijo)
+			.forEach(nodo => {
+				this.bloqueo = true;
+				const nodoBloqueado = this.cy.getElementById(nodo.id);
+				nodoBloqueado.ungrabify()
+				nodoBloqueado.style({
+					'border-color': 'purple',
+					'border-width': 10,
+					'label': `${nombreUsuario} - ${nodoBloqueado.data().nombre}`
+				});
+			});
 	}
 
-	private desbloquearNodo(datos: any) {
-		datos.nodos.forEach(idNodo => {
-			this.bloqueo = true;
-			this.cy.getElementById(idNodo).grabify()
-		});
-		//TODO: Quitar el nombre debajo del nodo padre.
+	private desbloquearNodo({ nodos }) {
+		//Hijos si tiene.
+		nodos.filter(nodo => nodo.esHijo)
+			.forEach(nodo => {
+				this.bloqueo = true;
+				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
+				nodoDesbloqueado.grabify()
+				nodoDesbloqueado.style({
+					'border-color': '#2980b9',
+					'border-width': 3
+				})
+			})
+
+		//Padre
+		nodos.filter(nodo => !nodo.esHijo)
+			.forEach(nodo => {
+				this.bloqueo = true;
+				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
+				nodoDesbloqueado.grabify()
+				nodoDesbloqueado.style({
+					'label': nodoDesbloqueado.data().nombre,
+					'border-color': '#2980b9',
+					'border-width': 3
+				})
+			});
 	}
 
 	private iniciarReinicio(datos) {
