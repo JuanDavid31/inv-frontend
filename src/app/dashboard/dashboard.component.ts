@@ -300,6 +300,8 @@ export class DashboardComponent implements OnInit {
 				return "Reaccionando a nodos";
 			case 4:
 				return "Elaborando escritos";
+			case 5:
+				return 'Problematica finalizada';
 			default:
 				return '';
 		}
@@ -355,14 +357,9 @@ export class DashboardComponent implements OnInit {
 		return problematica.fase === 0 && problematica.esInterventor;
 	}
 
-	estaEnFase0() {
+	estaEnFase(pFase:number) {
 		const { fase } = this.problematicaSeleccionada;
-		return fase === 0;
-	}
-
-	estaEnFase1() {
-		const { fase } = this.problematicaSeleccionada;
-		return fase === 1;
+		return fase === pFase;
 	}
 
 	darInfoAlAvanzar() {
@@ -372,7 +369,7 @@ export class DashboardComponent implements OnInit {
 			headers: headers
 		}
 		this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}`, options)
+			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?estado=true`, options)
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
