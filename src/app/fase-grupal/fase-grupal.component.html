@@ -32,12 +32,13 @@
 				</div>
 				<div>
 					Cantidad solicitantes {{ darCantidadSolicitantes() }}/
-					{{solicitantes.length}}
+					{{usuarios.length}}
 				</div>
 				<div>
-					<span *ngFor="let usuario of solicitantes">
+					<span *ngFor="let usuario of usuarios">
 						{{usuario.nombre}}
 					</span>
+					<span>{{bloqueo}}</span>
 				</div>
 			</div>
 		</div>

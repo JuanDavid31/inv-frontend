@@ -38,7 +38,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	ejecucionEnMensajeRecibido: boolean = false;
 
-	solicitantes: any[] = [{
+	usuarios: any[] = [{
 		nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
 		email: this.serviciosLocalStorage.darEmail(),
 		solicitandoOrganizacion: false
@@ -299,9 +299,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private positionEvent(event) {
 		const nodo = event.target;
-		if (this.idNodoAgarrado !== event.target.id()) return;
 		if (this.bloqueo) {
 			this.bloqueo = false;
+			return;
+		}
+		if (this.idNodoAgarrado !== event.target.id()) {
 			return;
 		}
 		if (nodo.isParent()) {
@@ -410,8 +412,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Desbloquear':
 				this.desbloquearNodo(json);
 				break;
-			case 'Iniciar reinicio':
-				this.iniciarReinicio(json);
+			case 'Cambio solicitud de organizacion':
+				this.cambioUnaSolicitud(json);
 				break;
 			case 'Reiniciar solicitudes':
 				this.reiniciarSolicitudes(json);
@@ -427,7 +429,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	bloqueo = false;
 
 	private alguienSeConecto({ nombre, email, solicitandoOrganizacion }) {
-		this.solicitantes.push({ nombre, email, solicitandoOrganizacion });
+		this.usuarios.push({ nombre, email, solicitandoOrganizacion });
+		this.serviciosToast.mostrarToast({ cuerpo: `${nombre} se ha conectado.` });
 	}
 
 	/**
@@ -524,6 +527,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			.filter(solicitante => solicitante.email === this.serviciosLocalStorage.darEmail())
 			.length;
 
+		//Por ahora solo se permite una conexión por usuario a la fase grupal.
 		if (conexionesDeEsteUsuario === 2) {
 			this.serviciosToast.mostrarToast({
 				titulo: 'Error',
@@ -534,7 +538,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		} else {
 			solicitantes = solicitantes
 				.filter(solicitante => solicitante.email != this.serviciosLocalStorage.darEmail());
-			this.solicitantes.concat(solicitantes);
+			this.usuarios = this.usuarios.concat(solicitantes);
 		}
 	}
 
@@ -569,7 +573,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		//Hijos si tiene
 		nodos.filter(nodo => nodo.esHijo)
 			.forEach((nodo) => {
-				this.bloqueo = true;
 				const nodoBloqueado = this.cy.getElementById(nodo.id);
 				nodoBloqueado.ungrabify()
 				nodoBloqueado.style({
@@ -581,7 +584,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		//Padre
 		nodos.filter(nodo => !nodo.esHijo)
 			.forEach(nodo => {
-				this.bloqueo = true;
 				const nodoBloqueado = this.cy.getElementById(nodo.id);
 				nodoBloqueado.ungrabify()
 				nodoBloqueado.style({
@@ -596,7 +598,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		//Hijos si tiene.
 		nodos.filter(nodo => nodo.esHijo)
 			.forEach(nodo => {
-				this.bloqueo = true;
 				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
 				nodoDesbloqueado.grabify()
 				nodoDesbloqueado.style({
@@ -608,7 +609,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		//Padre
 		nodos.filter(nodo => !nodo.esHijo)
 			.forEach(nodo => {
-				this.bloqueo = true;
 				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
 				nodoDesbloqueado.grabify()
 				nodoDesbloqueado.style({
@@ -619,23 +619,41 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			});
 	}
 
-	private iniciarReinicio(datos) {
-		this.cy.reset();
-		this.solicitandoOrganizacion = false;
-		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+	private cambioUnaSolicitud({ email, solicitandoOrganizacion }) {
+		this.usuarios.find(solicitante => {
+			return solicitante.email === email
+		}).solicitandoOrganizacion = solicitandoOrganizacion;
 	}
 
-	private reiniciarSolicitudes(datos) {
+	private reiniciarSolicitudes({ nodos }) {
 		this.solicitandoOrganizacion = false;
-		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+		this.usuarios.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+
+		nodos.filter(nodo => !nodo.data.source) //Que no sean edges.
+			.forEach(nodo => {
+				const nodoCy = this.cy.getElementById(nodo.data.id);
+				if (!nodoCy.isNode()) { return; }
+				this.bloqueo = true;
+				nodoCy.position(nodo.position);
+			})
+
+		this.serviciosToast.mostrarToast({ cuerpo: 'Se han reiniciado las posiciones.' });
 	}
 
-	private alguienSeDesconecto(datos: any) {
-		const { email } = datos;
+	private alguienSeDesconecto({ email }) {
 
 		//Elimina el solicitante con el email dado.
-		this.solicitantes = this.solicitantes
-			.filter(solicitante => solicitante.email !== email);
+		let nombreUsuarioAElminar;
+		this.usuarios.some((usuario, indice) => {
+			if (usuario.email === email && usuario.nombre.substr(usuario.nombre.length - 4) !== '(Tú)') {
+				nombreUsuarioAElminar = usuario.nombre;
+				this.usuarios.splice(indice, 1);
+				return true;
+			}
+			return false;
+		})
+
+		this.serviciosToast.mostrarToast({ cuerpo: `${nombreUsuarioAElminar} se desconecto.` });
 	}
 
 	//Adición y elimnación de edges
@@ -645,8 +663,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const id = this.grupoA.id;
 
 		if (!this.nodosValidos(idPadre, id)) return;
+		if (!this.nodosDiferentes(idPadre, id)) return;
 		if (this.yaExisteRelacion(idPadre, id)) return;
 		if (this.tieneOtroPadre(id)) return;
+		if (this.tieneOtroHijo(idPadre)) return;
 		if (this.esConexion(idPadre, id)) return;
 
 		this.crearEdge(id, idPadre);
@@ -664,6 +684,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		return true;
 	}
 
+	private nodosDiferentes(idPadre, id) {
+		if (idPadre !== id) { return true; }
+		this.serviciosToast.mostrarToast({
+			titulo: 'Error',
+			cuerpo: 'Debe seleccionar 2 nodos diferente',
+			esMensajeInfo: false
+		})
+		return false;
+	}
 	private yaExisteRelacion(idPadre, id) {
 		if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
 			this.serviciosToast.mostrarToast({
@@ -678,15 +707,28 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private esEdge(id) {
 		let posibleEdge = this.cy.getElementById(id);
-		return posibleEdge.length > 0 && posibleEdge[0].isEdge();
+		return posibleEdge.length > 0 && posibleEdge.isEdge();
 	}
 
 	private tieneOtroPadre(idNodo) {
-		const tieneOtroPadre = this.gruposYEdges.find(grupo => this.esEdge(`${grupo.id}${idNodo}`)) !== undefined
+		const tieneOtroPadre = this.gruposYEdges.find(grupo => this.esEdge(`${grupo.data.id}${idNodo}`)) !== undefined
 		if (tieneOtroPadre) {
 			this.serviciosToast.mostrarToast({
 				titulo: 'Error',
 				cuerpo: 'Un nodo no puede tener 2 padres.',
+				esMensajeInfo: false
+			});
+			return true;
+		}
+		return false;
+	}
+
+	private tieneOtroHijo(idPadre) {
+		const tieneOtroHijo = this.gruposYEdges.find(grupo => this.esEdge(`${idPadre}${grupo.id}`)) !== undefined
+		if (tieneOtroHijo) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Un nodo no puede tener 2 hijos.',
 				esMensajeInfo: false
 			});
 			return true;
@@ -717,9 +759,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	cambioSolicitud(event) {
-		this.solicitandoOrganizacion = !this.solicitandoOrganizacion;
-
-		this.solicitantes.find(solicitante => {
+		//Cambio la solicitud de este usuario.
+		this.usuarios.find(solicitante => {
 			return solicitante.email === this.serviciosLocalStorage.darEmail()
 		}).solicitandoOrganizacion = this.solicitandoOrganizacion;
 
@@ -747,7 +788,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	atenderCambioDeSolicitud(datos) {
-		this.solicitantes
+		this.usuarios
 			.find(solicitante => solicitante.email === datos.email)
 			.solicitandoOrganizacion = datos.solicitandoOrganizacion;
 	}
@@ -764,7 +805,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	darCantidadSolicitantes() {
-		return this.solicitantes
+		return this.usuarios
 			.filter(solicitante => solicitante.solicitandoOrganizacion)
 			.length;
 	}
