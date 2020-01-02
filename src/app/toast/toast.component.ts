@@ -50,14 +50,14 @@ export class ToastComponent implements OnInit, OnDestroy {
 
     const nodo = this.htmlToElement(toastHtmlString);
     this.contenedorToasts.appendChild(nodo);
-    this.toast = (<any>$(`#toast${this.contador}`)).toast({ delay: 3000 })
+    this.toast = (<any>$(`#toast${this.contador}`)).toast({ delay: 4000 })
     this.toast.toast('show')
 
     setTimeout(() => {
       const nodoToast = document.getElementById(`toast${this.contador}`)
       if (nodoToast) nodoToast.remove();
       if (!this.contenedorToasts.hasChildNodes()) this.contenedorToasts.style.visibility = 'hidden';
-    }, 3000)
+    }, 4000)
 
     this.contador++;
   }

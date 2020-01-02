@@ -4,9 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
 declare var cytoscape;
+declare var tippy;
 
 declare var $;
-
+//TODO: 5 - Añadir funcionalidad de reinicio de posiciones.
+//TODO: 6 - Arreglo estilos visual.
 @Component({
 	selector: 'app-fase-grupal',
 	templateUrl: './fase-grupal.component.html',
@@ -24,6 +26,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	grupoDe: any;
 	grupoA: any;
 
+	nodoSeleccionado: any;
+
+	grupoSeleccionado: any;
+	nuevoNombreGrupo: String = '';
+
 	cy: any = {};
 	cdnd: any = {};
 
@@ -31,13 +38,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	ejecucionEnMensajeRecibido: boolean = false;
 
-	solicitantes: any[] = [{
+	usuarios: any[] = [{
 		nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
 		email: this.serviciosLocalStorage.darEmail(),
 		solicitandoOrganizacion: false
 	}];
 
 	socket: WebSocket;
+
+	modalCambioNombreGrupo: any
+	modalVisualizacionImagenNodo: any;
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private activatedRoute: ActivatedRoute,
@@ -61,7 +71,12 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
+				this.socket.onerror = this.onWebsocketError.bind(this);
+				this.socket.onclose = this.onWebSocketClose.bind(this);
 			});
+
+		this.modalCambioNombreGrupo = $('#modal-cambio-nombre');
+		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 
 		// const cy = this.cy;
 
@@ -88,14 +103,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				{
 					selector: 'node',
 					style: {
-						'label': 'data(nombre)',
 						'font-size': '40',
 						'height': 200,
 						'width': 200,
 						'background-fit': 'cover',
 						'border-color': '#2980b9',
 						'border-width': 3,
-						'border-opacity': 0.5
+						'border-opacity': 0.5,
+						'label': 'data(id)'
 					}
 				},
 				{
@@ -142,19 +157,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 					}
 				}
 			]
-			// ,
-			// elements: {
-			// 	nodes: [
-			// 		{ data: { id: 'a' } },
-			// 		{ data: { id: 'b' } },
-			// 		{ data: { id: 'c' } },
-			// 		{ data: { id: 'd' } }
-			// 	],
-			// 	edges: [
-
-			// 	]
-			// }
 		});
+
 
 		const options = {
 			grabbedNode: node => true, // filter function to specify which nodes are valid to grab and drop into other nodes
@@ -178,15 +182,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.cy.on('position', this.positionEvent.bind(this));
 		this.cy.on('cdndover', this.cdndoverEvent.bind(this));
 		this.cy.on('cdndout', this.cdndoutEvent.bind(this));
-
-		this.cy.on('data', elemento => {
-			console.log('Data event')
-			console.log(elemento.target.data());
-		})
 	}
 
 	private addEvent(event) {
-		console.log('Add event - ' + event.target.data().id);
 		const elemento = event.target;
 		this.agregarAGruposYEdges(elemento);
 
@@ -201,11 +199,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}));
 	}
 
-	private eventosPendientes: number = 0;
-
 	private moveEvent(event) {
-		console.log('Move event');
-
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -240,7 +234,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	};
 
 	private removeEvent(event) {
-		console.log('Remove event - ' + event.target.data().id);
 		const elemento = event.target;
 		this.eliminar(elemento.id())
 
@@ -271,32 +264,32 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private grabonEvent(event) {
-		const nodo = event.target;
-		this.idNodoAgarrado = nodo.id();
-		const nodos = [event.target.id()];
-		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
-
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
+
+		const nodo = event.target;
+		this.idNodoAgarrado = nodo.id();
+		const nodos = [{ id: event.target.id(), esHijo: false }];
+		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
 
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
 			nodos,
-			nombreUsuario: this.serviciosLocalStorage.darNombres()
+			nombreUsuario: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()}`
 		}))
 	}
 
 	private freeEvent(event) {
-		const nodo = event.target;
-		const nodos = [event.target.id()];
-		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push(e.id())); }
-
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
+
+		const nodo = event.target;
+		const nodos = [{ id: event.target.id(), esHijo: false }];
+		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
 
 		this.socket.send(JSON.stringify({
 			accion: 'Desbloquear',
@@ -308,9 +301,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private positionEvent(event) {
 		const nodo = event.target;
-		if (this.idNodoAgarrado !== event.target.id()) return;
 		if (this.bloqueo) {
 			this.bloqueo = false;
+			return;
+		}
+		if (this.idNodoAgarrado !== event.target.id()) {
 			return;
 		}
 		if (nodo.isParent()) {
@@ -337,11 +332,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoverEvent(event, nodoPadre, dropSibling) {
-		console.log('Entrar nodo event');
+
 	}
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
-		console.log('Salie nodo event');
 		this.removeParentsOfOneChild();
 	}
 
@@ -367,7 +361,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			commands: [
 				{
 					content: '<span class="fa fa-edit fa-2x"></span>',
-					select: console.log('Editando')//this.cambiarNombreGrupo.bind(this)
+					select: this.abrirModalCambioNombreGrupo.bind(this)
+				},
+				{
+					content: '<span class="fa fa-eye fa-2x"></span>',
+					select: this.abrirModalImagenNodo.bind(this) //this.cambiarNombreGrupo.bind(this)
 				},
 				{
 					content: 'Nada',
@@ -407,14 +405,17 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			case 'Eliminar elemento':
 				this.eliminarElemento(json);
 				break;
+			case 'Cambiar nombre':
+				this.cambioUnNombre(json);
+				break;
 			case 'Bloquear':
 				this.bloquearNodo(json);
 				break;
 			case 'Desbloquear':
 				this.desbloquearNodo(json);
 				break;
-			case 'Iniciar reinicio':
-				this.iniciarReinicio(json);
+			case 'Cambio solicitud de organizacion':
+				this.cambioUnaSolicitud(json);
 				break;
 			case 'Reiniciar solicitudes':
 				this.reiniciarSolicitudes(json);
@@ -429,51 +430,118 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	bloqueo = false;
 
-	private alguienSeConecto(datos: any) {
-		const { nombre, email, solicitandoOrganizacion } = datos;
-		this.solicitantes.push({ nombre, email, solicitandoOrganizacion });
+	private alguienSeConecto({ nombre, email, solicitandoOrganizacion }) {
+		this.usuarios.push({ nombre, email, solicitandoOrganizacion });
+		this.serviciosToast.mostrarToast({ cuerpo: `${nombre} se ha conectado.` });
 	}
 
-	private cargarNodos(datos: any) {
-		this.gruposYEdges = datos.nodos.filter(nodo => nodo.data.esGrupo);
-		const nodos = this.cy.nodes();
+	/**
+	 * @param {any[]} solicitantes usuarios que contienen a este mismo usuario.
+	 */
+	private cargarNodos({ nodos, solicitantes }) {
+		this.gruposYEdges = nodos.filter(nodo => nodo.data.esGrupo);
+		const nodosCytoscape = this.cy.nodes();
 
 		this.bloqueo = true;
-		this.cy.remove(nodos);
+		this.cy.remove(nodosCytoscape);
 
-		datos.nodos
-			.filter(nodo => nodo.data.esGrupo)
+		this.cargarNodosPadre(nodos);
+		this.cargarNodosHijos(nodos);
+		this.bloquearNodosSiLosHay(nodos);
+
+		if (solicitantes.length === 1) {
+			this.activarLayoutCose();
+		} else {
+			this.activarLayoutPreset();
+		}
+
+		this.validarUsuarioActual(solicitantes);
+	}
+
+	private cargarNodosPadre(nodos) {
+		nodos.filter(nodo => nodo.data.esGrupo)
 			.forEach(grupo => {
 				this.bloqueo = true;
-
 				this.cy.add(grupo);
-			})
+			});
+	}
 
-		datos.nodos
-			.filter(nodo => !nodo.data.esGrupo)
+	private cargarNodosHijos(nodos) {
+		nodos.filter(nodo => !nodo.data.esGrupo)
 			.forEach(nodo => {
 				this.bloqueo = true;
-
-				this.cy.add({ data: nodo.data, position: nodo.position });
-
+				this.cy.add(nodo);
 				this.cy.style()
 					.selector(`#${nodo.data.id}`)
-					.css({
-						'background-image': `${nodo.data.urlFoto}`
-					}).update();
+					.css({ 'background-image': `${nodo.data.urlFoto}` })
+					.update();
 			});
+	}
 
-		console.log(this.cy.nodes());
+	private bloquearNodosSiLosHay(nodos) {
+		nodos.filter(nodo => nodo.data.bloqueado)
+			.forEach(nodo => {
+				const nodoCy = this.cy.getElementById(nodo.data.id);
+				nodoCy.ungrabify();
+				nodoCy.style({
+					'border-color': 'purple',
+					'border-width': 10
+				});
+			})
+	}
 
+	/**
+	 * El layout cose asigna posiciones a nodos normales y compuestos
+	 */
+	private activarLayoutCose() {
 		this.cy.layout({
 			name: 'cose',
-			rows: 3,
-			cols: 3,
-			padding: 20,
-			boundingBox: { x1: 0, y1: 0, w: 500, h: 1500 }
+			nodeOverlap: 1,
+			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run();
+		this.enviarActualizacionDePosiciones()
+	}
 
-		this.solicitantes.concat(datos.solicitantes);
+	private enviarActualizacionDePosiciones() {
+		const nodos = this.cy.nodes();
+		//el setTimeout espera a que el layout este listo antes de
+		//pedir las posiciones.
+		const that = this;
+		setTimeout(() => {
+			that.socket.send(JSON.stringify({
+				accion: 'Actualizar posiciones',
+				nodos: nodos.jsons()
+			}));
+		}, 0);
+	}
+
+	/**
+	 * El layout preset permite agregar nodos con posiciones definidas de manera manual.
+	 */
+	private activarLayoutPreset() {
+		this.cy.layout({
+			name: 'preset'
+		}).run();
+	}
+
+	private validarUsuarioActual(solicitantes) {
+		const conexionesDeEsteUsuario = solicitantes
+			.filter(solicitante => solicitante.email === this.serviciosLocalStorage.darEmail())
+			.length;
+
+		//Por ahora solo se permite una conexión por usuario a la fase grupal.
+		if (conexionesDeEsteUsuario === 2) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Ya estas conectado desde otro pestaña o navegador.',
+				esMensajeInfo: false
+			})
+			this.router.navigateByUrl('/dashboard');
+		} else {
+			solicitantes = solicitantes
+				.filter(solicitante => solicitante.email != this.serviciosLocalStorage.darEmail());
+			this.usuarios = this.usuarios.concat(solicitantes);
+		}
 	}
 
 	private agregarElemento(json) {
@@ -482,7 +550,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moverElemento(json) {
-		console.log('Moviendo elemento');
 		const { elemento } = json
 		this.bloqueo = true;
 		this.cy.getElementById(elemento.data.id)
@@ -504,41 +571,91 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		nodoAMover.position(elemento.position);
 	}
 
-	private bloquearNodo(datos: any) {
-		const { nodos, nombreUsuario } = datos;
-		nodos.forEach(idNodo => {
-			this.bloqueo = true;
-			this.cy.getElementById(idNodo).ungrabify()
-		});
-		//TODO: Poner el nombre debajo del nodo padre.
+	private bloquearNodo({ nodos, nombreUsuario }) {
+		//Hijos si tiene
+		nodos.filter(nodo => nodo.esHijo)
+			.forEach((nodo) => {
+				const nodoBloqueado = this.cy.getElementById(nodo.id);
+				nodoBloqueado.ungrabify()
+				nodoBloqueado.style({
+					'border-color': 'purple',
+					'border-width': 10
+				});
+			})
+
+		//Padre
+		nodos.filter(nodo => !nodo.esHijo)
+			.forEach(nodo => {
+				const nodoBloqueado = this.cy.getElementById(nodo.id);
+				nodoBloqueado.ungrabify()
+				nodoBloqueado.style({
+					'border-color': 'purple',
+					'border-width': 10,
+					'label': `${nombreUsuario} - ${nodoBloqueado.data().nombre}`
+				});
+			});
 	}
 
-	private desbloquearNodo(datos: any) {
-		datos.nodos.forEach(idNodo => {
-			this.bloqueo = true;
-			this.cy.getElementById(idNodo).grabify()
-		});
-		//TODO: Quitar el nombre debajo del nodo padre.
+	private desbloquearNodo({ nodos }) {
+		//Hijos si tiene.
+		nodos.filter(nodo => nodo.esHijo)
+			.forEach(nodo => {
+				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
+				nodoDesbloqueado.grabify()
+				nodoDesbloqueado.style({
+					'border-color': '#2980b9',
+					'border-width': 3
+				})
+			})
+
+		//Padre
+		nodos.filter(nodo => !nodo.esHijo)
+			.forEach(nodo => {
+				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
+				nodoDesbloqueado.grabify()
+				nodoDesbloqueado.style({
+					'label': nodoDesbloqueado.data().nombre,
+					'border-color': '#2980b9',
+					'border-width': 3
+				})
+			});
 	}
 
-	private iniciarReinicio(datos) {
-		this.cy.reset();
+	private cambioUnaSolicitud({ email, solicitandoOrganizacion }) {
+		this.usuarios.find(solicitante => {
+			return solicitante.email === email
+		}).solicitandoOrganizacion = solicitandoOrganizacion;
+	}
+
+	private reiniciarSolicitudes({ nodos }) {
 		this.solicitandoOrganizacion = false;
-		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+		this.usuarios.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
+
+		nodos.filter(nodo => !nodo.data.source) //Que no sean edges.
+			.forEach(nodo => {
+				const nodoCy = this.cy.getElementById(nodo.data.id);
+				if (!nodoCy.isNode()) { return; }
+				this.bloqueo = true;
+				nodoCy.position(nodo.position);
+			})
+
+		this.serviciosToast.mostrarToast({ cuerpo: 'Se han reiniciado las posiciones.' });
 	}
 
-	private reiniciarSolicitudes(datos) {
-		this.solicitandoOrganizacion = false;
-		this.solicitantes.forEach(solicitante => solicitante.solicitandoOrganizacion = false);
-	}
-
-	private alguienSeDesconecto(datos: any) {
-		console.log('Alguien se desconecto');
-		const { email } = datos;
+	private alguienSeDesconecto({ email }) {
 
 		//Elimina el solicitante con el email dado.
-		this.solicitantes = this.solicitantes
-			.filter(solicitante => solicitante.email !== email);
+		let nombreUsuarioAElminar;
+		this.usuarios.some((usuario, indice) => {
+			if (usuario.email === email && usuario.nombre.substr(usuario.nombre.length - 4) !== '(Tú)') {
+				nombreUsuarioAElminar = usuario.nombre;
+				this.usuarios.splice(indice, 1);
+				return true;
+			}
+			return false;
+		})
+
+		this.serviciosToast.mostrarToast({ cuerpo: `${nombreUsuarioAElminar} se desconecto.` });
 	}
 
 	//Adición y elimnación de edges
@@ -548,8 +665,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const id = this.grupoA.id;
 
 		if (!this.nodosValidos(idPadre, id)) return;
+		if (!this.nodosDiferentes(idPadre, id)) return;
 		if (this.yaExisteRelacion(idPadre, id)) return;
 		if (this.tieneOtroPadre(id)) return;
+		if (this.tieneOtroHijo(idPadre)) return;
 		if (this.esConexion(idPadre, id)) return;
 
 		this.crearEdge(id, idPadre);
@@ -567,6 +686,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		return true;
 	}
 
+	private nodosDiferentes(idPadre, id) {
+		if (idPadre !== id) { return true; }
+		this.serviciosToast.mostrarToast({
+			titulo: 'Error',
+			cuerpo: 'Debe seleccionar 2 nodos diferente',
+			esMensajeInfo: false
+		})
+		return false;
+	}
 	private yaExisteRelacion(idPadre, id) {
 		if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
 			this.serviciosToast.mostrarToast({
@@ -581,15 +709,28 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private esEdge(id) {
 		let posibleEdge = this.cy.getElementById(id);
-		return posibleEdge.length > 0 && posibleEdge[0].isEdge();
+		return posibleEdge.length > 0 && posibleEdge.isEdge();
 	}
 
 	private tieneOtroPadre(idNodo) {
-		const tieneOtroPadre = this.gruposYEdges.find(grupo => this.esEdge(`${grupo.id}${idNodo}`)) !== undefined
+		const tieneOtroPadre = this.gruposYEdges.find(grupo => this.esEdge(`${grupo.data.id}${idNodo}`)) !== undefined
 		if (tieneOtroPadre) {
 			this.serviciosToast.mostrarToast({
 				titulo: 'Error',
 				cuerpo: 'Un nodo no puede tener 2 padres.',
+				esMensajeInfo: false
+			});
+			return true;
+		}
+		return false;
+	}
+
+	private tieneOtroHijo(idPadre) {
+		const tieneOtroHijo = this.gruposYEdges.find(grupo => this.esEdge(`${idPadre}${grupo.id}`)) !== undefined
+		if (tieneOtroHijo) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Un nodo no puede tener 2 hijos.',
 				esMensajeInfo: false
 			});
 			return true;
@@ -620,9 +761,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	cambioSolicitud(event) {
-		this.solicitandoOrganizacion = !this.solicitandoOrganizacion;
-
-		this.solicitantes.find(solicitante => {
+		//Cambio la solicitud de este usuario.
+		this.usuarios.find(solicitante => {
 			return solicitante.email === this.serviciosLocalStorage.darEmail()
 		}).solicitandoOrganizacion = this.solicitandoOrganizacion;
 
@@ -636,9 +776,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	cambiarNombreGrupo(id, nuevoNombre) {
 		this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
-			.grupo.data.nombre = nuevoNombre;
+			.data.nombre = nuevoNombre;
 
 		this.cy.getElementById(id).data({ nombre: nuevoNombre });
+
+		this.modalCambioNombreGrupo.modal('toggle');
 
 		//Esto puede ir aquí o en un dataEvent.
 		this.socket.send(JSON.stringify({
@@ -648,7 +790,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	atenderCambioDeSolicitud(datos) {
-		this.solicitantes
+		this.usuarios
 			.find(solicitante => solicitante.email === datos.email)
 			.solicitandoOrganizacion = datos.solicitandoOrganizacion;
 	}
@@ -658,14 +800,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
-			.nombre = nombre;
+			.data.nombre = nombre;
 
 		const nodo = this.cy.getElementById(id);
 		nodo.data({ nombre });
 	}
 
 	darCantidadSolicitantes() {
-		return this.solicitantes
+		return this.usuarios
 			.filter(solicitante => solicitante.solicitandoOrganizacion)
 			.length;
 	}
@@ -683,10 +825,59 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.gruposYEdges.push({ data: grupoOEdge.data() });
 	}
 
+	private abrirModalCambioNombreGrupo(elemento) {
+		if (!elemento.data().esGrupo) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'El cambio de nombre es solo para grupos.',
+				esMensajeInfo: false
+			})
+			return;
+		}
+		this.grupoSeleccionado = elemento.data();
+		this.modalCambioNombreGrupo.modal('toggle');
+	}
+
+	private abrirModalImagenNodo(elemento) {
+		if (elemento.data().esGrupo || !elemento.isNode()) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Solo se pueden visualizar las imagenes de los nodos o individuales.',
+				esMensajeInfo: false
+			})
+			return;
+		}
+		this.nodoSeleccionado = elemento.data();
+		this.modalVisualizacionImagenNodo.modal('toggle');
+	}
+
+	cerradoNormal = false;
+
 	ngOnDestroy() {
 		if (this.socket) {
+			this.cerradoNormal = true;
 			this.socket.close();
 		}
+	}
+
+	private onWebSocketClose(event) {
+		if (!this.cerradoNormal) {
+			this.serviciosToast.mostrarToast({
+				esMensajeInfo: false,
+				titulo: 'Error',
+				cuerpo: 'Fuiste expulsado dada tu inactividad.'
+			});
+			this.router.navigateByUrl('/dashboard');
+		}
+	}
+
+	private onWebsocketError(err) {
+		this.serviciosToast.mostrarToast({
+			esMensajeInfo: false,
+			titulo: 'Error',
+			cuerpo: 'Un error inesperado ha ocurrido, por favor vuelve a ingresar.'
+		});
+		this.router.navigateByUrl('/dashboard');
 	}
 
 }

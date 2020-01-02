@@ -25,20 +25,76 @@
 					<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()"
 						style="height: 38px;">
 				</div>
-				<!-- <div class="checkbox-interventor noselect">
+				<div class="noselect checkbox-solicitud">
 					<input type="checkbox" id="solicitarOrganizado" [(ngModel)]="solicitandoOrganizacion"
-						name="solicitarOrganizadoInput" (change)="cambioSolicitud(event)">
-					<label for="solicitarOrganizado">¿Solicitar organizado?</label>
+						name="solicitarOrganizadoInput" (change)="cambioSolicitud()">
+					<label for="solicitarOrganizado" data-tippy-content="Tooltip">¿Solicitar organizado?</label>
 				</div>
 				<div>
 					Cantidad solicitantes {{ darCantidadSolicitantes() }}/
-					{{this.solicitantes.length}}
+					{{usuarios.length}}
 				</div>
 				<div>
-					<span *ngFor="let usuario of solicitantes">
+					<span *ngFor="let usuario of usuarios">
 						{{usuario.nombre}}
 					</span>
-				</div> -->
+					<span>{{bloqueo}}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="modal-cambio-nombre" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<!-- contenido del titulo -->
+				<div class="modal-header" style="color:white; background:#0C5F97;">
+					<h4 class="modal-tittle">Cambiar nombre ({{grupoSeleccionado?.nombre}})</h4>
+					<button tyle="button" style="color:#FFFFFF" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+				</div>
+				<!-- contenido de la ventana-->
+				<div class="modal-body">
+					<form #modalForm="ngForm">
+						<div class="form-group">
+							<label for="nombre-problematica">Nombre</label>
+							<input type="text" id="nombre-problematica" name="nuevoNombre" #nuevoNombre="ngModel"
+								class="form-control" [(ngModel)]="nuevoNombreGrupo" name="nuevoNombreGrupoInput"
+								minlength="4" maxlength="15" required>
+							<div *ngIf="nuevoNombre?.touched">
+								<div class="alert alert-danger" role="alert"
+									style="height:50px;text-align:center;background:#F08080"
+									*ngIf="nuevoNombre?.errors?.minlength">
+									<a>Debe tener minimo 4 caracteres</a>
+									<button type="button" class="close" data-dismiss="alert" aria-label="Close"
+										style="color:#FFFFFF">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+							</div>
+						</div>
+						<button type="submit" style="background:#0C5F97" class="btn btn-info"
+							(click)="cambiarNombreGrupo(grupoSeleccionado.id, nuevoNombreGrupo)"
+							[disabled]="modalForm.invalid">Guardar
+							cambios</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="modal-visualizacion-imagen-nodo" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<!-- contenido del titulo -->
+				<div class="modal-header" style="color:white; background:#0C5F97;">
+					<h4 class="modal-tittle">{{nodoSeleccionado?.nombre}}</h4>
+					<button tyle="button" style="color:#FFFFFF" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+				</div>
+				<!-- contenido de la ventana-->
+				<div class="modal-body">
+					<a [href]="nodoSeleccionado?.urlFoto" target="_blank">Abrir imagen en una pestaña nueva.</a>
+					<img src="{{nodoSeleccionado?.urlFoto}}" alt="Imagen nodo">
+				</div>
 			</div>
 		</div>
 	</div>

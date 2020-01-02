@@ -182,9 +182,10 @@
 						<h5 style="font-weight: bold">Etapa</h5>
 						<p> {{darFaseProblematica()}} </p>
 					</div>
-					<div class="modal-footer">
+					<div class="modal-footer" *ngIf="problematicaSeleccionada.fase < 5">
 						<button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="participar()"
-							data-dismiss="modal" aria-label="Close"> Participar</button>
+							data-dismiss="modal" aria-label="Close"
+							*ngIf="0 < problematicaSeleccionada.fase">Participar</button>
 						<button class="btn" style="background:#0C5F97" data-target="#confirmarFase" data-dismiss="modal"
 							*ngIf="problematicaSeleccionada.esInterventor" data-toggle="modal"
 							(click)="darInfoAlAvanzar()">
@@ -206,21 +207,22 @@
 					</div>
 					<div class="modal-body">
 						<p><strong>¿Estás seguro? </strong></p>
-						<p *ngIf="estaEnFase0()">Actualmente hay
+						<p *ngIf="problematicaSeleccionada.fase === 0">Actualmente hay
 							<span class="text-danger">{{datosProblematica.cantidadParticipantes}}</span> participantes.
 							Recuerde que
 							<span class="text-danger">NO </span>se puede devolver la fase.
 						</p>
-						<p *ngIf="estaEnFase1()">Actualmente se han elaborado
+						<p *ngIf="estaEnFase(1)">Actualmente se han elaborado
 							<span class="text-danger">{{datosProblematica.cantidadNodos}}</span> nodos. Recuerde que
 							<span class="text-danger">NO </span>se puede devolver la fase.
 						</p>
+						<!--Crear el resto de textos para cada fase.-->
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary"
-							(click)="modal.dismiss('cancel click')">No</button>
+							data-dismiss="modal">No</button>
 						<button style="background:#0C5F97" type="button" class="btn btn-primary"
-							(click)="avanzarFase()"> Si</button>
+							data-dismiss="modal" (click)="avanzarFase()"> Si</button>
 					</div>
 				</div>
 			</div>
@@ -240,12 +242,12 @@
 					</div>
 					<div class="modal-body">
 						<p><strong>¿Estás seguro? </strong></p>
-						<p *ngIf="estaEnFase0()">Actualmente hay
+						<p *ngIf="estaEnFase(0)">Actualmente hay
 							<span class="text-danger">{{datosProblematica.cantidadParticipantes}}</span> participantes.
 							Recuerde que
 							<span class="text-danger">NO </span>se puede devolver la fase.
 						</p>
-						<p *ngIf="estaEnFase1()">Actualmente se han elaborado
+						<p *ngIf="estaEnFase(1)">Actualmente se han elaborado
 							<span class="text-danger">{{datosProblematica.cantidadNodos}}</span> nodos. Recuerde que
 							<span class="text-danger">NO </span>se puede devolver la fase.
 
