@@ -18,6 +18,16 @@ h1{
 	font-size: 1em;
 	font-weight: bold;
 }
+
+.checkbox-solicitud{
+	display: flex;
+    align-items: center;
+    min-width: 170px;
+}
+
+.checkbox-solicitud label{
+	margin:0px;
+}
 	
 #modal-visualizacion-imagen-nodo .modal-body{
 	width: 498px;

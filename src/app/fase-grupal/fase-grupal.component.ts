@@ -71,6 +71,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.socket = new WebSocket(`ws:localhost:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
+				this.socket.onerror = this.onWebsocketError.bind(this);
+				this.socket.onclose = this.onWebSocketClose.bind(this);
 			});
 
 		this.modalCambioNombreGrupo = $('#modal-cambio-nombre');
@@ -849,10 +851,33 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.modalVisualizacionImagenNodo.modal('toggle');
 	}
 
+	cerradoNormal = false;
+
 	ngOnDestroy() {
 		if (this.socket) {
+			this.cerradoNormal = true;
 			this.socket.close();
 		}
+	}
+
+	private onWebSocketClose(event){
+		if(!this.cerradoNormal){
+			this.serviciosToast.mostrarToast({
+				esMensajeInfo: false,
+				titulo: 'Error',
+				cuerpo:'Fuiste expulsado dada tu inactividad.'
+			});
+			this.router.navigateByUrl('/dashboard');
+		}
+	}
+
+	private onWebsocketError(err) {
+		this.serviciosToast.mostrarToast({
+			esMensajeInfo: false,
+			titulo: 'Error',
+			cuerpo:'Un error inesperado ha ocurrido, por favor vuelve a ingresar.'
+		});
+		this.router.navigateByUrl('/dashboard');
 	}
 
 }
