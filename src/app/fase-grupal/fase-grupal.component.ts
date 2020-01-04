@@ -4,11 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
 declare var cytoscape;
-declare var tippy;
-
 declare var $;
-//TODO: 5 - Añadir funcionalidad de reinicio de posiciones.
-//TODO: 6 - Arreglo estilos visual.
+
 @Component({
 	selector: 'app-fase-grupal',
 	templateUrl: './fase-grupal.component.html',
@@ -156,7 +153,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 						'border-style': 'dashed'
 					}
 				}
-			]
+			],
+			minZoom: 0.1,
+			maxZoom: 2
 		});
 
 
@@ -386,6 +385,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private onmessageEvent(event) {
 		const json = JSON.parse(event.data);
+		console.log(`Llego un evento  -> ${json.accion}`);
+		console.log(json);
 		switch (json.accion) {
 			case 'Conectarse':
 				this.alguienSeConecto(json);
@@ -639,6 +640,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				nodoCy.position(nodo.position);
 			})
 
+		this.cy.center();
+
 		this.serviciosToast.mostrarToast({ cuerpo: 'Se han reiniciado las posiciones.' });
 	}
 
@@ -798,12 +801,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	cambioUnNombre(datos) {
 		const { id, nombre } = datos.grupo.data;
 
-		this.gruposYEdges
+		const nodoEncontrado = this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
-			.data.nombre = nombre;
-
-		const nodo = this.cy.getElementById(id);
-		nodo.data({ nombre });
+		nodoEncontrado.data.nombre = nombre;
+		this.cy.getElementById(id).data({ nombre: `Nombre Random - ${Math.random() * 10000}` });
 	}
 
 	darCantidadSolicitantes() {
