@@ -7,8 +7,6 @@ import { LocalStorageService } from '../services/localstorage/local-storage.serv
 import { ToastService } from 'app/services/toast/toast.service';
 declare var $;
 
-//TODO: Push notifications para informar sobre una fase avanzada.
-
 @Component({
 	selector: 'app-dashboard',
 	templateUrl: './dashboard.component.html',
@@ -53,6 +51,7 @@ export class DashboardComponent implements OnInit {
 		this.modal = $('#mi-modal');
 
 		// this.servidor = new EventSource('http://localhost:8080/sse')
+		// this.servidor.onopen = function (event) { console.log(event) };
 		// this.servidor.onmessage = this.recibirEvento.bind(this);
 	}
 
@@ -134,6 +133,8 @@ export class DashboardComponent implements OnInit {
 	}
 
 	private recibirEvento(datos) {
+		console.log('Llego algo');
+		console.log(datos);
 		const json = JSON.parse(datos);
 		switch (json.accion) {
 			case 'Cambio fase problematica':
@@ -357,7 +358,7 @@ export class DashboardComponent implements OnInit {
 		return problematica.fase === 0 && problematica.esInterventor;
 	}
 
-	estaEnFase(pFase:number) {
+	estaEnFase(pFase: number) {
 		const { fase } = this.problematicaSeleccionada;
 		return fase === pFase;
 	}
