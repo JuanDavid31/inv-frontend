@@ -185,28 +185,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moveEvent(event) {
-		if (!event.target.data().parent) {
-			const elId = this.gruposYEdges
-				.filter(elemento => elemento.data.esGrupo)
-				.find(grupo => grupo !== event.target.data().id)
-				.data.id;
-
-			const that = this;
-			setTimeout(() => {
-
-				// that.cy.add({ data: { id: 999 }, position: { x: 0, y: 0 } });
-				// that.bloqueo = true;
-				// nodoCy.emit('grabon');
-				// this.bloqueo = true;
-				// nodoCy.emit('free');
-				// const pos = nodoCy.position();
-				// const nuevaPos = { x: pos.x + 1, y: pos.y };
-				// nodoCy.position(nuevaPos);
-			}, 1000);
-		}
-
-
-
 		console.log('move');
 		if (this.bloqueo) {
 			this.bloqueo = false;
@@ -220,10 +198,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			elemento: { data: elemento.data() }
 		}));
 
-	}
-
-	private areThereParentsWithOneChild() { //TODO: Borrar
-		return this.cy.nodes().find(this.isParentOfOneChildAndIsNotAnEdge);
 	}
 
 	private isParentOfOneChildAndIsNotAnEdge(node) {
@@ -417,7 +391,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private onmessageEvent(event) {
-		console.log('onmessage');
 		const json = JSON.parse(event.data);
 		console.log(`Llego un evento  -> ${json.accion}`);
 		console.log(json);
@@ -737,14 +710,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.serviciosToast.mostrarToast({ cuerpo: `${nombreUsuarioAElminar} se desconecto.` });
 	}
 
-	//Adición y elimnación de edges
-
 	conectar() {
-		const idPadre = this.grupoDe.id;
-		const id = this.grupoA.id;
+		const idPadre = this.grupoDe ? this.grupoDe.id : undefined;
+		const id = this.grupoA ? this.grupoA.id : undefined;
 
 		if (!this.nodosValidos(idPadre, id)) return;
 		if (!this.nodosDiferentes(idPadre, id)) return;
+		if (!this.existeGrupo(idPadre) || !this.existeGrupo(id)) return;
 		if (this.yaExisteRelacion(idPadre, id)) return;
 		if (this.tieneOtroPadre(id)) return;
 		if (this.tieneOtroHijo(idPadre)) return;
@@ -757,7 +729,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		if (!idPadre || !id) {
 			this.serviciosToast.mostrarToast({
 				titulo: 'Error',
-				cuerpo: 'Debe seleccionar 2 nodos diferente',
+				cuerpo: 'Debe seleccionar 2 nodos diferentes',
 				esMensajeInfo: false
 			})
 			return false;
@@ -769,11 +741,25 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		if (idPadre !== id) { return true; }
 		this.serviciosToast.mostrarToast({
 			titulo: 'Error',
-			cuerpo: 'Debe seleccionar 2 nodos diferente',
+			cuerpo: 'Debe seleccionar 2 nodos diferentes',
 			esMensajeInfo: false
 		})
 		return false;
 	}
+
+	private existeGrupo(id) {
+		const nodo = this.cy.getElementById(id);
+		const existe = nodo.length > 0 && nodo.isParent();;
+		if (!existe) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Debe seleccionar 2 nodos diferentes',
+				esMensajeInfo: false
+			})
+		}
+		return existe;
+	}
+
 	private yaExisteRelacion(idPadre, id) {
 		if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
 			this.serviciosToast.mostrarToast({
@@ -880,7 +866,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const nodoEncontrado = this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
 		nodoEncontrado.data.nombre = nombre;
-		this.cy.getElementById(id).data({ nombre: `Nombre Random - ${Math.random() * 10000}` });
+		const nodoCy = this.cy.getElementById(id);
+		nodoCy.data({ nombre });
+		nodoCy.style({ label: nombre });
 	}
 
 	darCantidadSolicitantes() {
