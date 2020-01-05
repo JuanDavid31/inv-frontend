@@ -65,6 +65,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
+
 				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
@@ -184,6 +185,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private addEvent(event) {
+		console.log('add');
 		const elemento = event.target;
 		this.agregarAGruposYEdges(elemento);
 
@@ -199,6 +201,29 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moveEvent(event) {
+		if (!event.target.data().parent) {
+			const elId = this.gruposYEdges
+				.filter(elemento => elemento.data.esGrupo)
+				.find(grupo => grupo !== event.target.data().id)
+				.data.id;
+
+			const that = this;
+			setTimeout(() => {
+
+				// that.cy.add({ data: { id: 999 }, position: { x: 0, y: 0 } });
+				// that.bloqueo = true;
+				// nodoCy.emit('grabon');
+				// this.bloqueo = true;
+				// nodoCy.emit('free');
+				// const pos = nodoCy.position();
+				// const nuevaPos = { x: pos.x + 1, y: pos.y };
+				// nodoCy.position(nuevaPos);
+			}, 1000);
+		}
+
+
+
+		console.log('move');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -213,7 +238,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	}
 
-	private areThereParentsWithOneChild() { //?TODO: Borrar
+	private areThereParentsWithOneChild() { //TODO: Borrar
 		return this.cy.nodes().find(this.isParentOfOneChildAndIsNotAnEdge);
 	}
 
@@ -233,6 +258,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	};
 
 	private removeEvent(event) {
+		console.log('remove');
 		const elemento = event.target;
 		this.eliminar(elemento.id())
 
@@ -263,6 +289,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private grabonEvent(event) {
+		console.log('grabon');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -281,6 +308,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private freeEvent(event) {
+		console.log('free');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -299,6 +327,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private positionEvent(event) {
+		console.log('position');
 		const nodo = event.target;
 		if (this.bloqueo) {
 			this.bloqueo = false;
@@ -335,7 +364,28 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
+		const idNodoPadre = dropTarget.data().id;
+		this.refrescarEdgesQueEstuvieronEnMovimiento(idNodoPadre);
 		this.removeParentsOfOneChild();
+	}
+
+	/**
+	 * Workaround para bug. Cuando hay 2 o 3 grupos de nodos conectados por 1 o 2 edges
+	 * respectivamente, si seleccionanos un nodo hijo de alguno de los grupos; 
+	 * lo movemos libremente y extraemos del grupo (Siempre y cuando este grupo tenga 3 o más
+	 * nodos. Si el grupo se elimina entonces el bug no sera visible) 
+	 * entonces los edges no se refrescaran de manera visual. Esto se ve fatal para el usuario.
+	 */
+	private refrescarEdgesQueEstuvieronEnMovimiento(idNodoPadre) {
+		const query = `edge[target = "${idNodoPadre}"], edge[source = "${idNodoPadre}"]`;
+		const edges = this.cy.edges(query);
+		edges.forEach(edge => {
+			const data = edge.data();
+			this.bloqueo = true;
+			edge.remove();
+			this.bloqueo = true;
+			this.cy.add({ data });
+		})
 	}
 
 	private prepararMenuEdges() {
@@ -384,6 +434,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private onmessageEvent(event) {
+		console.log('onmessage');
 		const json = JSON.parse(event.data);
 		console.log(`Llego un evento  -> ${json.accion}`);
 		console.log(json);
