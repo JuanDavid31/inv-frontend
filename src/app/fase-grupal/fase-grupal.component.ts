@@ -75,22 +75,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.modalCambioNombreGrupo = $('#modal-cambio-nombre');
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
-
-		// const cy = this.cy;
-
-		// setTimeout(function () {
-		// 	cy.add([{ data: { id: 'e', parent: 'h' } }, { data: { id: 'h' } }]);
-		// }, 2000);
-
-		// const nodo = this.cy.getElementById('a');
-		// setTimeout(() => {
-		// 	nodo.data({ id: 'aa' });
-		// }, 2000);
-
-		// const nodo = this.cy.getElementById('p');
-		// setInterval(function () {
-		// 	nodo.position({ x: 0, y: 0 });
-		// }, 2000)
 	}
 
 	private prepararCytoscape() {
@@ -288,17 +272,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			})
 	}
 
-	private grabonEvent(event) {
+	private grabonEvent({ target }) {
 		console.log('grabon');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
 
-		const nodo = event.target;
-		this.idNodoAgarrado = nodo.id();
-		const nodos = [{ id: event.target.id(), esHijo: false }];
-		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
+		this.idNodoAgarrado = target.id();
+		const nodos = [{ id: target.id(), esHijo: target.isChild() }];
+		if (target.isParent()) { target.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
 
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
@@ -624,18 +607,42 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private bloquearNodo({ nodos, nombreUsuario }) {
-		//Hijos si tiene
+
+		if (nodos.length === 1) {
+			this.bloquearNodoUnico(nodos, nombreUsuario);
+		} else {
+			this.bloquearConjuntoDeNodos(nodos, nombreUsuario);
+		}
+
+	}
+
+	/**
+	 * Al bloquear un solo nodo es necesario poner en el label
+	 * el nombre del usuario que lo bloquea.
+	 */
+	private bloquearNodoUnico(nodos, nombreUsuario) {
+		nodos.forEach(nodo => {
+			const nodoBloqueado = this.cy.getElementById(nodo.id);
+			nodoBloqueado.ungrabify()
+			nodoBloqueado.style({
+				'border-color': 'purple',
+				'border-width': 10,
+				'label': `${nombreUsuario} - ${nodoBloqueado.data().id}`
+			});
+		})
+	}
+
+	private bloquearConjuntoDeNodos(nodos, nombreUsuario) {
 		nodos.filter(nodo => nodo.esHijo)
 			.forEach((nodo) => {
 				const nodoBloqueado = this.cy.getElementById(nodo.id);
 				nodoBloqueado.ungrabify()
 				nodoBloqueado.style({
 					'border-color': 'purple',
-					'border-width': 10
+					'border-width': 10,
 				});
 			})
 
-		//Padre
 		nodos.filter(nodo => !nodo.esHijo)
 			.forEach(nodo => {
 				const nodoBloqueado = this.cy.getElementById(nodo.id);
@@ -649,7 +656,26 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private desbloquearNodo({ nodos }) {
-		//Hijos si tiene.
+		if (nodos.length === 1) {
+			this.desbloquearNodoUnico(nodos);
+		} else {
+			this.desbloquearConjuntoDeNodos(nodos);
+		}
+	}
+
+	private desbloquearNodoUnico(nodos) {
+		nodos.forEach(nodo => {
+			const nodoBloqueado = this.cy.getElementById(nodo.id);
+			nodoBloqueado.grabify()
+			nodoBloqueado.style({
+				'border-color': '#2980b9',
+				'border-width': 3,
+				'label': nodoBloqueado.data().id
+			});
+		})
+	}
+
+	private desbloquearConjuntoDeNodos(nodos) {
 		nodos.filter(nodo => nodo.esHijo)
 			.forEach(nodo => {
 				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
@@ -660,7 +686,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				})
 			})
 
-		//Padre
 		nodos.filter(nodo => !nodo.esHijo)
 			.forEach(nodo => {
 				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
@@ -693,7 +718,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.cy.center();
 
-		this.serviciosToast.mostrarToast({ cuerpo: 'Se han reiniciado las posiciones.' });
+		this.serviciosToast.mostrarToast({ cuerpo: 'Los nodos han vuelto a su posición original.' });
 	}
 
 	private alguienSeDesconecto({ email }) {
