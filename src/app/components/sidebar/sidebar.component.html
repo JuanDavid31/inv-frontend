@@ -1,13 +1,13 @@
 <div class="logo">
     <a href="https://www.creative-tim.com" class="simple-text">
         <div class="logo-img">
-            <img src="/assets/img/Unibague_ESCUDO.jpg"/>
+            <img src="/assets/img/Unibague_ESCUDO.jpg" />
         </div>
         Unibague
     </a>
 </div>
 <div class="sidebar-wrapper">
-  <div *ngIf="isMobileMenu()">
+    <!-- <div *ngIf="isMobileMenu()">
     <form class="navbar-form">
       <span class="bmd-form-group">
         <div class="input-group no-border">
@@ -53,8 +53,24 @@
             </a>
         </li>
     </ul>
-  </div>
-    <ul class="nav">
+  </div> -->
+    <div *ngIf="isMobileMenu()">
+        <ul class="nav navbar-nav nav-mobile-menu">
+            <li routerLinkActive="active" *ngFor="let menuItem of menuItems" class="{{menuItem.class}} nav-item">
+                <a class="nav-link" [routerLink]="[menuItem.path]">
+                    <i class="material-icons">{{menuItem.icon}}</i>
+                    <p>{{menuItem.title}}</p>
+                </a>
+            </li>
+            <li class="nav-item cerrar-sesion">
+                <span class="nav-link">
+                    <i class="material-icons">exit_to_app</i>
+                    <p>Cerrar sesión</p>
+                </span>
+            </li>
+        </ul>
+    </div>
+    <ul class="nav d-none d-lg-block">
         <li routerLinkActive="active" *ngFor="let menuItem of menuItems" class="{{menuItem.class}} nav-item">
             <a class="nav-link" [routerLink]="[menuItem.path]">
                 <i class="material-icons">{{menuItem.icon}}</i>

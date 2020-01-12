@@ -554,15 +554,6 @@
             position: relative;
             z-index: 4;
         }
-
-        .navbar-form{
-            margin: 10px 0px;
-            float: none !important;
-            padding-top: 1px;
-            padding-bottom: 1px;
-            position: relative;
-        }
-
         .table-responsive {
             width: 100%;
             margin-bottom: 15px;
@@ -584,13 +575,6 @@
         }
     }
 
-    .navbar-form{
-        .btn{
-            position: absolute;
-            top: -5px;
-            right: -50px;
-        }
-    }
 
     .close-layer{
         height: 100%;
@@ -823,8 +807,7 @@
     }
   }
 
-  .nav-mobile-menu,
-  .sidebar .navbar-form{
+  .nav-mobile-menu{
     display: none !important;
   }
 }

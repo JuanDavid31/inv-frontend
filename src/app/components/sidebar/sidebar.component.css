@@ -1,0 +1,40 @@
+@media (max-width:992px){
+    .sidebar-wrapper{
+        height: 100%;
+    }
+
+    .sidebar-wrapper > div{
+        height: 100%;
+    }
+
+    .sidebar-wrapper > div ul{
+        height: 100%;
+        display: flex;
+    }
+
+    .sidebar-wrapper > div ul .cerrar-sesion{
+        margin-top: auto;
+        margin-bottom:11px;
+    }
+}
+
+.cerrar-sesion::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 15px;
+    height: 1px;
+    width: calc(100% - 30px);
+    background-color: rgba(180, 180, 180, 0.3);
+}
+
+li.nav-item span{
+    margin: 10px 15px 0;
+    border-radius: 3px;
+    color: #3C4858;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-transform: capitalize;
+    font-size: 13px;
+    padding: 10px 15px;
+}

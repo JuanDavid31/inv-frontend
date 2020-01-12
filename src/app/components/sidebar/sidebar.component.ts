@@ -1,37 +1,45 @@
 import { Component, OnInit } from '@angular/core';
+import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
+import { Router } from '@angular/router';
 
 
 declare const $: any;
 declare interface RouteInfo {
-  path: string;
-  title: string;
-  icon: string;
-  class: string;
+	path: string;
+	title: string;
+	icon: string;
+	class: string;
 }
 export const ROUTES: RouteInfo[] = [
-  { path: '/dashboard', title: 'Problemáticas', icon: 'dashboard', class: '' },
-  { path: '/user-profile', title: 'Perfil', icon: 'person', class: '' },
-  { path: '/notifications', title: 'Invitaciones', icon: 'notifications', class: '' },
-  { path: '/upgrade', title: 'Acerca de...', icon: 'unarchive', class: 'active-pro' },
+	{ path: '/dashboard', title: 'Problemáticas', icon: 'dashboard', class: '' },
+	{ path: '/user-profile', title: 'Perfil', icon: 'person', class: '' },
+	{ path: '/notifications', title: 'Invitaciones', icon: 'notifications', class: '' },
+	{ path: '/upgrade', title: 'Acerca de...', icon: 'unarchive', class: 'active-pro' },
 ];
 
 @Component({
-  selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+	selector: 'app-sidebar',
+	templateUrl: './sidebar.component.html',
+	styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-  menuItems: any[];
+	menuItems: any[];
 
-  constructor() { }
+	constructor(private serviciosLocalStorage: LocalStorageService,
+		private router: Router) { }
 
-  ngOnInit() {
-    this.menuItems = ROUTES.filter(menuItem => menuItem);
-  }
-  isMobileMenu() {
-    if ($(window).width() > 991) {
-      return false;
-    }
-    return true;
-  };
+	ngOnInit() {
+		this.menuItems = ROUTES.filter(menuItem => menuItem);
+	}
+	isMobileMenu() {
+		if ($(window).width() > 991) {
+			return false;
+		}
+		return true;
+	};
+
+	cerrarCesion() {
+		this.serviciosLocalStorage.eliminarDatos();
+		this.router.navigateByUrl("/login");
+	}
 }

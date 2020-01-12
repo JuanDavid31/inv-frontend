@@ -437,7 +437,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	cambioEscrito() {
-		const { nombre, descripcion } = this.escritoSeleccionado;
+		// const { nombre, descripcion } = this.escritoSeleccionado;
 		// this.nombreNuevaProblematica = nombre;
 		// this.descripcionNuevaProblematica = descripcion;
 	}
