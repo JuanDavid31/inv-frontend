@@ -1,37 +1,46 @@
 <div class="main-content">
-  <div class="container-fluid">
-    <div class="card">
-      <div class="card-header card-header" style="background:#CAC8C8">
-        <h3 class="card-title" style="text-align:center">Notificaciones</h3>
-      </div>
-      <br>
-      <div class="card-body">
-        <div class="row" *ngFor="let invitacion of invitaciones">
-          <div class="col-md-10">
-            <div class="alert alert-info alert-with-icon" data-notify="container" style="background:#0C5F97">
-              <i class="material-icons" data-notify="icon">add_alert</i>
-              <span data-notify="message">
-                {{invitacion.nombreRemitente}} - {{invitacion.nombreProblematica}} -
-                {{invitacion.descripcionProblematica}}
-              </span>
-            </div>
-          </div>
-          <div class="col-md-2">
-
-            <div class="row ">
-              <span>
-                <a class="myButton" (click)="aceptarInvitacion(invitacion, true)">
-                  <span class="input-group-text"><i class="	fa fa-check"></i></span>
-                </a>
-                <a class="myButton" (click)="rechazarInvitacion(invitacion)" style="margin-left: 10px">
-                  <span class="input-group-text"><i class="fa fa-close"></i></span>
-                </a>
-              </span>
-            </div>
-          </div>
-        </div>
-        <span *ngIf="invitaciones.length === 0">No tienes notificaciones pendientes</span>
-      </div>
-    </div>
-  </div>
+	<div class="container-fluid">
+		<div class="card">
+			<div class="card-header card-header" style="background:#CAC8C8">
+				<h3 class="card-title" style="text-align:center">Invitaciones</h3>
+			</div>
+			<div class="card-body">
+				<div *ngFor="let invitacion of invitaciones">
+					<div>
+						<div class="alert alert-info alert-with-icon" data-notify="container"
+							style="background:#0C5F97">
+							<div class="cabecera-invitacion">
+								<i class="material-icons" data-notify="icon">add_alert</i>
+								<div class="texto-cabecera">
+									<span class="titulo-invitacion">
+										{{invitacion.nombreProblematica}}
+									</span>
+									<span class="nombre-invitacion">
+										{{invitacion.nombreRemitente}}
+									</span>
+								</div>
+							</div>
+							<br>
+							<span>
+								{{invitacion.descripcionProblematica}}
+							</span>
+							<span class="acciones-al-responder">
+								<a class="myButton" (click)="aceptarInvitacion(invitacion, true)">
+									<span class="input-group-text">
+										<i class="fa fa-check text-success"></i>
+									</span>
+								</a>
+								<a class="myButton" (click)="rechazarInvitacion(invitacion)">
+									<span class="input-group-text">
+										<i class="fa fa-close text-danger"></i>
+									</span>
+								</a>
+							</span>
+						</div>
+					</div>
+				</div>
+				<span *ngIf="invitaciones.length === 0">No tienes notificaciones pendientes</span>
+			</div>
+		</div>
+	</div>
 </div>

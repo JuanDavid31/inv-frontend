@@ -43,4 +43,8 @@ export class RegistroComponent {
         }
       })
   }
+
+  esPassValido() {
+    return this.password === this.password2;
+  }
 }

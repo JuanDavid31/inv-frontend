@@ -865,10 +865,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		const nodoEncontrado = this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
+		const nombreAntiguo = nodoEncontrado.data.nombre;
 		nodoEncontrado.data.nombre = nombre;
 		const nodoCy = this.cy.getElementById(id);
 		nodoCy.data({ nombre });
 		nodoCy.style({ label: nombre });
+
+		this.serviciosToast.mostrarToast({ cuerpo: `El grupo "${nombreAntiguo}" ahora se llama "${nombre}".` });
 	}
 
 	darCantidadSolicitantes() {
