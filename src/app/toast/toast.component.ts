@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ToastService } from '../services/toast/toast.service';
 import { Subscription } from 'rxjs';
+declare var $: any;
 
 @Component({
   selector: 'app-toast',
@@ -32,34 +33,62 @@ export class ToastComponent implements OnInit, OnDestroy {
     this.cuerpo = cuerpo;
     this.esMensajeInfo = esMensajeInfo;
 
-    this.contenedorToasts.style.visibility = 'visible';
+    const type = ['', 'info', 'success', 'warning', 'danger'];
 
-    const toastHtmlString = `<div id="toast${this.contador}" class="toast" style="bottom: 5px; right: 25px; z-index:100">` +
-      `<div class="toast-header">` +
-      `<div class="${esMensajeInfo ? 'bg-info' : 'bg-danger'} rounded mr-2"` +
-      `style="height: 20px; width: 20px; border-radius: 4px;"></div>` +
-      `<strong class="mr-auto">${titulo}</strong>` +
-      `<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">` +
-      `<span aria-hidden="true">&times;</span>` +
-      `</button>` +
-      `</div>` +
-      `<div class="toast-body">` +
-      cuerpo +
-      `</div>` +
-      `</div>`;
+    const color = Math.floor((Math.random() * 4) + 1);
 
-    const nodo = this.htmlToElement(toastHtmlString);
-    this.contenedorToasts.appendChild(nodo);
-    this.toast = (<any>$(`#toast${this.contador}`)).toast({ delay: 4000 })
-    this.toast.toast('show')
+    $.notify({
+      icon: "notifications",
+      message: "Welcome to <b>Material Dashboard</b> - a beautiful freebie for every web developer."
 
-    setTimeout(() => {
-      const nodoToast = document.getElementById(`toast${this.contador}`)
-      if (nodoToast) nodoToast.remove();
-      if (!this.contenedorToasts.hasChildNodes()) this.contenedorToasts.style.visibility = 'hidden';
-    }, 4000)
+    }, {
+      type: type[color],
+      timer: 2000,
+      placement: {
+        from: 'bottom',
+        align: 'right'
+      },
+      template: '<div data-notify="container" class="col-xl-4 col-lg-4 col-11 col-sm-4 col-md-4 alert alert-{0} alert-with-icon" role="alert">' +
+        '<button mat-button  type="button" aria-hidden="true" class="close mat-button" data-notify="dismiss">  <i class="material-icons">close</i></button>' +
+        '<i class="material-icons" data-notify="icon">notifications</i> ' +
+        '<span data-notify="title">{1}</span> ' +
+        '<span data-notify="message">{2}</span>' +
+        '<div class="progress" data-notify="progressbar">' +
+        '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+        '</div>' +
+        '<a href="{3}" target="{4}" data-notify="url"></a>' +
+        '</div>'
+    });
 
-    this.contador++;
+
+    // this.contenedorToasts.style.visibility = 'visible';
+
+    // const toastHtmlString = `<div id="toast${this.contador}" class="toast" style="bottom: 5px; right: 25px; z-index:100">` +
+    //   `<div class="toast-header">` +
+    //   `<div class="${esMensajeInfo ? 'bg-info' : 'bg-danger'} rounded mr-2"` +
+    //   `style="height: 20px; width: 20px; border-radius: 4px;"></div>` +
+    //   `<strong class="mr-auto">${titulo}</strong>` +
+    //   `<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">` +
+    //   `<span aria-hidden="true">&times;</span>` +
+    //   `</button>` +
+    //   `</div>` +
+    //   `<div class="toast-body">` +
+    //   cuerpo +
+    //   `</div>` +
+    //   `</div>`;
+
+    // const nodo = this.htmlToElement(toastHtmlString);
+    // this.contenedorToasts.appendChild(nodo);
+    // this.toast = (<any>$(`#toast${this.contador}`)).toast({ delay: 4000 })
+    // this.toast.toast('show')
+
+    // setTimeout(() => {
+    //   const nodoToast = document.getElementById(`toast${this.contador}`)
+    //   if (nodoToast) nodoToast.remove();
+    //   if (!this.contenedorToasts.hasChildNodes()) this.contenedorToasts.style.visibility = 'hidden';
+    // }, 4000)
+
+    // this.contador++;
   }
 
 
