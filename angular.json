@@ -36,7 +36,6 @@
               "node_modules/bootstrap-notify/bootstrap-notify.js",
               "node_modules/chartist/dist/chartist.js",
               "node_modules/bootstrap-3-typeahead/bootstrap3-typeahead.min.js",
-              "src/assets/js/bootstrap.min.js",
               "src/assets/js/cytoscape.min.js",
               "src/assets/js/cytoscape-cxtmenu.js",
               "src/assets/js/cytoscape-compound-drag-and-drop.js"
