@@ -6,12 +6,9 @@ import { AdminLayoutRoutes } from './admin-layout.routing';
 import { DashboardComponent } from '../../dashboard/dashboard.component';
 import { UserProfileComponent } from '../../user-profile/user-profile.component';
 import { TableListComponent } from '../../table-list/table-list.component';
-import { TypographyComponent } from '../../typography/typography.component';
-import { IconsComponent } from '../../icons/icons.component';
 import { FaseIndividualComponent } from '../../fase-individual/fase-individual.component';
 import { FaseGrupalComponent } from '../../fase-grupal/fase-grupal.component';
 import { NotificationsComponent } from '../../notifications/notifications.component';
-import { UpgradeComponent } from '../../upgrade/upgrade.component';
 
 import {
   MatButtonModule,
@@ -21,7 +18,6 @@ import {
   MatTooltipModule,
   MatSelectModule
 } from '@angular/material';
-import { ToastComponent } from 'app/toast/toast.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -39,12 +35,9 @@ import { ToastComponent } from 'app/toast/toast.component';
     DashboardComponent,
     UserProfileComponent,
     TableListComponent,
-    TypographyComponent,
-    IconsComponent,
     FaseIndividualComponent,
     FaseGrupalComponent,
-    NotificationsComponent,
-    UpgradeComponent
+    NotificationsComponent
   ]
 })
 

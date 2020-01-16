@@ -40,7 +40,7 @@
 				<i class="fa fa-users"></i>
 				<span class="ml-2">Usuarios</span>
 			</div>
-			<div class="dropdown-menu dropdown-menu-left" style="height: 35px;" aria-labelledby="dropdownMenuButton">
+			<div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuButton">
 				<span class="dropdown-item" *ngFor="let usuario of usuarios">
 					{{usuario.nombre}}
 				</span>
@@ -48,7 +48,6 @@
 		</div>
 	</div>
 	<div id="cy">
-		<span>{{bloqueo}}</span>
 	</div>
 	<div id="modal-cambio-nombre" class="modal fade">
 		<div class="modal-dialog">

@@ -1,3 +1,44 @@
+.alert span{
+	max-width: initial;
+}
+
+.alert.alert-with-icon{
+	padding-left: 15px;
+}
+
+.cabecera-invitacion{
+	display: flex;
+    align-items: center;
+}
+
+.cabecera-invitacion i{
+	left: initial;
+    position: initial;
+    top: initial;
+	margin-top: 0px;
+	margin-right: 10px;
+}
+
+.titulo-invitacion{
+	font-size: 17px;
+    font-weight: 400;
+}
+
+.nombre-invitacion{
+	color: #ffffffb3;
+}
+
+.acciones-al-responder{
+	display: flex;
+    justify-content: flex-end;
+}
+
+.myButton{
+	padding: initial;
+	width: initial;
+	width: 40px;
+}
+
 .myButton {
 	-moz-border-radius:28px;
 	-webkit-border-radius:28px;
@@ -7,15 +48,23 @@
 	color:#ffffff;
 	font-family:Arial;
 	font-size:17px;
-	padding:16px 31px;
-	width:70px; 
 	text-decoration:none;
 
 }
+
 .myButton:hover {
-	background-color:#CAC8C8;
+	background-color:white;
 }
+
 .myButton:active {
 	position:relative;
 	top:1px;
+}
+
+.acciones-al-responder{
+	margin-top: 10px;
+}
+
+.acciones-al-responder a:last-child{
+	margin-left: 20px;
 }

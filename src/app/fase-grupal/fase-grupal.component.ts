@@ -4,11 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
 declare var cytoscape;
-declare var tippy;
-
 declare var $;
-//TODO: 5 - Añadir funcionalidad de reinicio de posiciones.
-//TODO: 6 - Arreglo estilos visual.
+
 @Component({
 	selector: 'app-fase-grupal',
 	templateUrl: './fase-grupal.component.html',
@@ -68,6 +65,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
+
 				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematica}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
@@ -77,22 +75,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		this.modalCambioNombreGrupo = $('#modal-cambio-nombre');
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
-
-		// const cy = this.cy;
-
-		// setTimeout(function () {
-		// 	cy.add([{ data: { id: 'e', parent: 'h' } }, { data: { id: 'h' } }]);
-		// }, 2000);
-
-		// const nodo = this.cy.getElementById('a');
-		// setTimeout(() => {
-		// 	nodo.data({ id: 'aa' });
-		// }, 2000);
-
-		// const nodo = this.cy.getElementById('p');
-		// setInterval(function () {
-		// 	nodo.position({ x: 0, y: 0 });
-		// }, 2000)
 	}
 
 	private prepararCytoscape() {
@@ -156,7 +138,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 						'border-style': 'dashed'
 					}
 				}
-			]
+			],
+			minZoom: 0.1,
+			maxZoom: 2
 		});
 
 
@@ -185,6 +169,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private addEvent(event) {
+		console.log('add');
 		const elemento = event.target;
 		this.agregarAGruposYEdges(elemento);
 
@@ -200,6 +185,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moveEvent(event) {
+		console.log('move');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -212,10 +198,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			elemento: { data: elemento.data() }
 		}));
 
-	}
-
-	private areThereParentsWithOneChild() { //?TODO: Borrar
-		return this.cy.nodes().find(this.isParentOfOneChildAndIsNotAnEdge);
 	}
 
 	private isParentOfOneChildAndIsNotAnEdge(node) {
@@ -234,6 +216,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	};
 
 	private removeEvent(event) {
+		console.log('remove');
 		const elemento = event.target;
 		this.eliminar(elemento.id())
 
@@ -263,16 +246,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			})
 	}
 
-	private grabonEvent(event) {
+	private grabonEvent({ target }) {
+		console.log('grabon');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
 		}
 
-		const nodo = event.target;
-		this.idNodoAgarrado = nodo.id();
-		const nodos = [{ id: event.target.id(), esHijo: false }];
-		if (nodo.isParent()) { nodo.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
+		this.idNodoAgarrado = target.id();
+		const nodos = [{ id: target.id(), esHijo: target.isChild() }];
+		if (target.isParent()) { target.descendants().forEach(e => nodos.push({ id: e.id(), esHijo: true })); }
 
 		this.socket.send(JSON.stringify({
 			accion: 'Bloquear',
@@ -282,6 +265,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private freeEvent(event) {
+		console.log('free');
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -300,6 +284,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private positionEvent(event) {
+		console.log('position');
 		const nodo = event.target;
 		if (this.bloqueo) {
 			this.bloqueo = false;
@@ -336,7 +321,28 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private cdndoutEvent(event, dropTarget, dropSibling) {
+		const idNodoPadre = dropTarget.data().id;
+		this.refrescarEdgesQueEstuvieronEnMovimiento(idNodoPadre);
 		this.removeParentsOfOneChild();
+	}
+
+	/**
+	 * Workaround para bug. Cuando hay 2 o 3 grupos de nodos conectados por 1 o 2 edges
+	 * respectivamente, si seleccionanos un nodo hijo de alguno de los grupos; 
+	 * lo movemos libremente y extraemos del grupo (Siempre y cuando este grupo tenga 3 o más
+	 * nodos. Si el grupo se elimina entonces el bug no sera visible) 
+	 * entonces los edges no se refrescaran de manera visual. Esto se ve fatal para el usuario.
+	 */
+	private refrescarEdgesQueEstuvieronEnMovimiento(idNodoPadre) {
+		const query = `edge[target = "${idNodoPadre}"], edge[source = "${idNodoPadre}"]`;
+		const edges = this.cy.edges(query);
+		edges.forEach(edge => {
+			const data = edge.data();
+			this.bloqueo = true;
+			edge.remove();
+			this.bloqueo = true;
+			this.cy.add({ data });
+		})
 	}
 
 	private prepararMenuEdges() {
@@ -386,6 +392,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private onmessageEvent(event) {
 		const json = JSON.parse(event.data);
+		console.log(`Llego un evento  -> ${json.accion}`);
+		console.log(json);
 		switch (json.accion) {
 			case 'Conectarse':
 				this.alguienSeConecto(json);
@@ -572,18 +580,42 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private bloquearNodo({ nodos, nombreUsuario }) {
-		//Hijos si tiene
+
+		if (nodos.length === 1) {
+			this.bloquearNodoUnico(nodos, nombreUsuario);
+		} else {
+			this.bloquearConjuntoDeNodos(nodos, nombreUsuario);
+		}
+
+	}
+
+	/**
+	 * Al bloquear un solo nodo es necesario poner en el label
+	 * el nombre del usuario que lo bloquea.
+	 */
+	private bloquearNodoUnico(nodos, nombreUsuario) {
+		nodos.forEach(nodo => {
+			const nodoBloqueado = this.cy.getElementById(nodo.id);
+			nodoBloqueado.ungrabify()
+			nodoBloqueado.style({
+				'border-color': 'purple',
+				'border-width': 10,
+				'label': `${nombreUsuario} - ${nodoBloqueado.data().id}`
+			});
+		})
+	}
+
+	private bloquearConjuntoDeNodos(nodos, nombreUsuario) {
 		nodos.filter(nodo => nodo.esHijo)
 			.forEach((nodo) => {
 				const nodoBloqueado = this.cy.getElementById(nodo.id);
 				nodoBloqueado.ungrabify()
 				nodoBloqueado.style({
 					'border-color': 'purple',
-					'border-width': 10
+					'border-width': 10,
 				});
 			})
 
-		//Padre
 		nodos.filter(nodo => !nodo.esHijo)
 			.forEach(nodo => {
 				const nodoBloqueado = this.cy.getElementById(nodo.id);
@@ -597,7 +629,26 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private desbloquearNodo({ nodos }) {
-		//Hijos si tiene.
+		if (nodos.length === 1) {
+			this.desbloquearNodoUnico(nodos);
+		} else {
+			this.desbloquearConjuntoDeNodos(nodos);
+		}
+	}
+
+	private desbloquearNodoUnico(nodos) {
+		nodos.forEach(nodo => {
+			const nodoBloqueado = this.cy.getElementById(nodo.id);
+			nodoBloqueado.grabify()
+			nodoBloqueado.style({
+				'border-color': '#2980b9',
+				'border-width': 3,
+				'label': nodoBloqueado.data().id
+			});
+		})
+	}
+
+	private desbloquearConjuntoDeNodos(nodos) {
 		nodos.filter(nodo => nodo.esHijo)
 			.forEach(nodo => {
 				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
@@ -608,7 +659,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				})
 			})
 
-		//Padre
 		nodos.filter(nodo => !nodo.esHijo)
 			.forEach(nodo => {
 				const nodoDesbloqueado = this.cy.getElementById(nodo.id);
@@ -639,7 +689,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				nodoCy.position(nodo.position);
 			})
 
-		this.serviciosToast.mostrarToast({ cuerpo: 'Se han reiniciado las posiciones.' });
+		this.cy.center();
+
+		this.serviciosToast.mostrarToast({ cuerpo: 'Los nodos han vuelto a su posición original.' });
 	}
 
 	private alguienSeDesconecto({ email }) {
@@ -658,14 +710,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.serviciosToast.mostrarToast({ cuerpo: `${nombreUsuarioAElminar} se desconecto.` });
 	}
 
-	//Adición y elimnación de edges
-
 	conectar() {
-		const idPadre = this.grupoDe.id;
-		const id = this.grupoA.id;
+		const idPadre = this.grupoDe ? this.grupoDe.id : undefined;
+		const id = this.grupoA ? this.grupoA.id : undefined;
 
 		if (!this.nodosValidos(idPadre, id)) return;
 		if (!this.nodosDiferentes(idPadre, id)) return;
+		if (!this.existeGrupo(idPadre) || !this.existeGrupo(id)) return;
 		if (this.yaExisteRelacion(idPadre, id)) return;
 		if (this.tieneOtroPadre(id)) return;
 		if (this.tieneOtroHijo(idPadre)) return;
@@ -678,7 +729,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		if (!idPadre || !id) {
 			this.serviciosToast.mostrarToast({
 				titulo: 'Error',
-				cuerpo: 'Debe seleccionar 2 nodos diferente',
+				cuerpo: 'Debe seleccionar 2 nodos diferentes',
 				esMensajeInfo: false
 			})
 			return false;
@@ -690,11 +741,25 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		if (idPadre !== id) { return true; }
 		this.serviciosToast.mostrarToast({
 			titulo: 'Error',
-			cuerpo: 'Debe seleccionar 2 nodos diferente',
+			cuerpo: 'Debe seleccionar 2 nodos diferentes',
 			esMensajeInfo: false
 		})
 		return false;
 	}
+
+	private existeGrupo(id) {
+		const nodo = this.cy.getElementById(id);
+		const existe = nodo.length > 0 && nodo.isParent();;
+		if (!existe) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Debe seleccionar 2 nodos diferentes',
+				esMensajeInfo: false
+			})
+		}
+		return existe;
+	}
+
 	private yaExisteRelacion(idPadre, id) {
 		if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
 			this.serviciosToast.mostrarToast({
@@ -798,12 +863,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	cambioUnNombre(datos) {
 		const { id, nombre } = datos.grupo.data;
 
-		this.gruposYEdges
+		const nodoEncontrado = this.gruposYEdges
 			.find(grupo => grupo.data.id === id)
-			.data.nombre = nombre;
+		const nombreAntiguo = nodoEncontrado.data.nombre;
+		nodoEncontrado.data.nombre = nombre;
+		const nodoCy = this.cy.getElementById(id);
+		nodoCy.data({ nombre });
+		nodoCy.style({ label: nombre });
 
-		const nodo = this.cy.getElementById(id);
-		nodo.data({ nombre });
+		this.serviciosToast.mostrarToast({ cuerpo: `El grupo "${nombreAntiguo}" ahora se llama "${nombre}".` });
 	}
 
 	darCantidadSolicitantes() {

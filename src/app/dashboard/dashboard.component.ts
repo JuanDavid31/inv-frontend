@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -12,10 +12,13 @@ declare var $;
 	templateUrl: './dashboard.component.html',
 	styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
 	problematicas = [];
+	problematicasTerminadas = [];
 	invitaciones = [];
+	escritos = [];
+	escritoSeleccionado = {};
 	nombreNuevaProblematica: string = '';
 	descripcionNuevaProblematica: string = '';
 	correoAInvitar: string;
@@ -30,7 +33,7 @@ export class DashboardComponent implements OnInit {
 	modal: any;
 	ventanaMensajes: any;
 
-	servidor: any;
+	servidor: EventSource;
 
 	estadosInvitacion = {
 		PENDIENTE: 'Pendiente',
@@ -46,6 +49,7 @@ export class DashboardComponent implements OnInit {
 
 	ngOnInit() {
 		this.cargarProblematicas();
+		this.cargarProblematicasTerminadas();
 		this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
 			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
@@ -53,7 +57,7 @@ export class DashboardComponent implements OnInit {
 		this.servidor = new EventSource('http://3.130.29.100:8080/eventos-dashboard')
 		this.servidor.onopen = function (event) { console.log('onOpenEventSource', event) };
 		this.servidor.onmessage = this.recibirEvento.bind(this);
-		this.servidor.onclose = this.onCloseEventSource.bind(this);
+		//this.servidor.onclose = this.onCloseEventSource.bind(this);
 	}
 
 	cargarProblematicas() {
@@ -76,6 +80,30 @@ export class DashboardComponent implements OnInit {
 					this.problematicas = res;
 				}
 			})
+	}
+
+	cargarProblematicasTerminadas() {
+		// const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+		// const options = {
+		// 	headers: headers
+		// }
+		//TODO: cambiar por url correcta.
+		// const url = `http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}/personas`;
+
+		// this.http.get(url, options)
+		// 	.pipe(catchError(err => of(err)))
+		// 	.subscribe((res: any) => {
+		// 		if (res.error) {
+		// 			this.serviciosToast.mostrarToast({
+		// 				titulo: 'Error',
+		// 				cuerpo: 'Ocurrió un error al buscar las problematicas terminadas, intentelo de nuevo.',
+		// 				esMensajeInfo: false
+		// 			});
+		// 		} else {
+		// 			this.problematicasTerminadas = res;
+		// 		}
+		// 	})
 	}
 
 	activateAutoCompletadoUsuariosAInvitar(query: string, result) {
@@ -133,10 +161,8 @@ export class DashboardComponent implements OnInit {
 		}
 	}
 
-	private recibirEvento(datos) {
-		console.log('Llego algo');
-		console.log(datos);
-		const json = JSON.parse(datos);
+	private recibirEvento(datos: MessageEvent) {
+		const json: any = JSON.parse(datos.data);
 		switch (json.accion) {
 			case 'Cambio fase problematica':
 				this.cambioFaseProblematica(json);
@@ -151,12 +177,12 @@ export class DashboardComponent implements OnInit {
 	}
 
 	private cambioFaseProblematica(datos) {
-		const { idProblematica, nuevaFase } = datos;
+		const { idProblematica } = datos;
 
 		const problematica = this.problematicas.find(problematica => problematica.id === idProblematica);
 
 		if (problematica) {
-			problematica.fase = nuevaFase;
+			problematica.fase++;
 			this.serviciosToast.mostrarToast({ cuerpo: `La problematica  "${problematica.nombre}" avanzo su fase.` });
 		}
 	}
@@ -391,5 +417,38 @@ export class DashboardComponent implements OnInit {
 					this.datosProblematica = res;
 				}
 			})
+	}
+
+	buscarEscritosPorProblematica(idProblematica) {
+		// const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+		// const options = {
+		// 	headers: headers
+		// }
+
+		// this.http
+		// 	.get(`http://3.130.29.100:8080/problematicas/${idProblematica}/escritos`, options)
+		// 	.pipe(catchError(err => of(err)))
+		// 	.subscribe(res => {
+		// 		if (res.error) {
+		// 			this.serviciosToast.mostrarToast({
+		// 				titulo: 'Error',
+		// 				cuerpo: 'Hubo un error al cargar los escritos, intentelo de nuevo',
+		// 				esMensajeInfo: false
+		// 			});
+		// 		} else {
+		// 			this.escritos = res;
+		// 		}
+		// 	})
+	}
+
+	cambioEscrito() {
+		// const { nombre, descripcion } = this.escritoSeleccionado;
+		// this.nombreNuevaProblematica = nombre;
+		// this.descripcionNuevaProblematica = descripcion;
+	}
+
+	ngOnDestroy() {
+		this.servidor.close();
 	}
 }

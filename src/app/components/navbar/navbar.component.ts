@@ -167,7 +167,9 @@ export class NavbarComponent implements OnInit {
         return 'Fase individual';
       case '/fase-grupal':
         return 'Fase grupal';
-        case '/table-list':
+      case '/notifications':
+        return 'Notificaciones';
+      case '/table-list':
         return 'Fase de reacciones';
     }
 

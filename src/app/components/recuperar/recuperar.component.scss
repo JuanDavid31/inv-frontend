@@ -1,98 +1,91 @@
 body,
   html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: #F2F6F6;
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	background: #F2F6F6;
   }
 
   .input-group-append{
-    margin-left: 0px;
+	margin-left: 0px;
   }
 
   .container.h-100{
-    background-image: url(https://storage.googleapis.com/efor-static/UIBG/Cloudkey%20estudiantes/bg-02.jpg);
-    margin-left: 0px;
-    margin-right: 0px;
-    max-width: 100%;
-    padding-left: 0px;
-    padding-right: 0px;
+	background-image: url(https://storage.googleapis.com/efor-static/UIBG/Cloudkey%20estudiantes/bg-02.jpg);
+	margin-left: 0px;
+	margin-right: 0px;
+	max-width: 100%;
+	padding-left: 15px;
+	padding-right: 15px;
   }
   
   .user_card {
-    width: 400px!important;
-    margin-top: auto;
-    margin-bottom: auto;
-    background: #ffffff;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    padding: 10px !important;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-radius: 5px;
+	width: 350px!important;
+	margin-top: auto;
+	margin-bottom: auto;
+	background:#CAD1D1;;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	padding: 10px !important;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	-webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	-moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	border-radius: 5px;
 
-  }
-
-  .form_container {
-    margin-top: 40px !important;
-  }
-
-  .alert{
-    margin: 0px 2rem;
   }
 
   .form-control, .is-focused .form-control {
-    background-image: none;
-    padding: .375rem .75rem;
+	background-image: none;
+	padding: .375rem .75rem;
+	background-color: white;
   }
   
   .custom-checkbox.custom-control{
-      display: flex;
-      align-items: center;
+	  display: flex;
+	  align-items: center;
   }
   
   .custom-checkbox.custom-control .custom-control-label{
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      color: black;
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  height: 100%;
+	  color: black;
   }
 
   .login_btn {
-    width: 100%;
-    background: #05376c !important;
-    color: white !important;
+	width: 100%;
+	background: #05376c !important;
+	color: white !important;
   }
   .login_btn:focus {
-    box-shadow: none !important;
-    outline: 0px !important;
-    text-transform: none;
+	box-shadow: none !important;
+	outline: 0px !important;
+	text-transform: none;
   font-size: 16px;
   }
   .login_container {
-    padding: 0 2rem;
+	padding: 0 2rem;
   }
   .input-group-text {
-    padding: 0px 15px 0px 15px;
-    background: #05376c !important;
-    color: white !important;
-    border: 0 !important;
-    border-radius: 0.25rem 0 0 0.25rem !important;
+	padding: 0px 15px 0px 15px;
+	background: #05376c !important;
+	color: white !important;
+	border: 0 !important;
+	border-radius: 0.25rem 0 0 0.25rem !important;
   }
   .input_text,
   .input_pass:focus {
-    width: 350px;
-    border-radius: 5px !important;
-    background-color: white !important;
-    box-shadow: none !important;
-    padding: 0 3rem;
-    outline: 0px !important;
-    font-size: 16px;
+	width: 350px;
+	border-radius: 5px !important;
+	background-color: white !important;
+	box-shadow: none !important;
+	padding: 0 3rem;
+	outline: 0px !important;
+	font-size: 16px;
   }
   .custom-checkbox .custom-control-input:checked~.custom-control-label::before {
-    background-color: #05376c !important;
+	background-color: #05376c !important;
   }

@@ -1,19 +1,19 @@
 <div class="main-content">
-	<div class="container-fluid">
+	<div class="row-container">
 		<div class="row">
-			<div class="col-md-3">
+			<div class="col-12 col-sm-6 col-md-4 col-lg-3">
 				<div class="card card-chart" style="background:#FFFFFF">
 					<div class="card-body">
 						<button type="button" class="btn" style="background:#0C5F97" aria-label="Close"
 							(click)="abrirModal()">
-							Crear problematica
+							Crear
 						</button>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="row">
-			<div *ngFor="let problematica of problematicas" class="col-md-3">
+			<div *ngFor="let problematica of problematicas" class="col-12 col-sm-6 col-md-4 col-lg-3">
 				<div class="card card-chart problematica-card">
 					<div class="card-header">
 						<img src="./assets/img/unibague_opt.png" class="card-img-top img-fluid">
@@ -49,6 +49,27 @@
 					</div>
 					<!-- contenido de la ventana-->
 					<div class="modal-body">
+						<form *ngIf="problematicasTerminadas.length > 0">
+							<div class="form-group">
+								<label for="problematicasTerminadas">Problematicas terminadas</label>
+								<select class="form-control" id="problematicasTerminadas"
+									(change)="buscarEscritosPorProblematica($event.target.value)">
+									<option *ngFor="let problematica of problematicasTerminadas"
+										[value]="problematica.id">
+										{{problematica.nombre}}
+									</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="escritos">Escritos</label>
+								<select class="form-control" id="escritos" [ngModel]="escritoSeleccionado"
+									(change)="cambioEscrito()">
+									<option *ngFor="let escrito of escritos" [value]="escrito">
+										{{escrito.nombre}}
+									</option>
+								</select>
+							</div>
+						</form>
 						<form>
 							<div class="form-group">
 								<label for="nombre-problematica">Nombre</label>
@@ -219,17 +240,14 @@
 						<!--Crear el resto de textos para cada fase.-->
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-outline-secondary"
-							data-dismiss="modal">No</button>
-						<button style="background:#0C5F97" type="button" class="btn btn-primary"
-							data-dismiss="modal" (click)="avanzarFase()"> Si</button>
+						<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">No</button>
+						<button style="background:#0C5F97" type="button" class="btn btn-primary" data-dismiss="modal"
+							(click)="avanzarFase()"> Si</button>
 					</div>
 				</div>
 			</div>
 		</div>
-
 		<!--modal de confirmacion-->
-
 		<div class="modal fade" id="confirmarFase">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -264,6 +282,5 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 </div>
