@@ -11,20 +11,21 @@ export class ToastService {
 
 	mostrarToast({titulo = 'Información', cuerpo = 'Este es un mensaje de información', esMensajeInfo = true}) {
 		
+		const icon = esMensajeInfo ? "notifications" : 'error_outline';
 		$.notify({
-			icon: "notifications",
+			icon: icon,
 			message: cuerpo
 
 		}, {
 			type: esMensajeInfo ? 'info': 'danger', //'', 'info', 'success', 'warning', 'danger'
-			timer: 2000,
+			timer: 1000,
 			placement: {
 			from: 'bottom',
 			align: 'right'
 		},
 		template: '<div data-notify="container" class="col-xl-4 col-lg-4 col-11 col-sm-4 col-md-4 alert alert-{0} alert-with-icon" role="alert">' +
 			'<button mat-button  type="button" aria-hidden="true" class="close mat-button" data-notify="dismiss">  <i class="material-icons">close</i></button>' +
-			'<i class="material-icons" data-notify="icon">notifications</i> ' +
+			`<i class="material-icons" data-notify="icon">${icon}</i> ` +
 			'<span data-notify="title">{1}</span> ' +
 			'<span data-notify="message">{2}</span>' +
 			'<div class="progress" data-notify="progressbar">' +

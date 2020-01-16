@@ -566,6 +566,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			})
 	}
 
+	/**
+	* Elimina edges y nodos padre.
+	* */
 	private eliminarElemento(json) {
 		const { elemento } = json;
 		this.bloqueo = true;
