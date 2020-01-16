@@ -4,8 +4,9 @@
     padding: 0px 15px;
 }
 
-#ctrl{
+.ctrl{
     width: 100%;
+    padding: 10px 12px;
 }
 
 #cy{
@@ -52,8 +53,7 @@
 }
 
 .div-archivo{
-    margin-top: 8px;
-    padding-left: 30px;
+    padding: 0px;
 }
 
 .custom-file-label::after {
@@ -61,11 +61,13 @@
 }
 
 input#nombre{
-    width: initial;
+    /* width: initial; */
+    height: 29px;
 }
 
 .div-conectar{
     width: initial;
+    padding: 0px;
 }
 
 .div-conectar select{
