@@ -17,9 +17,6 @@ declare var $;
 
 export class FaseIndividualComponent implements OnInit {
 
-    esMenu1 = true;
-    menuOb = {};
-
     nodos = [];
     nodoDe: any;
     nodoA: any;

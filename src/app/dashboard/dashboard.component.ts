@@ -50,9 +50,10 @@ export class DashboardComponent implements OnInit {
 			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
 
-		// this.servidor = new EventSource('http://localhost:8080/sse')
-		// this.servidor.onopen = function (event) { console.log(event) };
-		// this.servidor.onmessage = this.recibirEvento.bind(this);
+		this.servidor = new EventSource('http://3.130.29.100:8080/eventos-dashboard')
+		this.servidor.onopen = function (event) { console.log('onOpenEventSource', event) };
+		this.servidor.onmessage = this.recibirEvento.bind(this);
+		this.servidor.onclose = this.onCloseEventSource.bind(this);
 	}
 
 	cargarProblematicas() {
@@ -143,6 +144,10 @@ export class DashboardComponent implements OnInit {
 			default:
 				break;
 		}
+	}
+	
+	private onCloseEventSource(event){
+		console.log('onCloseEventSource', event);
 	}
 
 	private cambioFaseProblematica(datos) {
@@ -317,6 +322,9 @@ export class DashboardComponent implements OnInit {
 				break;
 			case 2:
 				this.router.navigateByUrl("/fase-grupal", { state: { idProblematica: id } });
+				break;
+			case 3:
+				this.router.navigateByUrl("/table-list", { state: { idProblematica: id } });
 				break;
 			default:
 				break;

@@ -1,0 +1,11 @@
+.main-content{
+    display: flex;
+    flex-direction: column;
+    padding: 0px 15px;
+}
+
+#cy{
+    background-color: white;
+    display: block;
+    flex-grow: 1;
+}
