@@ -45,21 +45,6 @@ export class NotificationsComponent implements OnInit {
 					});
 				} else {
 					this.invitaciones = res;
-					this.invitaciones = [
-						{
-							nombreRemitente: 'Juan David Piza',
-							nombreProblematica: 'Problematica de prueba N°1',
-							descripcionProblematica: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo, eligendi maiores iusto quod praesentium sit alias optio ab quia magnam excepturi expedita repellendus delectus quae nihil ullam, natus sapiente similique.'
-						}, {
-							nombreRemitente: 'Juan David Piza',
-							nombreProblematica: 'Problematica de prueba N°1',
-							descripcionProblematica: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo, eligendi maiores iusto quod praesentium sit alias optio ab quia magnam excepturi expedita repellendus delectus quae nihil ullam, natus sapiente similique.'
-						}, {
-							nombreRemitente: 'Juan David Piza',
-							nombreProblematica: 'Problematica de prueba N°1',
-							descripcionProblematica: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.'
-						}
-					]
 				}
 			})
 	}

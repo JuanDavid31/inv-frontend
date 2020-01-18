@@ -41,6 +41,18 @@ h1{
 
 .ctrl div > select{
 	padding: 0px;
+	background-image: none;
+
+    display: block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
 .ctrl div label.invisible{
@@ -82,12 +94,13 @@ h1{
 	
 #modal-visualizacion-imagen-nodo .modal-body{
 	width: 498px;
-    height: 450px;
+	height: initial;
+	padding: 0.5rem 1rem;
 }
 
 #modal-visualizacion-imagen-nodo .modal-body img{
 	width: 100%;
-    height: 95%;
+    margin: 10px 0px;
     object-fit: contain;
     object-position: center;
 }
