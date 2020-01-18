@@ -1,4 +1,22 @@
 <div class="main-content">
   <div id="cy">
   </div>
+  <div id="modal-visualizacion-imagen-nodo" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<!-- contenido del titulo -->
+				<div class="modal-header" style="color:white; background:#0C5F97;">
+					<h4 class="modal-tittle">{{nodoSeleccionado?.nombre}}</h4>
+					<button tyle="button" style="color:#FFFFFF" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+				</div>
+				<!-- contenido de la ventana-->
+				<div class="modal-body">
+					{{nodoSeleccionado?.nombreCreador}}
+					<a [href]="nodoSeleccionado?.urlFoto" target="_blank">Abrir imagen en una pestaña nueva.</a>
+					<img src="{{nodoSeleccionado?.urlFoto}}" alt="Imagen nodo">
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

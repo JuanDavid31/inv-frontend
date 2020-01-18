@@ -1,11 +1,93 @@
 .main-content{
-    display: flex;
-    flex-direction: column;
-    padding: 0px 15px;
+	display: flex;
+	flex-direction: column;
+	padding: 0px 15px;
+}
+
+.ctrl{
+	padding: 8px 6px;
+	display: flex;
+    flex-wrap: wrap;
 }
 
 #cy{
-    background-color: white;
-    display: block;
-    flex-grow: 1;
+	background-color: white;
+	display: block;
+	flex-grow: 1;
+
+	height: 100%;
+	width: 100%;
+}
+
+h1{
+	opacity: 0.5;
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.div-conectar{
+	
+}
+
+.div-select{
+	display: flex;
+	align-items: flex-end;
+}
+
+.div-select select{
+	line-height: 2.8;
+    height: 29px;
+}
+
+.ctrl div > select{
+	padding: 0px;
+}
+
+.ctrl div label.invisible{
+	margin:0px;
+}
+
+.solicitar-organizado{
+	display: flex;
+    align-items: flex-end;
+}
+
+.ctrl .solicitar-organizado label{
+	font-size: 16px;
+	margin:0px 10px 0px 5px;
+}
+
+.checkbox-solicitud{
+	display: flex;
+    align-items: center;
+    min-width: 170px;
+}
+
+.checkbox-solicitud label{
+	margin:0px;
+}
+
+.div-usuarios{
+	display: flex;
+	align-items: flex-end;
+}
+
+.div-usuarios .dropdown-toggle{
+	margin:0px;
+}
+
+.div-usuarios .dropdown-menu .dropdown-item{
+	padding: 3px 3px;
+}
+	
+#modal-visualizacion-imagen-nodo .modal-body{
+	width: 498px;
+    height: 450px;
+}
+
+#modal-visualizacion-imagen-nodo .modal-body img{
+	width: 100%;
+    height: 95%;
+    object-fit: contain;
+    object-position: center;
 }

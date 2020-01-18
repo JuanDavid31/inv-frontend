@@ -19,6 +19,8 @@ export class TableListComponent implements OnInit {
     nodoA: any;
     nombreNodo = '';
     cy: any = {}; 
+    idGrupoSeleccionado: any;
+    modalVisualizacionImagenNodo: any;
 
     problematicaActual: number;
 
@@ -30,6 +32,8 @@ export class TableListComponent implements OnInit {
 
   ngOnInit() {
     this.iniciar();
+   this.prepararMenuGrupos()
+    this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
   }
   
    private iniciar() {
@@ -44,8 +48,7 @@ export class TableListComponent implements OnInit {
                 this.nodoA = {};
 
                 this.prepararCytoscape();
-                 this.cargarNodos();
-               
+                this.cargarNodos();
             })
     }
     
@@ -57,8 +60,7 @@ export class TableListComponent implements OnInit {
                 {
                     selector: 'node',
                     style: {
-                        'background-color': '#2980b9',
-                        'label': 'data(nombre)',
+                        'label': 'data(id)',
                         'font-size': '40',
                         'height': 200,
                         'width': 200,
@@ -68,6 +70,18 @@ export class TableListComponent implements OnInit {
                         'border-opacity': 0.5
                     }
                 },
+				{
+					selector: 'node:parent',
+					style: {
+						'label': 'data(nombre)',
+						'font-size': '40',
+						'height': 200,
+						'width': 200,
+						'background-fit': 'cover',
+						'border-width': 3,
+						'border-opacity': 0.5
+					}
+				},
                 {
                     selector: 'edge',
                     style: {
@@ -107,36 +121,98 @@ export class TableListComponent implements OnInit {
     
      private dibujarNodos(nodos) {
         this.nodos = nodos;
-        this.nodos.forEach(nodo => {
-            const { id, nombre } = nodo;
-            this.cy.add({ data: { id, nombre } });
-
-            this.cy.style()
-                .selector(`#${nodo.id}`)
-                .css({
-                    'background-image': `${nodo.urlFoto}`
-                }).update();
-        })
+        
+        
+        this.dibujarNodosPadre(nodos);
+        this.dibujarNodosHijo(nodos);
 
         this.cy.layout({
-            name: 'grid',
-            rows: 3,
-            cols: 3,
-            padding: 50
+            name: 'cose',
+			nodeOverlap: 1,
+			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
         }).run()
 
-        this.cargarEdges();
+        
     }
     
-    private cargarEdges() {
-        this.nodos
-            .filter(nodo => nodo.idPadre !== 0)
-            .forEach(nodo => this.crearEdge(nodo.id, nodo.idPadre));
+    private dibujarNodosPadre(nodos){
+        nodos.filter(nodo => nodo.data.esGrupo)
+			.forEach(grupo => {
+				this.cy.add(grupo);
+			});
     }
     
-     private crearEdge(idNodo, idPadre) {
-        this.cy.add({ data: { id: `${idPadre}${idNodo}`, source: `${idPadre}`, target: `${idNodo}` } })
+    private dibujarNodosHijo(nodos){
+        nodos.filter( nodo => !nodo.data.esGrupo)
+        .forEach(nodo => {
+            this.cy.add(nodo);
+
+            this.cy.style()
+                .selector(`#${nodo.data.id}`)
+                .css({
+                    'background-image': `${nodo.data.urlFoto}`
+                }).update();
+        })
     }
+    
+    private prepararMenuGrupos() {
+		this.cy.cxtmenu({
+			selector: 'node',
+			commands: [
+				
+				{
+				    //Reacción positiva
+					content: '<span class="far fa-frown fa-3x" ></span>',
+					select: this.reaccionar.bind(this,-1) //this.cambiarNombreGrupo.bind(this)
+				},
+				{
+				    //reacción negativa
+					content: '<span class="far fa-smile-beam fa-3x" ></span>',
+					select: this.reaccionar.bind(this,1) //this.cambiarNombreGrupo.bind(this)
+				},
+				{
+				   // reacción neutra
+					content: '<span class="far fa-meh fa-3x" ></span>',
+					select:  this.reaccionar.bind(this,0) 
+				},
+				{
+				    // visualizar imagen
+					content:'<span class="fa fa-eye fa-2x"></span>',
+					select: this.abrirModalImagenNodo.bind(this) //this.cambiarNombreGrupo.bind(this)
+				}
+			]
+		});
+	}
+	 private prepararMenuNodos() {
+		this.cy.cxtmenu({
+			selector: 'node',
+			commands: [
+				
+				{
+					content:'<span class="fa fa-eye fa-2x"></span>',
+					select: this.abrirModalImagenNodo.bind(this) //this.cambiarNombreGrupo.bind(this)
+				},
+				{
+					content: 'Nada',
+					select: function (ele) { }
+				}
+			]
+		});
+	}
+    
+    private abrirModalImagenNodo(elemento) {
+		if (elemento.data().esGrupo || !elemento.isNode()) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Solo se pueden visualizar las imagenes de los nodos o individuales.',
+				esMensajeInfo: false
+			})
+			return;
+		}
+		this.idGrupoSeleccionado = elemento.data();
+		this.modalVisualizacionImagenNodo.modal('toggle');
+	}
+	
     
     private atenderErr(err) {
         this.serviciosToast.mostrarToast({
@@ -145,5 +221,39 @@ export class TableListComponent implements OnInit {
             esMensajeInfo: false
         });
     }
+    
+    private reaccionar(valorReaccion,elemento){
+        
+        const options = {
+            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
+        }
+
+        const email = this.serviciosLocalStorage.darEmail();
+        
+    	if (!elemento.data().esGrupo) {
+			this.serviciosToast.mostrarToast({
+				titulo: 'Error',
+				cuerpo: 'Solo se puede reaccionar sobre un grupo.',
+				esMensajeInfo: false
+			})
+			return;
+    	}
+    	else{
+    	    this.idGrupoSeleccionado = elemento.data().id; 
+    	    this.http
+            .post(`http://3.130.29.100:8080/grupos/${this.idGrupoSeleccionado}/reacciones?valor=${valorReaccion}&id-persona-problematica=${email}${this.problematicaActual}`, options)
+            .pipe(catchError(err => of(err)))
+            .subscribe(res => {
+                if (res.error) {
+                    this.atenderErr(res.error);
+                } else {
+                    console.log(valorReaccion)
+                }
+            });
+    	    
+    	}
+        	
+    }
+    
     
 }
