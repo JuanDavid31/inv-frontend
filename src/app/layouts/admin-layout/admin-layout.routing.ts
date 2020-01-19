@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 import { DashboardComponent } from '../../dashboard/dashboard.component';
 import { UserProfileComponent } from '../../user-profile/user-profile.component';
-import { TableListComponent } from '../../table-list/table-list.component';
+import { FaseReaccionesComponent } from '../../fase-reacciones/fase-reacciones.component';
 import { FaseIndividualComponent } from '../../fase-individual/fase-individual.component';
 import { FaseGrupalComponent } from '../../fase-grupal/fase-grupal.component';
 import { NotificationsComponent } from '../../notifications/notifications.component';
@@ -52,7 +52,7 @@ export const AdminLayoutRoutes: Routes = [
     // }
     { path: 'dashboard', component: DashboardComponent },
     { path: 'user-profile', component: UserProfileComponent },
-    { path: 'table-list', component: TableListComponent },
+    { path: 'fase-reacciones', component: FaseReaccionesComponent },
     { path: 'fase-individual', component: FaseIndividualComponent },
     { path: 'fase-grupal', component: FaseGrupalComponent },
     { path: 'notifications', component: NotificationsComponent }

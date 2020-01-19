@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AdminLayoutRoutes } from './admin-layout.routing';
 import { DashboardComponent } from '../../dashboard/dashboard.component';
 import { UserProfileComponent } from '../../user-profile/user-profile.component';
-import { TableListComponent } from '../../table-list/table-list.component';
+import { FaseReaccionesComponent } from '../../fase-reacciones/fase-reacciones.component';
 import { FaseIndividualComponent } from '../../fase-individual/fase-individual.component';
 import { FaseGrupalComponent } from '../../fase-grupal/fase-grupal.component';
 import { NotificationsComponent } from '../../notifications/notifications.component';
@@ -18,6 +18,7 @@ import {
   MatTooltipModule,
   MatSelectModule
 } from '@angular/material';
+import { FaseEscritosComponent } from 'app/fase-escritos/fase-escritos.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -34,9 +35,10 @@ import {
   declarations: [
     DashboardComponent,
     UserProfileComponent,
-    TableListComponent,
+    FaseReaccionesComponent,
     FaseIndividualComponent,
     FaseGrupalComponent,
+    FaseEscritosComponent,
     NotificationsComponent
   ]
 })
