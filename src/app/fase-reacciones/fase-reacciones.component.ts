@@ -110,7 +110,7 @@ export class FaseReaccionesComponent implements OnInit {
         const email = this.serviciosLocalStorage.darEmail(); if (!email) return;
 
         this.http
-            .get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/grupos?email=${email}`, options)
+            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -247,9 +247,10 @@ export class FaseReaccionesComponent implements OnInit {
             return;
         }
         else {
+            const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
             this.idGrupoSeleccionado = elemento.data().id;
             this.http
-                .post(`http://3.130.29.100:8080/grupos/${this.idGrupoSeleccionado}/reacciones?valor=${valorReaccion}&id-persona-problematica=${email}${this.problematicaActual}`, options)
+                .post(url, { valor: valorReaccion }, options)
                 .pipe(catchError(err => of(err)))
                 .subscribe(res => {
                     if (res.error) {
