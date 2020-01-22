@@ -352,6 +352,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			case 3:
 				this.router.navigateByUrl("/fase-reacciones", { state: { idProblematica: id } });
 				break;
+			case 4:
+				this.router.navigateByUrl("/fase-escritos", { state: { idProblematica: id } });
+				break;
 			default:
 				break;
 		}

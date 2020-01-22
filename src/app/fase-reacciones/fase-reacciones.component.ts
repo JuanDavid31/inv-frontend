@@ -14,13 +14,11 @@ declare var cytoscape;
 })
 export class FaseReaccionesComponent implements OnInit {
 
-    nodos = [];
-    nodoDe: any;
-    nodoA: any;
     nombreNodo = '';
     cy: any = {};
     idGrupoSeleccionado: any;
     modalVisualizacionImagenNodo: any;
+    nodoSeleccionado: any
 
     problematicaActual: number;
 
@@ -31,8 +29,8 @@ export class FaseReaccionesComponent implements OnInit {
         private activatedRoute: ActivatedRoute) { }
 
     ngOnInit() {
-        this.iniciar();
         this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
+        this.iniciar();
     }
 
     private iniciar() {
@@ -41,10 +39,7 @@ export class FaseReaccionesComponent implements OnInit {
             .pipe(map(() => window.history.state))
             .subscribe(params => {
                 this.problematicaActual = params.idProblematica;
-                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard') }
-
-                this.nodoDe = {};
-                this.nodoA = {};
+                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
 
                 this.prepararCytoscape();
                 this.cargarNodos();
@@ -122,9 +117,6 @@ export class FaseReaccionesComponent implements OnInit {
     }
 
     private dibujarNodos(nodos) {
-        this.nodos = nodos;
-
-
         this.dibujarNodosPadre(nodos);
         this.dibujarNodosHijo(nodos);
 
@@ -133,8 +125,6 @@ export class FaseReaccionesComponent implements OnInit {
             nodeOverlap: 1,
             boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
         }).run()
-
-
     }
 
     private dibujarNodosPadre(nodos) {
@@ -217,7 +207,7 @@ export class FaseReaccionesComponent implements OnInit {
             })
             return;
         }
-        this.idGrupoSeleccionado = elemento.data();
+        this.nodoSeleccionado = elemento.data();
         this.modalVisualizacionImagenNodo.modal('toggle');
     }
 
@@ -225,7 +215,7 @@ export class FaseReaccionesComponent implements OnInit {
     private atenderErr(err) {
         this.serviciosToast.mostrarToast({
             titulo: 'Error',
-            cuerpo: err.errros[0],
+            cuerpo: err.erros[0],
             esMensajeInfo: false
         });
     }
@@ -245,10 +235,9 @@ export class FaseReaccionesComponent implements OnInit {
                 esMensajeInfo: false
             })
             return;
-        }
-        else {
-            const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
+        }else {
             this.idGrupoSeleccionado = elemento.data().id;
+            const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
             this.http
                 .post(url, { valor: valorReaccion }, options)
                 .pipe(catchError(err => of(err)))
@@ -260,5 +249,13 @@ export class FaseReaccionesComponent implements OnInit {
                     }
                 });
         }
+    }
+    
+    organizar(){
+        this.cy.layout({
+            name: 'cose',
+            nodeOverlap: 1,
+            boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+        }).run()
     }
 }

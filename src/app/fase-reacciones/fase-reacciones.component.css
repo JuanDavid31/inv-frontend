@@ -25,25 +25,7 @@ h1{
 	font-weight: bold;
 }
 
-.div-conectar{
-	
-}
-
-.div-select{
-	display: flex;
-	align-items: flex-end;
-}
-
-.div-select select{
-	line-height: 2.8;
-    height: 29px;
-}
-
-.ctrl div > select{
-	padding: 0px;
-}
-
-.ctrl div label.invisible{
+.ctrl div .invisible{
 	margin:0px;
 }
 
@@ -57,29 +39,6 @@ h1{
 	margin:0px 10px 0px 5px;
 }
 
-.checkbox-solicitud{
-	display: flex;
-    align-items: center;
-    min-width: 170px;
-}
-
-.checkbox-solicitud label{
-	margin:0px;
-}
-
-.div-usuarios{
-	display: flex;
-	align-items: flex-end;
-}
-
-.div-usuarios .dropdown-toggle{
-	margin:0px;
-}
-
-.div-usuarios .dropdown-menu .dropdown-item{
-	padding: 3px 3px;
-}
-	
 #modal-visualizacion-imagen-nodo .modal-body{
 	width: 498px;
     height: 450px;

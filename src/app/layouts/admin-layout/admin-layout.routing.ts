@@ -6,6 +6,7 @@ import { FaseReaccionesComponent } from '../../fase-reacciones/fase-reacciones.c
 import { FaseIndividualComponent } from '../../fase-individual/fase-individual.component';
 import { FaseGrupalComponent } from '../../fase-grupal/fase-grupal.component';
 import { NotificationsComponent } from '../../notifications/notifications.component';
+import { FaseEscritosComponent } from 'app/fase-escritos/fase-escritos.component';
 
 export const AdminLayoutRoutes: Routes = [
     // {
@@ -55,5 +56,6 @@ export const AdminLayoutRoutes: Routes = [
     { path: 'fase-reacciones', component: FaseReaccionesComponent },
     { path: 'fase-individual', component: FaseIndividualComponent },
     { path: 'fase-grupal', component: FaseGrupalComponent },
+    { path: 'fase-escritos', component: FaseEscritosComponent },
     { path: 'notifications', component: NotificationsComponent }
 ];
