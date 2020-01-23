@@ -33,6 +33,15 @@ h1{
 	box-shadow: initial;
 }
 
+.moda-content-mensaje{
+	display: flex;
+    align-items: center;	
+}
+
+.modal-content-form{
+	padding: 20px;	
+}
+
 #modal-visualizacion-imagen-nodo .modal-body{
 	width: 498px;
     height: 450px;

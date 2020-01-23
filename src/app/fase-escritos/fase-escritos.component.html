@@ -1,13 +1,17 @@
 <div class="main-content">
-	<div class="col-lg-6">
+	<div class="col-lg-6 mb-5">
 		<div class="ctrl" style="background:#DCE3E8">
-			<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Organizar grupos" (click)="organizar()">
+			<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Organizar grupos1" (click)="organizar()">
 		</div>
 		<div id="cy">
 		</div>
 	</div>
-	<div class="col-lg-6">
-		<div class="modal-content">
+	<div class="col-lg-6 mb-5">
+		<div *ngIf="!grupoSeleccionado" class="modal-content">Por favor seleccione un grupo.</div>
+		<div *ngIf="grupoSeleccionado" class="modal-content">
+			<div class="modal-header" style="color:white;background:#0C5F97;">
+				<h4 class="modal-tittle"> grupo: {{grupoSeleccionado?.nombre}}</h4>
+			</div>
 			<!-- contenido de la ventana-->
 			<div class="modal-body">
 				<form #formEscrito="ngForm">
@@ -15,7 +19,7 @@
 						<label for="nombre-escrito">Titulo</label>
 						<input type="text" id="nombre-escrito" #nombreEscritoInput="ngModel" class="form-control"
 							[(ngModel)]="nombreEscrito" name="nombreNuevoEscritoInput"
-							minlength="10" maxlength="40" [disabled]="!idGrupoSeleccionado " required>
+							minlength="10" maxlength="40" [disabled]="!grupoSeleccionado" required>
 						<div *ngIf="nombreEscritoInput?.touched">
 							<div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080" *ngIf="nombreEscritoInput?.errors?.minlength">
 								<a>Debe tener minimo 10 caracteres</a>
@@ -28,7 +32,7 @@
 					<div class="form-group">
 						<label for="descripcion">Descripción</label>
 						<textarea id="descrip" cols="55" rows="5" #descripcionEscritoInput="ngModel" class="form-control" [(ngModel)]="descripcionEscrito" 
-							name="descripcionEscritoInput" minlength="20" maxlength="500" [disabled]="!idGrupoSeleccionado " required></textarea>
+							name="descripcionEscritoInput" minlength="20" maxlength="500" [disabled]="!grupoSeleccionado" required></textarea>
 						<div *ngIf="descripcionEscritoInput?.touched">
 							<div class="alert alert-danger" role="alert" style="height:50px;text-align:center;background:#F08080" *ngIf="descripcionEscritoInput?.errors?.minlength">
 								<a>Debe tener minimo 20 caracteres</a>
@@ -38,8 +42,8 @@
 							</div>
 						</div>
 					</div>
-					{{testing(formEscrito)}}
-					<button *ngIf="!escritoSeleccionado" type="submit" style="background:#0C5F97" class="btn btn-info" [disabled]="formEscrito.invalid && formEscrito.pristine"
+					<!--{{testing(formEscrito)}}-->
+					<button *ngIf="!escritoSeleccionado" type="submit" style="background:#0C5F97" class="btn btn-info" [disabled]="formEscrito.invalid"
 						(click)="crearEscrito()">
 						Crear
 					</button>
@@ -47,15 +51,13 @@
 						(click)="editarEscrito()">
 						Editar
 					</button>
-					<button class="btn btn-danger" click="eliminarEscrito()" [disabled]="true">
+					<button class="btn btn-danger" click="eliminarEscrito()" *ngIf="escritoSeleccionado">
 						Eliminar
 					</button>
 				</form>
 			</div>
 		</div>
 	</div>
-
-
 
 	<div id="modal-visualizacion-imagen-nodo" class="modal fade">
 		<div class="modal-dialog">
@@ -74,4 +76,5 @@
 			</div>
 		</div>
 	</div>
+	
 </div>

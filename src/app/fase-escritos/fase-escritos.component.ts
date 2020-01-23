@@ -23,7 +23,7 @@ export class FaseEscritosComponent implements OnInit {
     nombreEscrito = '';
     descripcionEscrito = '';
     
-    idGrupoSeleccionado = undefined;
+    grupoSeleccionado = undefined;
     escritoSeleccionado = undefined;
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
@@ -102,14 +102,16 @@ export class FaseEscritosComponent implements OnInit {
 	}
 	
 	private visualizarEscrito({ target }){
-		let idGrupo;
-		this.idGrupoSeleccionado = idGrupo = target.data().id;
-		this.escritoSeleccionado = this.escritos.find(escrito => escrito.idGrupo === idGrupo);
+		this.grupoSeleccionado = target.data();
+		if(!this.grupoSeleccionado)return;
 		
-		if(this.escritoSeleccionado){
+		const idGrupo = this.grupoSeleccionado.id;
+		this.escritoSeleccionado = this.escritos.find(escrito => escrito.idGrupo === this.grupoSeleccionado.id);
+		
+		if(this.escritoSeleccionado){ //Hay escrito, muestro boton de editar y eliminar.
 			this.nombreEscrito = this.escritoSeleccionado.nombre;
 			this.descripcionEscrito = this.escritoSeleccionado.descripcion;
-		}else{
+		}else{//No hay escrito. Activo crear solo si el formulario es valido.
 			
 		}
 	}
@@ -272,6 +274,38 @@ export class FaseEscritosComponent implements OnInit {
 			nodeOverlap: 1,
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
+	}
+	
+	crearEscrito(){
+		const options = {
+			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
+		}
+		
+		const body = {
+			nombre: this.nombreEscrito,
+			descripcion: this.descripcionEscrito,
+			idGrupo: this.grupoSeleccionado.id
+		}
+
+		return this.http
+			.post(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${this.serviciosLocalStorage.darEmail}/escritos`, body, options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if(res.error){
+					//TODO
+					this.serviciosToast.mostrarToast({esMensajeInfo: false, titulo: 'Error', cuerpo:res.err.errs})//TODO: Revisar.
+				}else{
+					
+				}
+			});
+	}
+	
+	editarEscrito(){
+		
+	}
+	
+	eliminarEscrito(){
+		
 	}
 	
 	testing(form){
