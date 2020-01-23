@@ -75,12 +75,12 @@
 								<label for="nombre-problematica">Nombre</label>
 								<input type="text" id="nombre-problematica" name="nombreProble" #nombreProble="ngModel"
 									class="form-control" [(ngModel)]="nombreNuevaProblematica"
-									name="nombreNuevaProblematicaInput" minlength="10" maxlength="40" required>
+									name="nombreNuevaProblematicaInput" minlength="10" maxlength="20" required>
 								<div *ngIf="nombreProble?.touched">
 									<div class="alert alert-danger" role="alert"
 										style="height:50px;text-align:center;background:#F08080"
 										*ngIf="nombreProble?.errors?.minlength">
-										<a>Debe tener minimo 10 caracteres</a>
+										<a>Debe tener entre 10 y 20 caracteres</a>
 										<button type="button" class="close" data-dismiss="alert" aria-label="Close"
 											style="color:#FFFFFF">
 											<span aria-hidden="true">&times;</span>
@@ -106,8 +106,8 @@
 									</div>
 								</div>
 							</div>
-							<button tyle="button" style="background:#0C5F97" class="btn btn-info" [disabled]="formProblematica.invalid"
-								(click)="crearProblematica()">Crear</button>
+							<button tyle="button" style="background:#0C5F97" class="btn btn-info"
+								[disabled]="formProblematica.invalid" (click)="crearProblematica()">Crear</button>
 						</form>
 					</div>
 				</div>

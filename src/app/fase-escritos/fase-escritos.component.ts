@@ -8,23 +8,23 @@ import { of, forkJoin } from 'rxjs';
 declare var cytoscape;
 
 @Component({
-  selector: 'app-fase-escritos',
-  templateUrl: './fase-escritos.component.html',
-  styleUrls: ['./fase-escritos.component.scss']
+	selector: 'app-fase-escritos',
+	templateUrl: './fase-escritos.component.html',
+	styleUrls: ['./fase-escritos.component.scss']
 })
 export class FaseEscritosComponent implements OnInit {
 
 	cy: any = {};
 	problematicaActual: number;
 	modalVisualizacionImagenNodo: any;
-    nodoSeleccionado: any;
-    escritos: any[] = [];
-    
-    nombreEscrito = '';
-    descripcionEscrito = '';
-    
-    grupoSeleccionado = undefined;
-    escritoSeleccionado = undefined;
+	nodoSeleccionado: any;
+	escritos: any[] = [];
+
+	nombreEscrito = '';
+	descripcionEscrito = '';
+
+	grupoSeleccionado = undefined;
+	escritoSeleccionado = undefined;
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
@@ -36,7 +36,7 @@ export class FaseEscritosComponent implements OnInit {
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 		this.iniciar();
 	}
-  
+
 	private iniciar() {
 		this.activatedRoute
 			.paramMap
@@ -51,7 +51,7 @@ export class FaseEscritosComponent implements OnInit {
 				this.prepararMenuGrupos()
 			})
 	}
-	
+
 	private prepararCytoscape() {
 		this.cy = cytoscape({
 
@@ -100,43 +100,65 @@ export class FaseEscritosComponent implements OnInit {
 		});
 		this.cy.on('select', this.visualizarEscrito.bind(this))
 	}
-	
-	private visualizarEscrito({ target }){
+
+	existeEscrito = false;
+
+	private visualizarEscrito({ target }) {
+		if (!target.data().esGrupo) return;
 		this.grupoSeleccionado = target.data();
-		if(!this.grupoSeleccionado)return;
-		
+
 		const idGrupo = this.grupoSeleccionado.id;
-		this.escritoSeleccionado = this.escritos.find(escrito => escrito.idGrupo === this.grupoSeleccionado.id);
-		
-		if(this.escritoSeleccionado){ //Hay escrito, muestro boton de editar y eliminar.
-			this.nombreEscrito = this.escritoSeleccionado.nombre;
-			this.descripcionEscrito = this.escritoSeleccionado.descripcion;
-		}else{//No hay escrito. Activo crear solo si el formulario es valido.
-			
+		this.escritoSeleccionado = this.escritos.find(escrito => escrito.idGrupo.toString() === this.grupoSeleccionado.id); //El id se guarda como String.
+
+		if (this.escritoSeleccionado) {
+			this.existeEscrito = true;
+			//Hay escrito, muestro boton de editar y eliminar. Editar solo es esta habilitado si el formulario es valido.
+			//Eliminar estara habilitado siempre que exista el escrito.
+
+			// this.escritoSeleccionado = {
+			// 	id: this.escritoSeleccionado.id,
+			// 	nombre: this.escritoSeleccionado.nombre,
+			// 	descripcion: this.escritoSeleccionado.descripcion,
+			// 	idGrupo: this.grupoSeleccionado.id
+			// }
+
+		} else {//No hay escrito. Muestro crear.
+			this.existeEscrito = false;
+			this.escritoSeleccionado = {
+				nombre: '',
+				descripcion: '',
+				idGrupo: 0 + this.grupoSeleccionado.id
+			}
+		}
+
+		if ({}) {
+			console.log('true') //* Para por aquí.
+		} else {
+			console.log('false')
 		}
 	}
 
-	private cargarNodosYEscritos(){
+	private cargarNodosYEscritos() {
 		const requestNodos = this.darRequestNodos();
 		const requestEscritos = this.darRequestEscritos();
-		
+
 		forkJoin([requestNodos, requestEscritos])
-		.subscribe( res => {
-			this.atenderRequestNodos(res[0]);
-			this.atenderRequestEscritos(res[1]);
-		})
+			.subscribe(res => {
+				this.atenderRequestNodos(res[0]);
+				this.atenderRequestEscritos(res[1]);
+			})
 	}
-	
-	private darRequestNodos(){
+
+	private darRequestNodos() {
 		const options = {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
 		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/reacciones`, options)
+			.get(`http://localhost:8080/problematicas/${this.problematicaActual}/reacciones`, options)
 			.pipe(catchError(err => of(err)))
 	}
-	
+
 	private darRequestEscritos() {
 		const options = {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
@@ -145,28 +167,30 @@ export class FaseEscritosComponent implements OnInit {
 		const email = this.serviciosLocalStorage.darEmail(); if (!email) return;
 
 		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
+			.get(`http://localhost:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
 			.pipe(catchError(err => of(err)))
 	}
-	
-	private atenderRequestNodos(res){
-		if(res.error){
+
+	private atenderRequestNodos(res) {
+		if (res.error) {
 			this.atenderErr('nodos')
-		}else{
+		} else {
 			this.dibujarNodos(res);
 		}
 	}
-	
+
 
 	private dibujarNodos(nodos) {
 		this.dibujarNodosPadre(nodos);
 		this.dibujarNodosHijo(nodos);
-
+		console.log(this.cy.nodes().jsons())
 		this.cy.layout({
 			name: 'cose',
 			nodeOverlap: 1,
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
+		console.log(this.cy.nodes().jsons())
+
 	}
 
 	private dibujarNodosPadre(nodos) {
@@ -188,11 +212,11 @@ export class FaseEscritosComponent implements OnInit {
 					}).update();
 			})
 	}
-	
-	private atenderRequestEscritos(res){
-		if(res.error){
+
+	private atenderRequestEscritos(res) {
+		if (res.error) {
 			this.atenderErr('escritos');
-		}else{
+		} else {
 			this.escritos = [];
 		}
 	}
@@ -261,57 +285,88 @@ export class FaseEscritosComponent implements OnInit {
 	}
 
 	private atenderErr(datos) {
-        this.serviciosToast.mostrarToast({
-            titulo: 'Error',
-            cuerpo: `Ocurrio un error al cargar los ${datos}`,
-            esMensajeInfo: false
-        });
-    }
-	
-	organizar(){
+		this.serviciosToast.mostrarToast({
+			titulo: 'Error',
+			cuerpo: `Ocurrio un error al cargar los ${datos}`,
+			esMensajeInfo: false
+		});
+	}
+
+	organizar() {
 		this.cy.layout({
 			name: 'cose',
 			nodeOverlap: 1,
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
 	}
-	
-	crearEscrito(){
+
+	crearEscrito() {
 		const options = {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
-		
-		const body = {
-			nombre: this.nombreEscrito,
-			descripcion: this.descripcionEscrito,
-			idGrupo: this.grupoSeleccionado.id
-		}
 
-		return this.http
-			.post(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${this.serviciosLocalStorage.darEmail}/escritos`, body, options)
+		const url = `http://localhost:8080/problematicas/${this.problematicaActual}/personas/` +
+			`${this.serviciosLocalStorage.darEmail()}/escritos`;
+
+		this.http
+			.post(url, this.escritoSeleccionado, options)
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
-				if(res.error){
-					//TODO
-					this.serviciosToast.mostrarToast({esMensajeInfo: false, titulo: 'Error', cuerpo:res.err.errs})//TODO: Revisar.
-				}else{
-					
+				if (res.error) {
+					//TODO: Recibir mensaje de success
+					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
+				} else {
+					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito agregado.' })
+					this.escritos.push(res);
 				}
 			});
 	}
-	
-	editarEscrito(){
-		
+
+	editarEscrito() {
+		const options = {
+			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
+		}
+
+		const url = `http://localhost:8080/problematicas/${this.problematicaActual}/personas/` +
+			`${this.serviciosLocalStorage.darEmail}/escritos/${this.escritoSeleccionado.id}`;
+
+		this.http
+			.put(url, this.escritoSeleccionado, options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
+				} else {
+					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito guardado.' })
+				}
+			});
 	}
-	
-	eliminarEscrito(){
-		
+
+	eliminarEscrito() {
+		const options = {
+			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
+		}
+
+		const url = `http://localhost:8080/problematicas/${this.problematicaActual}/personas/` +
+			`${this.serviciosLocalStorage.darEmail}/escritos/${this.escritoSeleccionado.id}`;
+
+		this.http
+			.delete(url, options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
+				} else {
+					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito borrado.' });
+					console.log(this.escritoSeleccionado.id);
+					this.escritos.findIndex(escrito => escrito.id === this.escritoSeleccionado.id);
+				}
+			});
 	}
-	
-	testing(form){
+
+	testing(form) {
 		console.log(form);
 		console.log(form.controls);
 		return '';
 	}
-
 }

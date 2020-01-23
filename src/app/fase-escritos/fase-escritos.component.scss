@@ -4,6 +4,11 @@
 	padding: 0px 15px;
 }
 
+.div-nodos{
+	display: flex;
+    flex-direction: column;
+}
+
 .ctrl{
 	padding: 8px 6px;
 	display: flex;
@@ -15,7 +20,7 @@
 	display: block;
 	flex-grow: 1;
 
-	height: 100%;
+	height: initial;
 	width: 100%;
 }
 
@@ -33,13 +38,19 @@ h1{
 	box-shadow: initial;
 }
 
-.moda-content-mensaje{
+.div-escrito{
 	display: flex;
-    align-items: center;	
+    align-items: center;
+}
+
+.modal-content-mensaje{
+	padding: 20px;
 }
 
 .modal-content-form{
-	padding: 20px;	
+	height: 100%;
+	border-style: solid;
+	border-width: 3px;
 }
 
 #modal-visualizacion-imagen-nodo .modal-body{
