@@ -38,7 +38,7 @@ export class NotificationsComponent implements OnInit {
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar las invitaciones, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar las invitaciones, intentelo de nuevo.', 'danger');
 				} else {
 					this.invitaciones = res;
 				}
@@ -62,7 +62,7 @@ export class NotificationsComponent implements OnInit {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Hubo un error al aceptar la invitación, intentelo de nuevo.', 'error')
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al aceptar la invitación, intentelo de nuevo.', 'danger')
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Invitación aceptada');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
@@ -91,7 +91,7 @@ export class NotificationsComponent implements OnInit {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Hubo un error al rechazar la invitación, intentelo de nuevo.', 'error')
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al rechazar la invitación, intentelo de nuevo.', 'danger')
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Rechazaste la invitación');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);

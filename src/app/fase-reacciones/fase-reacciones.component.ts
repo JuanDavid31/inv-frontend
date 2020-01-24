@@ -200,7 +200,7 @@ export class FaseReaccionesComponent implements OnInit {
 
     private abrirModalImagenNodo(elemento) {
         if (elemento.data().esGrupo || !elemento.isNode()) {
-            this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'error');
+            this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'danger');
             return;
         }
         this.nodoSeleccionado = elemento.data();
@@ -209,7 +209,7 @@ export class FaseReaccionesComponent implements OnInit {
 
 
     private atenderErr(err) {
-        this.serviciosToast.mostrarToast('Error', err.erros[0], 'error');
+        this.serviciosToast.mostrarToast('Error', err.erros[0], 'danger');
     }
 
     private reaccionar(valorReaccion, elemento) {
@@ -221,7 +221,7 @@ export class FaseReaccionesComponent implements OnInit {
         const email = this.serviciosLocalStorage.darEmail();
 
         if (!elemento.data().esGrupo) {
-            this.serviciosToast.mostrarToast('Error', 'Solo se puede reaccionar sobre un grupo.', 'error')
+            this.serviciosToast.mostrarToast('Error', 'Solo se puede reaccionar sobre un grupo.', 'danger')
             return;
         } else {
             this.idGrupoSeleccionado = elemento.data().id;

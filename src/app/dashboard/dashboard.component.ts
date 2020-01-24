@@ -71,7 +71,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', 'danger');
 				} else {
 					this.problematicas = res;
 				}
@@ -123,7 +123,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al buscar los usuarios, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al buscar los usuarios, intentelo de nuevo.', 'danger');
 				} else {
 					this.prepareData(res);
 				}
@@ -192,7 +192,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error alcargar los invitados, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error alcargar los invitados, intentelo de nuevo.', 'danger');
 				} else {
 					this.invitaciones = res;
 				}
@@ -216,7 +216,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al agregar la problematica, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al agregar la problematica, intentelo de nuevo.', 'danger');
 				} else {
 					this.problematicas.unshift(res);
 					this.modal.modal('toggle');
@@ -240,9 +240,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al invitar, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al invitar, intentelo de nuevo.', 'danger');
 				} else {
-					this.serviciosToast.mostrarToast(null, 'Usuario invitado.');
+					this.serviciosToast.mostrarToast(undefined, 'Usuario invitado.');
 					this.invitaciones.push(res);
 					this.correoAInvitar = '';
 				}
@@ -259,7 +259,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al eliminar la invitación, intentelo de nuevo.', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al eliminar la invitación, intentelo de nuevo.', 'danger');
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Invitación eliminada', 'success');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.id !== id);
@@ -278,7 +278,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Hubo un error al avanzar la fase, intentelo de nuevo', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al avanzar la fase, intentelo de nuevo', 'danger');
 				} else {
 					this.avanzarFaseDeLaProblematicaActual();
 					this.serviciosToast.mostrarToast(undefined, 'Se avanzo a la siguiente fase');
@@ -383,7 +383,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar la información de la problematica, intentelo de nuevo', 'error');
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar la información de la problematica, intentelo de nuevo', 'danger');
 				} else {
 					this.datosProblematica = res;
 				}

@@ -8,10 +8,11 @@
 		</div>
 	</div>
 	<div class="col-lg-6 mb-5 div-escrito">
-		<div [hidden]="grupoSeleccionado" class="modal-content modal-content-mensaje">Por favor seleccione un grupo.</div>
+		<div [hidden]="grupoSeleccionado" class="modal-content modal-content-mensaje">Por favor seleccione un grupo.
+		</div>
 		<div [hidden]="!grupoSeleccionado" class="modal-content modal-content-form">
 			<div class="modal-header" style="color:white;background:#0C5F97;">
-				<h4 class="modal-tittle"> Grupo: {{grupoSeleccionado?.nombre}}</h4>
+				<h4 class="modal-tittle">{{grupoSeleccionado?.nombre}}</h4>
 			</div>
 			<!-- contenido de la ventana-->
 			<div class="modal-body">
@@ -59,12 +60,14 @@
 						Crear
 					</button>
 					<button *ngIf="existeEscrito" type="submit" style="background:#0C5F97" class="btn btn-info"
-						[disabled]="formEscrito.invalid || formEscrito.pristine || getOPutEnProceso || deleteEnProceso" (click)="editarEscrito()">
+						[disabled]="formEscrito.invalid || formEscrito.pristine || getOPutEnProceso || deleteEnProceso"
+						(click)="editarEscrito()">
 						<span class="spinner-absoluto spinner-border spinner-border-sm" role="status" aria-hidden="true"
 							*ngIf="getOPutEnProceso"></span>
 						Guardar cambios.
 					</button>
-					<button class="btn btn-danger" click="eliminarEscrito()" *ngIf="existeEscrito" [disabled]="deleteEnProceso || getOPutEnProceso">
+					<button class="btn btn-danger" (click)="eliminarEscrito()" *ngIf="existeEscrito"
+						[disabled]="deleteEnProceso || getOPutEnProceso">
 						<span class="spinner-absoluto spinner-border spinner-border-sm" role="status" aria-hidden="true"
 							*ngIf="deleteEnProceso"></span>
 						Eliminar

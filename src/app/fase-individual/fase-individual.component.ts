@@ -186,19 +186,19 @@ export class FaseIndividualComponent implements OnInit {
     }
 
     private atenderErr(err) {
-        this.serviciosToast.mostrarToast('Error', err.errros[0], 'error');
+        this.serviciosToast.mostrarToast('Error', err.errros[0], 'danger');
     }
 
     agregar() {
         if (!this.nombreNodo) {
-            this.serviciosToast.mostrarToast('Error', 'El nodo necesita un nombre.', 'error');
+            this.serviciosToast.mostrarToast('Error', 'El nodo necesita un nombre.', 'danger');
             return;
         }
 
         const foto = this.fotoFileInput.files[0];
 
         if (!foto) {
-            this.serviciosToast.mostrarToast('Error', 'El nodo necesita una imagen.', 'error');
+            this.serviciosToast.mostrarToast('Error', 'El nodo necesita una imagen.', 'danger');
             return;
         }
 
@@ -303,7 +303,7 @@ export class FaseIndividualComponent implements OnInit {
 
     private nodosValidos(idPadre, id) {
         if (!idPadre || !id) {
-            this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferente', 'error');
+            this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferente', 'danger');
             return false;
         }
         return true;
@@ -311,7 +311,7 @@ export class FaseIndividualComponent implements OnInit {
 
     private yaExisteRelacion(idPadre, id) {
         if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
-            this.serviciosToast.mostrarToast('Error', 'Ya existe una relación', 'error');
+            this.serviciosToast.mostrarToast('Error', 'Ya existe una relación', 'danger');
             return true;
         }
         return false;
@@ -325,7 +325,7 @@ export class FaseIndividualComponent implements OnInit {
     private tieneOtroPadre(idNodo) {
         const tieneOtroPadre = this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
         if (tieneOtroPadre) {
-            this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 padres.', 'error');
+            this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 padres.', 'danger');
             return true;
         }
         return false;
@@ -336,7 +336,7 @@ export class FaseIndividualComponent implements OnInit {
         let idA = this.nodoA.id;
         let ob = this.cy.getElementById(`${idDesde}${idA}`);
         if (ob.length > 0 && ob[0].isEdge()) {
-            this.serviciosToast.mostrarToast('Error', 'Ya existe la conexión', 'error');
+            this.serviciosToast.mostrarToast('Error', 'Ya existe la conexión', 'danger');
         } else {
             this.crearEdge(idA, idDesde);
         }

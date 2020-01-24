@@ -539,7 +539,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 		//Por ahora solo se permite una conexión por usuario a la fase grupal.
 		if (conexionesDeEsteUsuario === 2) {
-			this.serviciosToast.mostrarToast('Error', 'Ya estas conectado desde otro pestaña o navegador.', 'error')
+			this.serviciosToast.mostrarToast('Error', 'Ya estas conectado desde otro pestaña o navegador.', 'danger')
 			this.router.navigateByUrl('/dashboard');
 		} else {
 			solicitantes = solicitantes
@@ -726,7 +726,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private nodosValidos(idPadre, id) {
 		if (!idPadre || !id) {
-			this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'error')
+			this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'danger')
 			return false;
 		}
 		return true;
@@ -734,7 +734,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private nodosDiferentes(idPadre, id) {
 		if (idPadre !== id) { return true; }
-		this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'error')
+		this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'danger')
 		return false;
 	}
 
@@ -742,14 +742,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const nodo = this.cy.getElementById(id);
 		const existe = nodo.length > 0 && nodo.isParent();;
 		if (!existe) {
-			this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'error')
+			this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'danger')
 		}
 		return existe;
 	}
 
 	private yaExisteRelacion(idPadre, id) {
 		if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
-			this.serviciosToast.mostrarToast('Error', 'Ya existe una relación', 'error')
+			this.serviciosToast.mostrarToast('Error', 'Ya existe una relación', 'danger')
 			return true;
 		}
 		return false;
@@ -763,7 +763,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private tieneOtroPadre(idNodo) {
 		const tieneOtroPadre = this.gruposYEdges.find(grupo => this.esEdge(`${grupo.data.id}${idNodo}`)) !== undefined
 		if (tieneOtroPadre) {
-			this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 padres.', 'error');
+			this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 padres.', 'danger');
 			return true;
 		}
 		return false;
@@ -772,7 +772,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private tieneOtroHijo(idPadre) {
 		const tieneOtroHijo = this.gruposYEdges.find(grupo => this.esEdge(`${idPadre}${grupo.id}`)) !== undefined
 		if (tieneOtroHijo) {
-			this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 hijos.', 'error');
+			this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 hijos.', 'danger');
 			return true;
 		}
 		return false;
@@ -781,7 +781,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private esConexion(idPadre, id) {
 		let ob = this.cy.getElementById(`${idPadre}${id}`);
 		if (ob.length > 0 && ob[0].isEdge()) {
-			this.serviciosToast.mostrarToast('Error', 'Ya existe la conexión', 'error');
+			this.serviciosToast.mostrarToast('Error', 'Ya existe la conexión', 'danger');
 			return true;
 		}
 		return false;
@@ -866,7 +866,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private abrirModalCambioNombreGrupo(elemento) {
 		if (!elemento.data().esGrupo) {
-			this.serviciosToast.mostrarToast('Error', 'El cambio de nombre es solo para grupos.', 'error')
+			this.serviciosToast.mostrarToast('Error', 'El cambio de nombre es solo para grupos.', 'danger')
 			return;
 		}
 		this.grupoSeleccionado = elemento.data();
@@ -875,7 +875,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private abrirModalImagenNodo(elemento) {
 		if (elemento.data().esGrupo || !elemento.isNode()) {
-			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'error')
+			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'danger')
 			return;
 		}
 		this.nodoSeleccionado = elemento.data();
@@ -893,13 +893,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private onWebSocketClose(event) {
 		if (!this.cerradoNormal) {
-			this.serviciosToast.mostrarToast('Error', 'Fuiste expulsado dada tu inactividad.', 'error');
+			this.serviciosToast.mostrarToast('Error', 'Fuiste expulsado dada tu inactividad.', 'danger');
 			this.router.navigateByUrl('/dashboard');
 		}
 	}
 
 	private onWebsocketError(err) {
-		this.serviciosToast.mostrarToast('Error', 'Un error inesperado ha ocurrido, por favor vuelve a ingresar.', 'error');
+		this.serviciosToast.mostrarToast('Error', 'Un error inesperado ha ocurrido, por favor vuelve a ingresar.', 'danger');
 		this.router.navigateByUrl('/dashboard');
 	}
 

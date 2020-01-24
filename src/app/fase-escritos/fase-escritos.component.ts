@@ -186,14 +186,11 @@ export class FaseEscritosComponent implements OnInit {
 	private dibujarNodos(nodos) {
 		this.dibujarNodosPadre(nodos);
 		this.dibujarNodosHijo(nodos);
-		console.log(this.cy.nodes().jsons())
 		this.cy.layout({
 			name: 'cose',
 			nodeOverlap: 1,
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
-		console.log(this.cy.nodes().jsons())
-
 	}
 
 	private dibujarNodosPadre(nodos) {
@@ -221,7 +218,7 @@ export class FaseEscritosComponent implements OnInit {
 			this.atenderErr('escritos');
 		}
 		else {
-			this.escritos = [];
+			this.escritos = res;
 		}
 	}
 
@@ -276,7 +273,7 @@ export class FaseEscritosComponent implements OnInit {
 
 	private abrirModalImagenNodo(elemento) {
 		if (elemento.data().esGrupo || !elemento.isNode()) {
-			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'error');
+			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'danger');
 			return;
 		}
 		this.nodoSeleccionado = elemento.data();
@@ -284,7 +281,7 @@ export class FaseEscritosComponent implements OnInit {
 	}
 
 	private atenderErr(datos) {
-		this.serviciosToast.mostrarToast('Error', `Ocurrio un error al cargar los ${datos}`, 'error');
+		this.serviciosToast.mostrarToast('Error', `Ocurrio un error al cargar los ${datos}`, 'danger');
 	}
 
 	organizar() {
@@ -312,12 +309,12 @@ export class FaseEscritosComponent implements OnInit {
 			.subscribe(res => {
 				this.getOPutEnProceso = false;
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'error');
+					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'danger');
 				} else {
-					this.serviciosToast.mostrarToast(undefined, 'Escrito agregado', 'error');
+					this.serviciosToast.mostrarToast(undefined, 'Escrito agregado', 'success');
 					this.escritos.push(res);
 					const data = this.grupoSeleccionado;
-					this.visualizarEscrito({ target: { data } })
+					this.visualizarEscrito({ target: { data: function () { return data } } })
 				}
 			});
 	}
@@ -329,7 +326,7 @@ export class FaseEscritosComponent implements OnInit {
 		}
 
 		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail}/escritos/${this.escritoSeleccionado.id}`;
+			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
 
 		this.http
 			.put(url, this.escritoSeleccionado, options)
@@ -337,9 +334,10 @@ export class FaseEscritosComponent implements OnInit {
 			.subscribe(res => {
 				this.getOPutEnProceso = false;
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'error');
+					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'danger');
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Escrito guardado.', 'success');
+					this.formEscrito.control.markAsPristine();
 				}
 			});
 	}
@@ -353,7 +351,7 @@ export class FaseEscritosComponent implements OnInit {
 		}
 
 		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail}/escritos/${this.escritoSeleccionado.id}`;
+			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
 
 		this.http
 			.delete(url, options)
@@ -361,11 +359,13 @@ export class FaseEscritosComponent implements OnInit {
 			.subscribe(res => {
 				this.deleteEnProceso = false;
 				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'error');
+					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'danger');
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Escrito borrado.', 'success');
+
 					const index = this.escritos.findIndex(escrito => escrito.id === this.escritoSeleccionado.id);
 					this.escritos.splice(index, 1);
+					this.cy.getElementById(this.grupoSeleccionado.id).unselect();
 					this.grupoSeleccionado = undefined;
 				}
 			});
