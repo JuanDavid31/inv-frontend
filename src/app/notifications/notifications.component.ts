@@ -38,11 +38,7 @@ export class NotificationsComponent implements OnInit {
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast({
-						titulo: 'Error',
-						cuerpo: 'Hubo un error al cargar las invitaciones, intentelo de nuevo.',
-						esMensajeInfo: false
-					});
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar las invitaciones, intentelo de nuevo.', 'error');
 				} else {
 					this.invitaciones = res;
 				}
@@ -66,13 +62,9 @@ export class NotificationsComponent implements OnInit {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast({
-						titulo: 'Error',
-						cuerpo: 'Hubo un error al aceptar la invitación, intentelo de nuevo.',
-						esMensajeInfo: false
-					})
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al aceptar la invitación, intentelo de nuevo.', 'error')
 				} else {
-					this.serviciosToast.mostrarToast({ cuerpo: 'Invitación aceptada' });
+					this.serviciosToast.mostrarToast(undefined, 'Invitación aceptada');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
 					this.eliminarNotificacion(res.id);
 				}
@@ -99,13 +91,9 @@ export class NotificationsComponent implements OnInit {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast({
-						titulo: 'Error',
-						cuerpo: 'Hubo un error al rechazar la invitación, intentelo de nuevo.',
-						esMensajeInfo: false
-					})
+					this.serviciosToast.mostrarToast('Error', 'Hubo un error al rechazar la invitación, intentelo de nuevo.', 'error')
 				} else {
-					this.serviciosToast.mostrarToast({ cuerpo: 'Rechazaste la invitación' })
+					this.serviciosToast.mostrarToast(undefined, 'Rechazaste la invitación');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
 					this.eliminarNotificacion(res.id);
 				}

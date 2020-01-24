@@ -200,11 +200,7 @@ export class FaseReaccionesComponent implements OnInit {
 
     private abrirModalImagenNodo(elemento) {
         if (elemento.data().esGrupo || !elemento.isNode()) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Solo se pueden visualizar las imagenes de los nodos o individuales.',
-                esMensajeInfo: false
-            })
+            this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'error');
             return;
         }
         this.nodoSeleccionado = elemento.data();
@@ -213,11 +209,7 @@ export class FaseReaccionesComponent implements OnInit {
 
 
     private atenderErr(err) {
-        this.serviciosToast.mostrarToast({
-            titulo: 'Error',
-            cuerpo: err.erros[0],
-            esMensajeInfo: false
-        });
+        this.serviciosToast.mostrarToast('Error', err.erros[0], 'error');
     }
 
     private reaccionar(valorReaccion, elemento) {
@@ -229,13 +221,9 @@ export class FaseReaccionesComponent implements OnInit {
         const email = this.serviciosLocalStorage.darEmail();
 
         if (!elemento.data().esGrupo) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Solo se puede reaccionar sobre un grupo.',
-                esMensajeInfo: false
-            })
+            this.serviciosToast.mostrarToast('Error', 'Solo se puede reaccionar sobre un grupo.', 'error')
             return;
-        }else {
+        } else {
             this.idGrupoSeleccionado = elemento.data().id;
             const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
             this.http
@@ -250,8 +238,8 @@ export class FaseReaccionesComponent implements OnInit {
                 });
         }
     }
-    
-    organizar(){
+
+    organizar() {
         this.cy.layout({
             name: 'cose',
             nodeOverlap: 1,

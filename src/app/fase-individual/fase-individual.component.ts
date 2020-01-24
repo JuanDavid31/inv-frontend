@@ -186,31 +186,19 @@ export class FaseIndividualComponent implements OnInit {
     }
 
     private atenderErr(err) {
-        this.serviciosToast.mostrarToast({
-            titulo: 'Error',
-            cuerpo: err.errros[0],
-            esMensajeInfo: false
-        });
+        this.serviciosToast.mostrarToast('Error', err.errros[0], 'error');
     }
 
     agregar() {
         if (!this.nombreNodo) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'El nodo necesita un nombre.',
-                esMensajeInfo: false
-            });
+            this.serviciosToast.mostrarToast('Error', 'El nodo necesita un nombre.', 'error');
             return;
         }
 
         const foto = this.fotoFileInput.files[0];
 
         if (!foto) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'El nodo necesita una imagen.',
-                esMensajeInfo: false
-            });
+            this.serviciosToast.mostrarToast('Error', 'El nodo necesita una imagen.', 'error');
             return;
         }
 
@@ -315,11 +303,7 @@ export class FaseIndividualComponent implements OnInit {
 
     private nodosValidos(idPadre, id) {
         if (!idPadre || !id) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Debe seleccionar 2 nodos diferente',
-                esMensajeInfo: false
-            })
+            this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferente', 'error');
             return false;
         }
         return true;
@@ -327,11 +311,7 @@ export class FaseIndividualComponent implements OnInit {
 
     private yaExisteRelacion(idPadre, id) {
         if (this.esEdge(`${idPadre}${id}`) || this.esEdge(`${id}${idPadre}`)) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Ya existe una relación',
-                esMensajeInfo: false
-            })
+            this.serviciosToast.mostrarToast('Error', 'Ya existe una relación', 'error');
             return true;
         }
         return false;
@@ -345,11 +325,7 @@ export class FaseIndividualComponent implements OnInit {
     private tieneOtroPadre(idNodo) {
         const tieneOtroPadre = this.nodos.find(nodo => this.esEdge(`${nodo.id}${idNodo}`)) !== undefined
         if (tieneOtroPadre) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Un nodo no puede tener 2 padres.',
-                esMensajeInfo: false
-            });
+            this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 padres.', 'error');
             return true;
         }
         return false;
@@ -360,11 +336,7 @@ export class FaseIndividualComponent implements OnInit {
         let idA = this.nodoA.id;
         let ob = this.cy.getElementById(`${idDesde}${idA}`);
         if (ob.length > 0 && ob[0].isEdge()) {
-            this.serviciosToast.mostrarToast({
-                titulo: 'Error',
-                cuerpo: 'Ya existe la conexión',
-                esMensajeInfo: false
-            });
+            this.serviciosToast.mostrarToast('Error', 'Ya existe la conexión', 'error');
         } else {
             this.crearEdge(idA, idDesde);
         }

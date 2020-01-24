@@ -4,7 +4,7 @@ import { ToastService } from 'app/services/toast/toast.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { map, catchError } from 'rxjs/operators';
-import { of , forkJoin } from 'rxjs';
+import { of, forkJoin } from 'rxjs';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -18,7 +18,7 @@ declare var cytoscape;
 	templateUrl: './fase-escritos.component.html',
 	styleUrls: ['./fase-escritos.component.scss']
 })
-export class FaseEscritosComponent implements OnInit{
+export class FaseEscritosComponent implements OnInit {
 
 	cy: any = {};
 	problematicaActual: number;
@@ -31,19 +31,19 @@ export class FaseEscritosComponent implements OnInit{
 
 	grupoSeleccionado = undefined;
 	escritoSeleccionado: any = {};
-	
+
 	private formEscrito: NgForm;
 
-	@ViewChild('formEscrito', {static: false}) //No funciona si esta dentro de un *ngIf
+	@ViewChild('formEscrito', { static: false }) //No funciona si esta dentro de un *ngIf
 	set form(content: NgForm) {
-    	this.formEscrito = content;
+		this.formEscrito = content;
 	}
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private http: HttpClient,
 		private router: Router,
-		private activatedRoute: ActivatedRoute) {}
+		private activatedRoute: ActivatedRoute) { }
 
 	ngOnInit() {
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
@@ -117,7 +117,7 @@ export class FaseEscritosComponent implements OnInit{
 	existeEscrito = false;
 
 	private visualizarEscrito({ target }) {
-		if(this.getOPutEnProceso || this.deleteEnProceso)return;
+		if (this.getOPutEnProceso || this.deleteEnProceso) return;
 		if (!target.data().esGrupo) return;
 		this.formEscrito.form.markAsPristine();
 		this.grupoSeleccionado = target.data();
@@ -149,7 +149,7 @@ export class FaseEscritosComponent implements OnInit{
 				this.atenderRequestNodos(res[0]);
 				this.atenderRequestEscritos(res[1]);
 			})
-	}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+	}
 
 	private darRequestNodos() {
 		const options = {
@@ -158,7 +158,7 @@ export class FaseEscritosComponent implements OnInit{
 
 		return this.http
 			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/reacciones`, options)
-			.pipe(catchError(err => of (err)))
+			.pipe(catchError(err => of(err)))
 	}
 
 	private darRequestEscritos() {
@@ -171,7 +171,7 @@ export class FaseEscritosComponent implements OnInit{
 
 		return this.http
 			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
-			.pipe(catchError(err => of (err)))
+			.pipe(catchError(err => of(err)))
 	}
 
 	private atenderRequestNodos(res) {
@@ -232,7 +232,7 @@ export class FaseEscritosComponent implements OnInit{
 			halign: "center",
 			valignBox: "bottom",
 			halignBox: "center",
-			tpl: function(data) {
+			tpl: function (data) {
 				return `
 					<div class="mt-6" style="display:flex; flex-direction:row">
 						<div style="display:flex; flex-direction:column;">
@@ -263,13 +263,13 @@ export class FaseEscritosComponent implements OnInit{
 		this.cy.cxtmenu({
 			selector: 'node',
 			commands: [{
-					// visualizar imagen
-					content: '<span class="fa fa-eye fa-2x"></span>',
-					select: this.abrirModalImagenNodo.bind(this)
-				},
-				{
-					content: 'Nada'
-				}
+				// visualizar imagen
+				content: '<span class="fa fa-eye fa-2x"></span>',
+				select: this.abrirModalImagenNodo.bind(this)
+			},
+			{
+				content: 'Nada'
+			}
 			]
 		});
 	}
@@ -284,11 +284,7 @@ export class FaseEscritosComponent implements OnInit{
 	}
 
 	private atenderErr(datos) {
-		this.serviciosToast.mostrarToast({
-			titulo: 'Error',
-			cuerpo: `Ocurrio un error al cargar los ${datos}`,
-			esMensajeInfo: false
-		});
+		this.serviciosToast.mostrarToast('Error', `Ocurrio un error al cargar los ${datos}`, 'error');
 	}
 
 	organizar() {
@@ -298,7 +294,7 @@ export class FaseEscritosComponent implements OnInit{
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
 	}
-	
+
 	getOPutEnProceso = false;
 
 	crearEscrito() {
@@ -312,20 +308,16 @@ export class FaseEscritosComponent implements OnInit{
 
 		this.http
 			.post(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of (err)))
+			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				this.getOPutEnProceso = false;
 				if (res.error) {
-					//TODO: Recibir mensaje de success
-					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
-					
-					
-					//TODO: Poner modo edición.
-					const data = this.grupoSeleccionado;
-					this.visualizarEscrito({target: {data}})
+					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'error');
 				} else {
-					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito agregado.' })
+					this.serviciosToast.mostrarToast(undefined, 'Escrito agregado', 'error');
 					this.escritos.push(res);
+					const data = this.grupoSeleccionado;
+					this.visualizarEscrito({ target: { data } })
 				}
 			});
 	}
@@ -341,17 +333,17 @@ export class FaseEscritosComponent implements OnInit{
 
 		this.http
 			.put(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of (err)))
+			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				this.getOPutEnProceso = false;
 				if (res.error) {
-					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
+					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'error');
 				} else {
-					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito guardado.' })
+					this.serviciosToast.mostrarToast(undefined, 'Escrito guardado.', 'success');
 				}
 			});
 	}
-	
+
 	deleteEnProceso = false;
 
 	eliminarEscrito() {
@@ -365,13 +357,13 @@ export class FaseEscritosComponent implements OnInit{
 
 		this.http
 			.delete(url, options)
-			.pipe(catchError(err => of (err)))
+			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				this.deleteEnProceso = false;
 				if (res.error) {
-					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
+					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'error');
 				} else {
-					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito borrado.' });
+					this.serviciosToast.mostrarToast(undefined, 'Escrito borrado.', 'success');
 					const index = this.escritos.findIndex(escrito => escrito.id === this.escritoSeleccionado.id);
 					this.escritos.splice(index, 1);
 					this.grupoSeleccionado = undefined;
@@ -406,29 +398,29 @@ export class FaseEscritosComponent implements OnInit{
 			},
 
 			content: [{
-					text: 'Resumen de escritos',
-					bold: true,
-					fontSize: 20,
-					alignment: 'center',
-					margin: [0, 0, 0, 20]
-				},
-				{
-					columns: [
-						[
+				text: 'Resumen de escritos',
+				bold: true,
+				fontSize: 20,
+				alignment: 'center',
+				margin: [0, 0, 0, 20]
+			},
+			{
+				columns: [
+					[
 
-							{
-								text: 'Elaborado por: ' + 'Diego Pena',
-								style: 'name'
-							},
-							{
-								text: datos
-							}
-						],
-						[
-							// Document definition for Profile pic
-						]
+						{
+							text: 'Elaborado por: ' + 'Diego Pena',
+							style: 'name'
+						},
+						{
+							text: datos
+						}
+					],
+					[
+						// Document definition for Profile pic
 					]
-				}
+				]
+			}
 			],
 			styles: {
 				name: {
