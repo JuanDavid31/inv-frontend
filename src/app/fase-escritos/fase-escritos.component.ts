@@ -1,10 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { map, catchError } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
+import { of , forkJoin } from 'rxjs';
+
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { NgForm } from '@angular/forms';
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
 declare var cytoscape;
 
 @Component({
@@ -12,7 +18,7 @@ declare var cytoscape;
 	templateUrl: './fase-escritos.component.html',
 	styleUrls: ['./fase-escritos.component.scss']
 })
-export class FaseEscritosComponent implements OnInit {
+export class FaseEscritosComponent implements OnInit{
 
 	cy: any = {};
 	problematicaActual: number;
@@ -24,13 +30,20 @@ export class FaseEscritosComponent implements OnInit {
 	descripcionEscrito = '';
 
 	grupoSeleccionado = undefined;
-	escritoSeleccionado = undefined;
+	escritoSeleccionado: any = {};
+	
+	private formEscrito: NgForm;
+
+	@ViewChild('formEscrito', {static: false}) //No funciona si esta dentor de un *ngIf
+	set form(content: NgForm) {
+    	this.formEscrito = content;
+	}
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private http: HttpClient,
 		private router: Router,
-		private activatedRoute: ActivatedRoute) { }
+		private activatedRoute: ActivatedRoute) {}
 
 	ngOnInit() {
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
@@ -104,7 +117,9 @@ export class FaseEscritosComponent implements OnInit {
 	existeEscrito = false;
 
 	private visualizarEscrito({ target }) {
+		if(this.getOPutEnProceso || this.deleteEnProceso)return;
 		if (!target.data().esGrupo) return;
+		this.formEscrito.form.markAsPristine();
 		this.grupoSeleccionado = target.data();
 
 		const idGrupo = this.grupoSeleccionado.id;
@@ -114,27 +129,14 @@ export class FaseEscritosComponent implements OnInit {
 			this.existeEscrito = true;
 			//Hay escrito, muestro boton de editar y eliminar. Editar solo es esta habilitado si el formulario es valido.
 			//Eliminar estara habilitado siempre que exista el escrito.
-
-			// this.escritoSeleccionado = {
-			// 	id: this.escritoSeleccionado.id,
-			// 	nombre: this.escritoSeleccionado.nombre,
-			// 	descripcion: this.escritoSeleccionado.descripcion,
-			// 	idGrupo: this.grupoSeleccionado.id
-			// }
-
-		} else {//No hay escrito. Muestro crear.
+		}
+		else { //No hay escrito. Muestro crear.
 			this.existeEscrito = false;
 			this.escritoSeleccionado = {
 				nombre: '',
 				descripcion: '',
-				idGrupo: 0 + this.grupoSeleccionado.id
+				idGrupo: +this.grupoSeleccionado.id
 			}
-		}
-
-		if ({}) {
-			console.log('true') //* Para por aquí.
-		} else {
-			console.log('false')
 		}
 	}
 
@@ -155,8 +157,8 @@ export class FaseEscritosComponent implements OnInit {
 		}
 
 		return this.http
-			.get(`http://localhost:8080/problematicas/${this.problematicaActual}/reacciones`, options)
-			.pipe(catchError(err => of(err)))
+			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/reacciones`, options)
+			.pipe(catchError(err => of (err)))
 	}
 
 	private darRequestEscritos() {
@@ -164,21 +166,22 @@ export class FaseEscritosComponent implements OnInit {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const email = this.serviciosLocalStorage.darEmail(); if (!email) return;
+		const email = this.serviciosLocalStorage.darEmail();
+		if (!email) return;
 
 		return this.http
-			.get(`http://localhost:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
-			.pipe(catchError(err => of(err)))
+			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
+			.pipe(catchError(err => of (err)))
 	}
 
 	private atenderRequestNodos(res) {
 		if (res.error) {
 			this.atenderErr('nodos')
-		} else {
+		}
+		else {
 			this.dibujarNodos(res);
 		}
 	}
-
 
 	private dibujarNodos(nodos) {
 		this.dibujarNodosPadre(nodos);
@@ -216,7 +219,8 @@ export class FaseEscritosComponent implements OnInit {
 	private atenderRequestEscritos(res) {
 		if (res.error) {
 			this.atenderErr('escritos');
-		} else {
+		}
+		else {
 			this.escritos = [];
 		}
 	}
@@ -228,7 +232,7 @@ export class FaseEscritosComponent implements OnInit {
 			halign: "center",
 			valignBox: "bottom",
 			halignBox: "center",
-			tpl: function (data) {
+			tpl: function(data) {
 				return `
 					<div class="mt-6" style="display:flex; flex-direction:row">
 						<div style="display:flex; flex-direction:column;">
@@ -258,8 +262,7 @@ export class FaseEscritosComponent implements OnInit {
 	private prepararMenuGrupos() {
 		this.cy.cxtmenu({
 			selector: 'node',
-			commands: [
-				{
+			commands: [{
 					// visualizar imagen
 					content: '<span class="fa fa-eye fa-2x"></span>',
 					select: this.abrirModalImagenNodo.bind(this)
@@ -299,22 +302,31 @@ export class FaseEscritosComponent implements OnInit {
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
 	}
+	
+	getOPutEnProceso = false;
 
 	crearEscrito() {
+		this.getOPutEnProceso = true;
 		const options = {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const url = `http://localhost:8080/problematicas/${this.problematicaActual}/personas/` +
+		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
 			`${this.serviciosLocalStorage.darEmail()}/escritos`;
 
 		this.http
 			.post(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of(err)))
+			.pipe(catchError(err => of (err)))
 			.subscribe(res => {
+				this.getOPutEnProceso = false;
 				if (res.error) {
 					//TODO: Recibir mensaje de success
 					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
+					
+					
+					//TODO: Poner modo edición.
+					const data = this.grupoSeleccionado;
+					this.visualizarEscrito({target: {data}})
 				} else {
 					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito agregado.' })
 					this.escritos.push(res);
@@ -323,17 +335,19 @@ export class FaseEscritosComponent implements OnInit {
 	}
 
 	editarEscrito() {
+		this.getOPutEnProceso = true;
 		const options = {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const url = `http://localhost:8080/problematicas/${this.problematicaActual}/personas/` +
+		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
 			`${this.serviciosLocalStorage.darEmail}/escritos/${this.escritoSeleccionado.id}`;
 
 		this.http
 			.put(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of(err)))
+			.pipe(catchError(err => of (err)))
 			.subscribe(res => {
+				this.getOPutEnProceso = false;
 				if (res.error) {
 					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
 				} else {
@@ -341,25 +355,30 @@ export class FaseEscritosComponent implements OnInit {
 				}
 			});
 	}
+	
+	deleteEnProceso = false;
 
 	eliminarEscrito() {
+		this.deleteEnProceso = true;
 		const options = {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const url = `http://localhost:8080/problematicas/${this.problematicaActual}/personas/` +
+		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
 			`${this.serviciosLocalStorage.darEmail}/escritos/${this.escritoSeleccionado.id}`;
 
 		this.http
 			.delete(url, options)
-			.pipe(catchError(err => of(err)))
+			.pipe(catchError(err => of (err)))
 			.subscribe(res => {
+				this.deleteEnProceso = false;
 				if (res.error) {
 					this.serviciosToast.mostrarToast({ esMensajeInfo: false, titulo: 'Error', cuerpo: res.error.errors[0] });
 				} else {
 					this.serviciosToast.mostrarToast({ cuerpo: 'Escrito borrado.' });
-					console.log(this.escritoSeleccionado.id);
-					this.escritos.findIndex(escrito => escrito.id === this.escritoSeleccionado.id);
+					const index = this.escritos.findIndex(escrito => escrito.id === this.escritoSeleccionado.id);
+					this.escritos.splice(index, 1);
+					this.grupoSeleccionado = undefined;
 				}
 			});
 	}
@@ -368,5 +387,78 @@ export class FaseEscritosComponent implements OnInit {
 		console.log(form);
 		console.log(form.controls);
 		return '';
+	}
+
+
+
+	escritosPdf = [];
+	nombresPdf = 'Algo iba aquí';
+
+	generatePdf() {
+
+		var datos = "";
+
+		for (var d = 0; d < this.escritosPdf.length; d++) {
+
+			datos += this.escritosPdf[d] + "\n";
+
+		}
+		let documentDefinition = {
+			info: {
+				title: 'Escritos problematicas',
+
+			},
+
+			content: [{
+					text: 'Resumen de escritos',
+					bold: true,
+					fontSize: 20,
+					alignment: 'center',
+					margin: [0, 0, 0, 20]
+				},
+				{
+					columns: [
+						[
+
+							{
+								text: 'Elaborado por: ' + 'Diego Pena',
+								style: 'name'
+							},
+							{
+								text: datos
+							}
+						],
+						[
+							// Document definition for Profile pic
+						]
+					]
+				}
+			],
+			styles: {
+				name: {
+					fontSize: 16,
+					bold: true
+				}
+			}
+
+		}
+
+
+		pdfMake.createPdf(documentDefinition).open();
+	}
+
+
+	generarDatosPdf() {
+
+		var datos = "{info: {title: 'Escritos problematicas', },content: [{ text: 'Resumen de escritos',bold: true, fontSize: 20, alignment: 'center', margin: [0, 0, 0, 20] }, {columns: [[ ";
+
+		for (var d = 0; d < this.escritosPdf.length; d++) {
+
+			datos += "{ text: 'Elaborado por: ' +" + this.nombresPdf + ", style: 'name'},{ text:" + this.escritosPdf + "},";
+
+		}
+		datos += "],[ ]]}],styles: { name: { fontSize: 16,bold: true } }"
+
+		return datos;
 	}
 }
