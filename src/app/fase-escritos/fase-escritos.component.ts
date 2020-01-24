@@ -34,7 +34,7 @@ export class FaseEscritosComponent implements OnInit{
 	
 	private formEscrito: NgForm;
 
-	@ViewChild('formEscrito', {static: false}) //No funciona si esta dentor de un *ngIf
+	@ViewChild('formEscrito', {static: false}) //No funciona si esta dentro de un *ngIf
 	set form(content: NgForm) {
     	this.formEscrito = content;
 	}
@@ -149,7 +149,7 @@ export class FaseEscritosComponent implements OnInit{
 				this.atenderRequestNodos(res[0]);
 				this.atenderRequestEscritos(res[1]);
 			})
-	}
+	}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 
 	private darRequestNodos() {
 		const options = {
@@ -276,11 +276,7 @@ export class FaseEscritosComponent implements OnInit{
 
 	private abrirModalImagenNodo(elemento) {
 		if (elemento.data().esGrupo || !elemento.isNode()) {
-			this.serviciosToast.mostrarToast({
-				titulo: 'Error',
-				cuerpo: 'Solo se pueden visualizar las imagenes de los nodos o individuales.',
-				esMensajeInfo: false
-			})
+			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'error');
 			return;
 		}
 		this.nodoSeleccionado = elemento.data();

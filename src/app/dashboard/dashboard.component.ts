@@ -228,15 +228,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast({
-						titulo: 'Error',
-						cuerpo: 'Ocurrió un error al agregar la problematica, intentelo de nuevo.',
-						esMensajeInfo: false
-					});
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al agregar la problematica, intentelo de nuevo.', 'error');
 				} else {
 					this.problematicas.unshift(res);
 					this.modal.modal('toggle');
-					this.serviciosToast.mostrarToast({ cuerpo: 'Problematica agregada' });
+					this.serviciosToast.mostrarToast(undefined, 'Problematica agregada', 'success');
 				}
 			})
 	}
@@ -256,13 +252,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		}, options).pipe(catchError(err => of(err)))
 			.subscribe((res: any) => {
 				if (res.error) {
-					this.serviciosToast.mostrarToast({
-						titulo: 'Error',
-						cuerpo: 'Ocurrió un error al invitar, intentelo de nuevo.',
-						esMensajeInfo: false
-					});
+					this.serviciosToast.mostrarToast( 'Error', 'Ocurrió un error al invitar, intentelo de nuevo.', 'error');
 				} else {
-					this.serviciosToast.mostrarToast({ cuerpo: 'Usuario invitado.' });
+					this.serviciosToast.mostrarToast(null, 'Usuario invitado.' );
 					this.invitaciones.push(res);
 					this.correoAInvitar = '';
 				}
