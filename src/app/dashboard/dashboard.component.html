@@ -204,16 +204,24 @@
 						<p> {{darFaseProblematica()}} </p>
 					</div>
 					<div class="modal-footer">
-						<button style="background:#0C5F97" class="btn btn-primary" (click)="participar()"
-							data-dismiss="modal" aria-label="Close"
-							*ngIf="0 < problematicaSeleccionada.fase">
-							Participar
-						</button>
-						<button class="btn" style="background:#0C5F97" data-target="#confirmarFase" 
-							data-dismiss="modal"
-							*ngIf="problematicaSeleccionada.esInterventor" data-toggle="modal"
-							(click)="darInfoAlAvanzar()">
-							Avanzar fase
+						<div *ngIf="problematicaSeleccionada.fase < 5">
+							<button style="background:#0C5F97" class="btn btn-primary" (click)="participar()"
+								data-dismiss="modal" aria-label="Close"
+								*ngIf="0 < problematicaSeleccionada.fase">
+								Participar
+							</button>
+							<button class="btn" style="background:#0C5F97" data-target="#confirmarFase" 
+								data-dismiss="modal"
+								*ngIf="problematicaSeleccionada.esInterventor" data-toggle="modal"
+								(click)="darInfoAlAvanzar()">
+								Avanzar fase
+							</button>
+							<!--TODO: Poner boton de finalizar problematica -->
+						</div>
+						<button class="btn"
+							*ngIf="problematicaSeleccionada.fase === 5"
+							(click)="verResultados()">
+							Resultados
 						</button>
 					</div>
 				</div>
