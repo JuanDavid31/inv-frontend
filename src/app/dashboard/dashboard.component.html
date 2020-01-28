@@ -14,7 +14,7 @@
 		</div>
 		<div class="row">
 			<div *ngFor="let problematica of problematicas" class="col-12 col-sm-6 col-md-4 col-lg-3">
-				<div class="card card-chart problematica-card">
+				<div class="card card-chart problematica-card"  >
 					<div class="card-header">
 						<img src="./assets/img/unibague_opt.png" class="card-img-top img-fluid">
 						<div class="ct-chart" id=""></div>
@@ -23,11 +23,11 @@
 						<h4 class="card-title">{{problematica.nombre}}...</h4>
 						<button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica)"
 							*ngIf="sePuedeInvitar(problematica)" data-target="#invitaciones" data-toggle="modal">
-							Invitar
+							Invitar 
 						</button>
 						<button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica)"
 							data-target="#informacion" data-toggle="modal">
-							Info
+							Info 
 						</button>
 					</div>
 					<div class="card-footer">
@@ -62,8 +62,8 @@
 							</div>
 							<div class="form-group">
 								<label for="escritos">Escritos</label>
-								<select class="form-control" id="escritos" [ngModel]="escritoSeleccionado"
-									(change)="cambioEscrito()">
+								<select class="form-control" id="escritos"
+									(change)="cambioEscrito($event.target.value)">
 									<option *ngFor="let escrito of escritos" [value]="escrito">
 										{{escrito.nombre}}
 									</option>
@@ -203,11 +203,14 @@
 						<h5 style="font-weight: bold">Etapa</h5>
 						<p> {{darFaseProblematica()}} </p>
 					</div>
-					<div class="modal-footer" *ngIf="problematicaSeleccionada.fase < 5">
-						<button style="background:#0C5F97" type="button" class="btn btn-primary" (click)="participar()"
+					<div class="modal-footer">
+						<button style="background:#0C5F97" class="btn btn-primary" (click)="participar()"
 							data-dismiss="modal" aria-label="Close"
-							*ngIf="0 < problematicaSeleccionada.fase">Participar</button>
-						<button class="btn" style="background:#0C5F97" data-target="#confirmarFase" data-dismiss="modal"
+							*ngIf="0 < problematicaSeleccionada.fase">
+							Participar
+						</button>
+						<button class="btn" style="background:#0C5F97" data-target="#confirmarFase" 
+							data-dismiss="modal"
 							*ngIf="problematicaSeleccionada.esInterventor" data-toggle="modal"
 							(click)="darInfoAlAvanzar()">
 							Avanzar fase

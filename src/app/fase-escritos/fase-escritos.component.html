@@ -52,7 +52,6 @@
 							</div>
 						</div>
 					</div>
-					<!--{{testing(formEscrito)}}-->
 					<button *ngIf="!existeEscrito" type="submit" style="background:#0C5F97" class="btn btn-info"
 						[disabled]="formEscrito.invalid || getOPutEnProceso" (click)="crearEscrito()">
 						<span class="spinner-absoluto spinner-border spinner-border-sm" role="status" aria-hidden="true"
@@ -95,5 +94,4 @@
 			</div>
 		</div>
 	</div>
-	<button class="btn" (click)="generatePdf()">PDF 1</button>
 </div>

@@ -19,6 +19,7 @@ import {
   MatSelectModule
 } from '@angular/material';
 import { FaseEscritosComponent } from 'app/fase-escritos/fase-escritos.component';
+import { ResultadosComponent } from 'app/resultados/resultados.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -39,7 +40,8 @@ import { FaseEscritosComponent } from 'app/fase-escritos/fase-escritos.component
     FaseIndividualComponent,
     FaseGrupalComponent,
     FaseEscritosComponent,
-    NotificationsComponent
+    NotificationsComponent,
+    ResultadosComponent
   ]
 })
 

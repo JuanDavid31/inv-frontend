@@ -18,7 +18,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	problematicasTerminadas = [];
 	invitaciones = [];
 	escritos = [];
-	escritoSeleccionado = {};
 	nombreNuevaProblematica: string = '';
 	descripcionNuevaProblematica: string = '';
 	correoAInvitar: string;
@@ -79,27 +78,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	cargarProblematicasTerminadas() {
-		// const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
-		// const options = {
-		// 	headers: headers
-		// }
-		//TODO: cambiar por url correcta.
-		// const url = `http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}/personas`;
+		const options = {
+			headers: headers
+		}
+		
+		const url = `http://3.130.29.100:8080/personas/${this.serviciosLocalStorage.darEmail()}/problematicas?fase=5`;
 
-		// this.http.get(url, options)
-		// 	.pipe(catchError(err => of(err)))
-		// 	.subscribe((res: any) => {
-		// 		if (res.error) {
-		// 			this.serviciosToast.mostrarToast(
-		// 				'Error',
-		// 				'Ocurrió un error al buscar las problematicas terminadas, intentelo de nuevo.',
-		// 				false
-		// 			});
-		// 		} else {
-		// 			this.problematicasTerminadas = res;
-		// 		}
-		// 	})
+		this.http.get(url, options)
+			.pipe(catchError(err => of(err)))
+			.subscribe((res: any) => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast(
+						'Error',
+						'Ocurrió un error al buscar las problematicas terminadas, intentelo de nuevo.', 
+						'error');
+				} else {
+					this.problematicasTerminadas = res;
+				}
+			})
 	}
 
 	activateAutoCompletadoUsuariosAInvitar(query: string, result) {
@@ -391,32 +389,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	buscarEscritosPorProblematica(idProblematica) {
-		// const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
-		// const options = {
-		// 	headers: headers
-		// }
+		const options = {
+			headers: headers
+		}
 
-		// this.http
-		// 	.get(`http://3.130.29.100:8080/problematicas/${idProblematica}/escritos`, options)
-		// 	.pipe(catchError(err => of(err)))
-		// 	.subscribe(res => {
-		// 		if (res.error) {
-		// 			this.serviciosToast.mostrarToast(
-		// 				'Error',
-		// 				'Hubo un error al cargar los escritos, intentelo de nuevo',
-		// 				false
-		// 			});
-		// 		} else {
-		// 			this.escritos = res;
-		// 		}
-		// 	})
+		this.http
+			.get(`http://3.130.29.100:8080/problematicas/${idProblematica}/escritos`, options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast(
+						'Error',
+						'Hubo un error al cargar los escritos, intentelo de nuevo',
+						'error'
+					);
+				} else {
+					this.escritos = res;
+				}
+			})
 	}
 
-	cambioEscrito() {
-		// const { nombre, descripcion } = this.escritoSeleccionado;
-		// this.nombreNuevaProblematica = nombre;
-		// this.descripcionNuevaProblematica = descripcion;
+	cambioEscrito(escrito) {
+		const { nombre, descripcion } = escrito;
+		this.nombreNuevaProblematica = nombre;
+		this.descripcionNuevaProblematica = descripcion;
 	}
 
 	ngOnDestroy() {

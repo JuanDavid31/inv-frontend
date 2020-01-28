@@ -167,6 +167,8 @@ export class NavbarComponent implements OnInit {
 				return 'Notificaciones';
 			case '/fase-reacciones':
 				return 'Fase de reacciones';
+			case '/resultados':
+				return 'Resultados';
 		}
 
 		for (var item = 0; item < this.listTitles.length; item++) {
@@ -177,7 +179,7 @@ export class NavbarComponent implements OnInit {
 		return 'Dashboard';
 	}
 
-	cerrarCesion() {
+	cerrarCesion() { //TODO: Cesion ?
 		this.serviciosLocalStorage.eliminarDatos();
 		this.router.navigateByUrl("/login");
 	}

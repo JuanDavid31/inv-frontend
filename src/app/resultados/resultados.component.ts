@@ -1,39 +1,34 @@
-import { Component, OnInit, ViewChild, ViewChildren, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { map, catchError } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
-import { NgForm } from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 declare var cytoscape;
 
-@Component({
-	selector: 'app-fase-escritos',
-	templateUrl: './fase-escritos.component.html',
-	styleUrls: ['./fase-escritos.component.scss']
-})
-export class FaseEscritosComponent implements OnInit {
 
+
+@Component({
+  selector: 'app-resultados',
+  templateUrl: './resultados.component.html',
+  styleUrls: ['./resultados.component.scss']
+})
+export class ResultadosComponent implements OnInit {
+	
 	cy: any = {};
 	problematicaActual: number;
 	modalVisualizacionImagenNodo: any;
 	nodoSeleccionado: any;
-	escritos: any[] = [];
 
-	nombreEscrito = '';
-	descripcionEscrito = '';
+	grupos = [];
+	escritos = [];
 
-	grupoSeleccionado = undefined;
 	escritoSeleccionado: any = {};
-
-	private formEscrito: NgForm;
-
-	@ViewChild('formEscrito', { static: false }) //No funciona si esta dentro de un *ngIf
-	set form(content: NgForm) {
-		this.formEscrito = content;
-	}
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
@@ -107,32 +102,6 @@ export class FaseEscritosComponent implements OnInit {
 			minZoom: 0.1,
 			maxZoom: 2
 		});
-		this.cy.on('select', this.visualizarEscrito.bind(this))
-	}
-
-	existeEscrito = false;
-
-	private visualizarEscrito({ target }) {
-		if (this.getOPutEnProceso || this.deleteEnProceso) return;
-		if (!target.data().esGrupo) return;
-		this.formEscrito.form.markAsPristine();
-		this.grupoSeleccionado = target.data();
-
-		this.escritoSeleccionado = this.escritos.find(escrito => escrito.idGrupo.toString() === this.grupoSeleccionado.id); //El id se guarda como String.
-
-		if (this.escritoSeleccionado) {
-			this.existeEscrito = true;
-			//Hay escrito, muestro boton de editar y eliminar. Editar solo es esta habilitado si el formulario es valido.
-			//Eliminar estara habilitado siempre que exista el escrito.
-		}
-		else { //No hay escrito. Muestro crear.
-			this.existeEscrito = false;
-			this.escritoSeleccionado = {
-				nombre: '',
-				descripcion: '',
-				idGrupo: +this.grupoSeleccionado.id
-			}
-		}
 	}
 
 	private cargarNodosYEscritos() {
@@ -165,7 +134,7 @@ export class FaseEscritosComponent implements OnInit {
 		if (!email) return;
 
 		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
+			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/escritos`, options)
 			.pipe(catchError(err => of(err)))
 	}
 
@@ -211,8 +180,7 @@ export class FaseEscritosComponent implements OnInit {
 	private atenderRequestEscritos(res) {
 		if (res.error) {
 			this.atenderErr('escritos');
-		}
-		else {
+		} else {
 			this.escritos = res;
 		}
 	}
@@ -236,8 +204,8 @@ export class FaseEscritosComponent implements OnInit {
 						<div class="ml-2 mr-2" style="display:flex; flex-direction:column;">
 							<span class="far fa-meh fa-9x"></span>
 							<span class="mt-4" style="font-size: 60px; display: flex; justify-content: center;"> 
-    							${data.reaccionesNeutras} 
-    						</span>
+								${data.reaccionesNeutras} 
+							</span>
 						</div>
 						<div  style="display:flex; flex-direction:column;">
 							<span class="far fa-smile-beam fa-9x"></span>
@@ -261,8 +229,7 @@ export class FaseEscritosComponent implements OnInit {
 			},
 			{
 				content: 'Nada'
-			}
-			]
+			}]
 		});
 	}
 
@@ -286,84 +253,76 @@ export class FaseEscritosComponent implements OnInit {
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
 	}
+	
+	actualizarListaEscritos({ escritos }){
+		this.escritos = escritos;
+	}
+	
+	cambioEscrito(escrito){
+		this.escritoSeleccionado = escrito;
+	}
+	
+	
+	
+    autoresPdfd: any[] = ['diego','piza','sumadre']
+    escritosPdf: any[] = ['blablablabla', 'reBlabla bla', 'pruebita de amor']
+    
+   
+	pruebaArreglo: any[] = []
+	
+	 generarArregloPdf(){
+		
+		for(var d=0;d<this.autoresPdfd.length;d++){
+			
+			this.pruebaArreglo[d]=[{text:'Grupo :'+ 'prueba - autor: '+this.autoresPdfd[d], style:'name'},this.escritosPdf[d]+'\n']
+			
+		}
+		
+		return this.pruebaArreglo
+	}
+	
+	generatePdf() {
 
-	getOPutEnProceso = false;
+		var datos = "";
 
-	crearEscrito() {
-		this.getOPutEnProceso = true;
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
+		for (var d = 0; d < this.escritosPdf.length; d++) {
+
+			datos += this.escritosPdf[d] + "\n";
+
+		}
+		let documentDefinition = {
+			info: {
+				title: 'Escritos problematicas',
+
+			},
+
+			content: [{
+				text: 'Resumen de escritos 1',
+				bold: true,
+				fontSize: 20,
+				alignment: 'center',
+				margin: [0, 0, 0, 20]
+			},
+			{
+				columns: [
+				this.generarArregloPdf(),
+					
+				]
+			}
+			],
+			styles: {
+				name: {
+					fontSize: 16,
+					bold: true
+				}
+			}
+
 		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail()}/escritos`;
 
-		this.http
-			.post(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of(err)))
-			.subscribe(res => {
-				this.getOPutEnProceso = false;
-				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'danger');
-				} else {
-					this.serviciosToast.mostrarToast(undefined, 'Escrito agregado', 'success');
-					this.escritos.push(res);
-					const data = this.grupoSeleccionado;
-					this.visualizarEscrito({ target: { data: function () { return data } } })
-				}
-			});
+		pdfMake.createPdf(documentDefinition).open();
 	}
 
-	editarEscrito() {
-		this.getOPutEnProceso = true;
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
-
-		this.http
-			.put(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of(err)))
-			.subscribe(res => {
-				this.getOPutEnProceso = false;
-				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'danger');
-				} else {
-					this.serviciosToast.mostrarToast(undefined, 'Escrito guardado.', 'success');
-					this.formEscrito.control.markAsPristine();
-				}
-			});
-	}
-
-	deleteEnProceso = false;
-
-	eliminarEscrito() {
-		this.deleteEnProceso = true;
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
-
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
-
-		this.http
-			.delete(url, options)
-			.pipe(catchError(err => of(err)))
-			.subscribe(res => {
-				this.deleteEnProceso = false;
-				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', res.error.errors[0], 'danger');
-				} else {
-					this.serviciosToast.mostrarToast(undefined, 'Escrito borrado.', 'success');
-
-					const index = this.escritos.findIndex(escrito => escrito.id === this.escritoSeleccionado.id);
-					this.escritos.splice(index, 1);
-					this.cy.getElementById(this.grupoSeleccionado.id).unselect();
-					this.grupoSeleccionado = undefined;
-				}
-			});
-	}
 
 }
