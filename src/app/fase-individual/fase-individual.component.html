@@ -1,21 +1,75 @@
 <div class="main-content">
-    <div class="ctrl" style="background:#DCE3E8">
+    <div class="ctrl d-block d-md-none" style="background:#DCE3E8">
+        <div class="iconos" [ngClass]="{'mb-3': hayMenuVisible()}">
+            <i class="material-icons ripple" (click)="alternarVisibilidadAccionesAgregarNodo()">
+                add
+            </i>
+            <i class="fas fa-project-diagram ml-2 mr-2 ripple" (click)="alternarVisibilidadAccionesConectarNodos()"></i>
+              <i class="material-icons ripple" (click)="reiniciar()">
+                reorder
+            </i>
+        </div>
+        <div *ngIf="esAccionesAgregarNodoVisible()" class="agregar-nodo-responsive">
+            <div class="col-12 col-sm-6 col-md-6 div-archivo">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="customFileLang" lang="es">
+                    <label class="custom-file-label" for="customFileLang">Seleccionar Archivo</label>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-6 d-flex form-group">
+                <input class="form-control mt-0" type="text" name="nombreNodoInput" placeholder="Dale un Nombre"
+                    minlength="1" maxlength="20" id="nombre" [(ngModel)]="nombreNodo">
+                <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Agregar" (click)="agregar()">
+            </div>    
+        </div>
+        <div *ngIf="esAccionesConectarNodosVisible()" class="conectar-nodos-responsive">
+            <div class="col-12 col-sm-4 col-md-3 form-group div-conectar">
+                <div class="d-flex align-items-end">
+                    <label class="mb-0 mr-2" for="De">De</label>
+                    <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe">
+                        <option disabled selected>Selecciona un nodo</option>
+                        <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                            {{nodo.nombre}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-4 col-md-3 form-group div-conectar">
+                <div class="d-flex align-items-end">
+                    <label class="mb-0 mr-2" for="A">A</label>
+                    <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA">
+                        <option disabled selected>Selecciona un nodo</option>
+                        <option *ngFor="let nodo of nodos" [ngValue]="nodo">
+                            {{nodo.nombre}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-4 col-md-3">
+                <div class="form-group ml-auto d-flex flex-column">
+                    <label class="invisible">A</label>
+                    <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ctrl d-none d-md-flex" style="background:#DCE3E8">
         <div class="col-12 col-sm-6 col-md-6 div-archivo">
             <div class="custom-file">
                 <input type="file" class="custom-file-input" id="customFileLang" lang="es">
                 <label class="custom-file-label" for="customFileLang">Seleccionar Archivo</label>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-md-6 d-flex form-group">
+        <div class="col-12 col-sm-6 col-md-6 d-flex form-group div-agregar-nodo">
             <input class="form-control mt-0" type="text" name="nombreNodoInput" placeholder="Dale un Nombre"
                 minlength="1" maxlength="20" id="nombre" [(ngModel)]="nombreNodo">
             <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Agregar" (click)="agregar()">
         </div>
-        <div class="col-12 col-sm-4 col-md-3 form-group div-conectar">
+        <div class="col-12 col-sm-4 col-md-3 form-group div-conectar pr-2">
             <div class="d-flex align-items-end">
                 <label class="mb-0 mr-2" for="De">De</label>
                 <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe">
-                    <option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+                    <option disabled selected>Selecciona un nodo</option>
                     <option *ngFor="let nodo of nodos" [ngValue]="nodo">
                         {{nodo.nombre}}
                     </option>
@@ -26,25 +80,27 @@
             <div class="d-flex align-items-end">
                 <label class="mb-0 mr-2" for="A">A</label>
                 <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA">
-                    <option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+                    <option disabled selected>Selecciona un nodo</option>
                     <option *ngFor="let nodo of nodos" [ngValue]="nodo">
                         {{nodo.nombre}}
                     </option>
                 </select>
             </div>
         </div>
-        <div class="col-12 col-sm-4 col-md-3">
+        <div class="col-12 col-sm-4 col-md-3 pl-2 pr-2">
             <div class="form-group ml-auto d-flex flex-column">
                 <label class="invisible">A</label>
                 <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()">
             </div>
         </div>
-        <div class="col-12 col-sm-12 col-md-3 d-flex align-items-center form-group">
-            <div class="form-group d-flex flex-column">
+        <div class="col-12 col-sm-12 col-md-3 d-flex align-items-center pl-2 pr-0">
+            <div class="form-group d-flex flex-column w-100">
                 <label class="invisible">A</label>
-                <div>
-                    <input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Ordenar" (click)="reiniciar()">
-                    &nbsp; {{nodos.length}} nodos
+                <div class="w-100">
+                    <input class="btn btn-default btn-sm mt-0 mb-0 w-100" type="submit" 
+                        value="Ordenar" 
+                        (click)="reiniciar()">
+                    <span class="d-none"> &nbsp; {{nodos.length}} nodos </span>
                 </div>
             </div>
         </div>

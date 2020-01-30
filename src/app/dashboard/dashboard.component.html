@@ -20,10 +20,10 @@
 						<div class="ct-chart" id=""></div>
 					</div>
 					<div class="card-body">
-						<h4 class="card-title">{{problematica.nombre}}...</h4>
+						<h4 class="card-title">{{problematica.nombre}}</h4>
 						<button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica)"
 							*ngIf="sePuedeInvitar(problematica)" data-target="#invitaciones" data-toggle="modal">
-							Invitar 
+							Invitar
 						</button>
 						<button class="btn" style="background:#0C5F97" (click)="cargarInvitados(problematica)"
 							data-target="#informacion" data-toggle="modal">
@@ -54,6 +54,7 @@
 								<label for="problematicasTerminadas">Problematicas terminadas</label>
 								<select class="form-control" id="problematicasTerminadas"
 									(change)="buscarEscritosPorProblematica($event.target.value)">
+									<option disabled selected>Seleccione una problematica (Opcional)</option>
 									<option *ngFor="let problematica of problematicasTerminadas"
 										[value]="problematica.id">
 										{{problematica.nombre}}
@@ -64,6 +65,7 @@
 								<label for="escritos">Escritos</label>
 								<select class="form-control" id="escritos"
 									(change)="cambioEscrito($event.target.value)">
+									<option disabled selected>Seleccione un escrito (Opcional)</option>
 									<option *ngFor="let escrito of escritos" [value]="escrito">
 										{{escrito.nombre}}
 									</option>
@@ -214,12 +216,13 @@
 								data-dismiss="modal"
 								*ngIf="problematicaSeleccionada.esInterventor" data-toggle="modal"
 								(click)="darInfoAlAvanzar()">
-								Avanzar fase
+								<span *ngIf="problematicaSeleccionada.fase < 4">Avanzar fase</span>
+								<span *ngIf="problematicaSeleccionada.fase === 4">Finalizar problematica</span>
 							</button>
-							<!--TODO: Poner boton de finalizar problematica -->
 						</div>
 						<button class="btn"
 							*ngIf="problematicaSeleccionada.fase === 5"
+							data-dismiss="modal" aria-label="Close"
 							(click)="verResultados()">
 							Resultados
 						</button>
@@ -238,19 +241,93 @@
 							aria-hidden="true">&times;</button>
 					</div>
 					<div class="modal-body">
-						<p><strong>¿Estás seguro? </strong></p>
-						<p *ngIf="problematicaSeleccionada.fase === 0">Actualmente hay
-							<span class="text-danger">{{datosProblematica.cantidadParticipantes}}</span> participantes.
-							Recuerde que
-							<span class="text-danger">NO </span>se puede devolver la fase.
-						</p>
-						<p *ngIf="estaEnFase(1)">Actualmente se han elaborado
-							<span class="text-danger">{{datosProblematica.cantidadNodos}}</span> nodos. Recuerde que
-							<span class="text-danger">NO </span>se puede devolver la fase.
-						</p>
-						<!--Crear el resto de textos para cada fase.-->
+						<div *ngIf="problematicaSeleccionada.fase === 0">
+							<p><strong>¿Estás seguro? </strong></p>
+							<span>Actualmente hay
+								<span class="text-danger">{{datosProblematica.cantidadParticipantes}}</span> 
+								participantes incluyendote.
+							</span>
+							<span>
+								Recuerde que
+								<span class="text-danger">NO</span>
+								se puede devolver la fase.
+							</span>
+						</div>
+						<div *ngIf="problematicaSeleccionada.fase === 1">
+							<div *ngIf="sePuedeAvanzarFase()">
+								<p><strong>¿Estás seguro? </strong></p>
+								<span>Actualmente se han creado
+									<span class="text-danger">{{datosProblematica.cantidadNodos}}</span> 
+									nodos entre los {{datosProblematica.cantidadParticipantes}} participantes.
+								</span>
+								<span>
+									Recuerde que
+									<span class="text-danger">NO</span>
+									se puede devolver la fase.
+								</span>
+							</div>
+							<div *ngIf="!sePuedeAvanzarFase()">
+								<span>No es posible avanzar la fase a menos que </span>
+								<span>haya al menos 2 nodos en toda la problematica.</span>
+							</div>
+						</div>
+						<div *ngIf="problematicaSeleccionada.fase === 2">
+							<div *ngIf="sePuedeAvanzarFase()">
+								<p><strong>¿Estás seguro? </strong></p>
+								<span>Actualmente se han creado
+									<span class="text-danger">{{datosProblematica.cantidadGrupos}}</span> 
+									grupos entre {{datosProblematica.cantidadNodos}} nodos.
+								</span>
+								<span>
+									Recuerde que
+									<span class="text-danger">NO</span>
+									se puede devolver la fase.
+								</span>
+							</div>
+							<div *ngIf="!sePuedeAvanzarFase()">
+								<span>No es posible avanzar la fase a menos que </span>
+								<span>haya al menos 1 grupo en toda la problematica.</span>
+							</div>
+						</div>
+						<div *ngIf="problematicaSeleccionada.fase === 3">
+							<div *ngIf="sePuedeAvanzarFase()">
+								<p><strong>¿Estás seguro? </strong></p>
+								<span>Actualmente se ha reaccionado
+									<span class="text-danger">{{datosProblematica.cantidadReacciones}}</span> 
+									veces, para un total de {{datosProblematica.cantidadParticipantes * datosProblematica.cantidadGrupos}} 
+									reacciones.
+								</span>
+								<span>
+									Recuerde que
+									<span class="text-danger">NO</span>
+									se puede devolver la fase.
+								</span>
+							</div>
+							<div *ngIf="!sePuedeAvanzarFase()">
+								<span>No es posible avanzar la fase a menos que </span>
+								<span>haya 1 reaccion en toda la problematica.</span>
+							</div>
+						</div>
+						<div *ngIf="problematicaSeleccionada.fase === 4">
+							<div *ngIf="sePuedeAvanzarFase()">
+								<p><strong>¿Estás seguro? </strong></p>
+								<span>Actualmente se han realizado
+									<span class="text-danger">{{datosProblematica.cantidadEscritos}}</span> escritos 
+									entre {{datosProblematica.cantidadParticipantes}} participantes y {{datosProblematica.cantidadGrupos}} grupos.
+								</span>
+								<span>
+									Recuerde que
+									<span class="text-danger">NO</span>
+									se puede devolver la fase.
+								</span>
+							</div>
+							<div *ngIf="!sePuedeAvanzarFase()">
+								<span>No es posible terminar la fase menos que </span>
+								<span>haya al menos 1 escrito en toda la problematica.</span>
+							</div>
+						</div>
 					</div>
-					<div class="modal-footer">
+					<div class="modal-footer" *ngIf="sePuedeAvanzarFase()">
 						<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">No</button>
 						<button style="background:#0C5F97" type="button" class="btn btn-primary" data-dismiss="modal"
 							(click)="avanzarFase()"> Si</button>
@@ -281,7 +358,6 @@
 							<span class="text-danger">NO </span>se puede devolver la fase.
 
 						</p>
-
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary"

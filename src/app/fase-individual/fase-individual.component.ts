@@ -22,6 +22,9 @@ export class FaseIndividualComponent implements OnInit {
     nodoA: any;
     nombreNodo = '';
     cy: any = {};
+    
+    private menuVisible: String = '';
+    private menu = { agregarNodo: 'Agregar nodo', conectarNodos: 'Conectar nodos' };
 
     problematicaActual: number;
 
@@ -186,7 +189,7 @@ export class FaseIndividualComponent implements OnInit {
     }
 
     private atenderErr(err) {
-        this.serviciosToast.mostrarToast('Error', err.errros[0], 'danger');
+        this.serviciosToast.mostrarToast('Error', err.erros[0], 'danger');
     }
 
     agregar() {
@@ -273,7 +276,10 @@ export class FaseIndividualComponent implements OnInit {
     }
 
     reiniciar() {
-        this.iniciar();
+        this.cy.layout({
+            name: 'grid',
+            rows: 3
+        }).run()
     }
 
     conectar() {
@@ -370,4 +376,33 @@ export class FaseIndividualComponent implements OnInit {
     private atenderPUTDesapadrinar(id) {
         this.cy.getElementById(id).remove();
     }
+    
+    hayMenuVisible(){
+        return this.menuVisible !== '';
+    }
+    
+    alternarVisibilidadAccionesAgregarNodo(){
+        if(this.menuVisible === this.menu.agregarNodo){
+            this.menuVisible = '';
+        }else{
+            this.menuVisible = this.menu.agregarNodo;
+        }
+    }
+    
+    alternarVisibilidadAccionesConectarNodos(){
+        if(this.menuVisible === this.menu.conectarNodos){
+            this.menuVisible = '';
+        }else{
+            this.menuVisible = this.menu.conectarNodos;
+        }
+    }
+        
+    esAccionesAgregarNodoVisible(){
+        return this.menuVisible === this.menu.agregarNodo
+    }
+    
+    esAccionesConectarNodosVisible(){
+        return this.menuVisible === this.menu.conectarNodos;
+    }
+
 }

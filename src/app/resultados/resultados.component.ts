@@ -10,8 +10,7 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 declare var cytoscape;
-
-
+declare var $;
 
 @Component({
   selector: 'app-resultados',
@@ -26,9 +25,13 @@ export class ResultadosComponent implements OnInit {
 	nodoSeleccionado: any;
 
 	grupos = [];
+	grupoSeleccionado;
 	escritos = [];
-
-	escritoSeleccionado: any = {};
+	escritoSeleccionado = {};
+	
+	arregloGrupos: any[] = [];
+	arregloEscritos : any[] = [];
+	arreglodatosPdf: any[]=[];
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
@@ -37,7 +40,7 @@ export class ResultadosComponent implements OnInit {
 		private activatedRoute: ActivatedRoute) { }
 
 	ngOnInit() {
-		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
+		// this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 		this.iniciar();
 	}
 
@@ -52,7 +55,9 @@ export class ResultadosComponent implements OnInit {
 				this.prepararCytoscape();
 				this.cargarNodosYEscritos();
 				this.prepararEtiquetaHtmlEnNodos();
-				this.prepararMenuGrupos()
+				this.prepararMenuGrupos();
+				this.cargarArregloGrupos();
+				
 			})
 	}
 
@@ -181,7 +186,7 @@ export class ResultadosComponent implements OnInit {
 		if (res.error) {
 			this.atenderErr('escritos');
 		} else {
-			this.escritos = res;
+			this.grupos = res;
 		}
 	}
 
@@ -254,72 +259,118 @@ export class ResultadosComponent implements OnInit {
 		}).run()
 	}
 	
-	actualizarListaEscritos({ escritos }){
-		this.escritos = escritos;
+	actualizarListaEscritos(){
+		this.escritos = this.grupoSeleccionado.escritos;
 	}
-	
-	cambioEscrito(escrito){
-		this.escritoSeleccionado = escrito;
-	}
-	
-	
-	
-    autoresPdfd: any[] = ['diego','piza','sumadre']
-    escritosPdf: any[] = ['blablablabla', 'reBlabla bla', 'pruebita de amor']
-    
-   
-	pruebaArreglo: any[] = []
-	
-	 generarArregloPdf(){
+ 
+	cargarArregloGrupos(){
 		
-		for(var d=0;d<this.autoresPdfd.length;d++){
+		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
+
+		const options = {
+			headers: headers
+		}
+		this.http
+			.get('http://3.130.29.100:8080/problematicas/'+this.problematicaActual+'/escritos', options)
+			.pipe(catchError(err => of(err)))
+			.subscribe(res => {
+				if (res.error) {
+					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', 'danger');
+				} else {
+					this.arregloGrupos = res;
+					
+				}
+			})
+	}
+	
+	
+	cargarArregloEscritos ()
+	{
+		
+       let contador=0;
+		
+	  for (  let d in this.arregloGrupos ) {
 			
-			this.pruebaArreglo[d]=[{text:'Grupo :'+ 'prueba - autor: '+this.autoresPdfd[d], style:'name'},this.escritosPdf[d]+'\n']
+			this.arreglodatosPdf[contador];
 			
+			const header = {
+				text: 'Grupo: '  + this.arregloGrupos[d].nombreGrupo + '\n\n',
+				style: 'header',
+				bold:true
+	        }
+	        
+	        this.arreglodatosPdf.push(header);
+	        
+	        
+			for (let i in this.arregloGrupos[d].escritos){
+				
+				this.arreglodatosPdf[contador];
+				
+				const headerAutor = {
+					text: 'Autor: ' + this.arregloGrupos[d].escritos[i].autor + '\n\n',
+					style: 'subheader',
+					bold:true
+		        };
+		        	const headerTitulo = {
+					text:  this.arregloGrupos[d].escritos[i].nombre + '- ' + this.arregloGrupos[d].escritos[i].autor + '\n\n',
+					style: 'subheader',
+					bold:true
+					
+		        };
+			
+				this.arreglodatosPdf.push(headerAutor);
+				this.arreglodatosPdf.push(headerTitulo);
+				
+				const otroParrafo = this.arregloGrupos[d].escritos[i].descripcion ;
+				
+				this.arreglodatosPdf.push(otroParrafo);
+			}
 		}
 		
-		return this.pruebaArreglo
+		return this.arreglodatosPdf;
 	}
+	
 	
 	generatePdf() {
 
-		var datos = "";
-
-		for (var d = 0; d < this.escritosPdf.length; d++) {
-
-			datos += this.escritosPdf[d] + "\n";
-
-		}
 		let documentDefinition = {
 			info: {
-				title: 'Escritos problematicas',
+				title: 'Escritos problematicas\n\n',
 
 			},
+			
+			alignment: 'justify',
 
 			content: [{
-				text: 'Resumen de escritos 1',
+				
+				text: 'Resumen de escritos ',
 				bold: true,
 				fontSize: 20,
 				alignment: 'center',
 				margin: [0, 0, 0, 20]
 			},
 			{
+				alignment: 'justify',
 				columns: [
-				this.generarArregloPdf(),
+			    this.cargarArregloEscritos(),
 					
 				]
-			}
-			],
+			}],
 			styles: {
-				name: {
-					fontSize: 16,
+				header: {
+					fontSize: 14,
 					bold: true
+				},
+				subheader: {
+					fontSize: 12,
+					bold: true
+					
 				}
 			}
 
 		}
 
-
+		console.log(documentDefinition);
 		pdfMake.createPdf(documentDefinition).open();
 	}
 

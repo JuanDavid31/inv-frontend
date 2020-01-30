@@ -38,3 +38,13 @@ li.nav-item span{
     font-size: 13px;
     padding: 10px 15px;
 }
+
+.nav li{
+    cursor: pointer;
+}
+
+.nav li:hover > span{
+    background-color: rgba(200, 200, 200, 0.2);
+    color: #3C4858;
+    box-shadow: none;
+}

@@ -93,7 +93,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 					this.serviciosToast.mostrarToast(
 						'Error',
 						'Ocurrió un error al buscar las problematicas terminadas, intentelo de nuevo.', 
-						'error');
+						'danger');
 				} else {
 					this.problematicasTerminadas = res;
 				}
@@ -264,6 +264,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 				}
 			})
 	}
+	
+	sePuedeAvanzarFase(){
+		const { fase } = this.problematicaSeleccionada;
+		switch(fase){
+			case 1:
+				return this.datosProblematica.cantidadNodos >= 2;
+			case 2:
+				return this.datosProblematica.cantidadGrupos >= 1;
+			case 3:
+				return this.datosProblematica.cantidadReacciones >= 1;
+			case 4:
+				return this.datosProblematica.cantidadEscritos >= 1;
+			default: 
+				return true;
+		}
+	}
 
 	avanzarFase() {
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
@@ -403,10 +419,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 					this.serviciosToast.mostrarToast(
 						'Error',
 						'Hubo un error al cargar los escritos, intentelo de nuevo',
-						'error'
+						'danger'
 					);
 				} else {
-					this.escritos = res;
+					this.escritos = res.flatMap(grupo => grupo.escritos);
 				}
 			})
 	}

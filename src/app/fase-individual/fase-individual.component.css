@@ -1,3 +1,80 @@
+@media (max-width: 576px){
+    
+    .div-archivo + div{
+        padding: 0px;
+        margin-top: 1rem;
+    }
+    
+    .conectar-nodos-responsive .invisible{
+        display: none;
+    }
+    
+    .conectar-nodos-responsive label{
+        width: 16.61px;
+    }
+    
+    .conectar-nodos-responsive div:last-child{
+        padding: 0px;
+    }
+    
+}
+
+@media (min-width: 577px){
+    .agregar-nodo-responsive{
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .agregar-nodo-responsive div:first-child{
+        padding-right: 0.5rem;
+    }
+    
+    .agregar-nodo-responsive div:last-child{
+        margin-top: 0px;
+        padding: 0px 0px 0px 0.5rem;
+    }
+    
+    .conectar-nodos-responsive{
+        display: flex;
+    }
+    
+    .conectar-nodos-responsive .div-conectar{
+        padding-right: 0.5rem;
+    }
+    
+    .conectar-nodos-responsive .form-group{
+        margin-top: 0px;
+    }
+    
+    .conectar-nodos-responsive .invisible{
+        display: none;
+    }
+    
+    .conectar-nodos-responsive div:last-child > div{
+        padding: 0px;
+    }
+}
+
+@media (min-width: 768px){
+    
+    .div-archivo{
+        
+    }
+    
+    .div-agregar-nodo{
+        padding: 0px 0px 0px 0.5rem;
+        margin-top: 0px;
+    }
+    
+    div.form-group{
+        padding-bottom: 0px;
+    }
+    
+    .invisible{
+        display: none;
+    }
+}
+
 .main-content{
     display: flex;
     flex-direction: column;
@@ -7,6 +84,20 @@
 .ctrl{
     width: 100%;
     padding: 10px 12px;
+    flex-wrap: wrap;
+}
+
+.iconos{
+    display: flex;
+    align-items: center;
+}
+
+.material-icons.add{
+    font-size: 25px;
+}
+
+.fas.fa-project-diagram{
+    font-size: 15px;
 }
 
 #cy{
@@ -16,23 +107,24 @@
 }
 
 .custom-file{
-    height: calc(2.25rem + 2px);
+    height: initial;
 }
 
 .custom-file .custom-file-input{
-    height: calc(2.25rem + 2px);
+    height: initial;
 }
 
 .custom-file-label{
     transition: inherit;
-    height: calc(2.25rem + 2px);
+    height: 29px;
     padding: .375rem .75rem;
     font-weight: inherit;
-    line-height: 1.5;
+    line-height: initial;
     background-color: #fff;
     border: 1px solid #ced4da;
     border-radius: .25rem;
     box-shadow: inherit;
+    margin-bottom: 0px;
 }
 
 .custom-file-label::after {
@@ -44,7 +136,7 @@
     display: block;
     height: 2.25rem;
     padding: .375rem .75rem;
-    line-height: 1.5;
+    line-height: initial;
     color: #495057;
     content: "Browse";
     background-color: #e9ecef;
@@ -58,6 +150,7 @@
 
 .custom-file-label::after {
     content: "Click";
+    height: 27px;
 }
 
 input#nombre{
@@ -79,10 +172,10 @@ select.form-control{
 
     display: block;
     width: 100%;
-    height: calc(2.25rem + 2px);
+    height: 29px;
     padding: .375rem .75rem;
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: initial;
     color: #495057;
     background-color: #fff;
     background-clip: padding-box;
@@ -94,4 +187,32 @@ select.form-control{
 input.form-control:focus{
     border-color: none;
     box-shadow: none;
+}
+
+.ripple {
+    background-color: #999999;
+    border-radius: 50%;
+    background-position: center;
+    transition: background 0.4s;
+    box-shadow: 0 2px 2px 0 rgba(153, 153, 153, 0.14), 
+                0 3px 1px -2px rgba(153, 153, 153, 0.2), 
+                0 1px 5px 0 rgba(153, 153, 153, 0.12);
+}
+
+.ripple:hover {
+  background: #c2bcbc radial-gradient(circle, transparent 1%, #c2bcbc 1%) center/15000%;
+}
+
+.ripple:active {
+    background-color: rgb(220, 227, 232);
+    background-size: 100%;
+    transition: background 0s;
+}
+
+i.ripple{
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

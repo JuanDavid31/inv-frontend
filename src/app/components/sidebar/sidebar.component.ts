@@ -38,7 +38,7 @@ export class SidebarComponent implements OnInit {
 		return true;
 	};
 
-	cerrarCesion() {
+	cerrarSesion() {
 		this.serviciosLocalStorage.eliminarDatos();
 		this.router.navigateByUrl("/login");
 	}

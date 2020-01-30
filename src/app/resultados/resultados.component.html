@@ -9,15 +9,15 @@
 	</div>
 	<div class="col-lg-6 mb-5 div-escrito">
 		<div class="modal-content modal-content-form">
-			<!-- contenido de la ventana-->
 			<div class="modal-body">
 			    <form>
 					<div class="form-group">
-						<label for="problematicasTerminadas">Grupo</label>
-						<select class="form-control" id="problematicasTerminadas"
-							(change)="actualizarListaEscritos($event.target.value)">
-							<option *ngFor="let grupo of grupos"
-								[value]="grupo">
+						<label for="grupos">Grupo</label>
+						<select class="form-control" id="grupos"
+							[(ngModel)]="grupoSeleccionado" name="grupoSeleccionadoSelect"
+								(change)="actualizarListaEscritos()">
+							<option disabled selected>Seleccione un grupo.</option>
+							<option *ngFor="let grupo of grupos" [ngValue]="grupo">
 								{{grupo.nombreGrupo}}
 							</option>
 						</select>
@@ -25,8 +25,9 @@
 					<div class="form-group">
 						<label for="escritos">Escritos</label>
 						<select class="form-control" id="escritos"
-							(change)="cambioEscrito($event.target.value)">
-							<option *ngFor="let escrito of escritos" [value]="escrito">
+							[(ngModel)]="escritoSeleccionado" name="escritoSeleccionadoSelect">
+							<option disabled selected>Seleccione un escrito.</option>
+							<option *ngFor="let escrito of escritos" [ngValue]="escrito">
 								{{escrito.nombre}}
 							</option>
 						</select>
@@ -48,7 +49,7 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-			    <button class="btn" (click)="generatePDF()">
+			    <button class="btn" (click)="generatePdf()">
 					Generar PDF
 					<i class="material-icons icono-pdf">
 						picture_as_pdf
@@ -61,13 +62,11 @@
 	<div id="modal-visualizacion-imagen-nodo" class="modal fade">
 		<div class="modal-dialog">
 			<div class="modal-content">
-				<!-- contenido del titulo -->
 				<div class="modal-header" style="color:white; background:#0C5F97;">
 					<h4 class="modal-tittle">{{nodoSeleccionado?.nombre}}</h4>
 					<button tyle="button" style="color:#FFFFFF" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
 				</div>
-				<!-- contenido de la ventana-->
 				<div class="modal-body">
 					{{nodoSeleccionado?.nombreCreador}}
 					<a [href]="nodoSeleccionado?.urlFoto" target="_blank">Abrir imagen en una pestaña nueva.</a>
@@ -76,4 +75,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</div>   
