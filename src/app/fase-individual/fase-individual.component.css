@@ -17,6 +17,10 @@
         padding: 0px;
     }
     
+    #modal-visualizacion-imagen-nodo div.modal-body{
+	    width: initial;
+    }
+    
 }
 
 @media (min-width: 577px){
@@ -90,6 +94,11 @@
 .iconos{
     display: flex;
     align-items: center;
+    user-select: none;
+}
+
+.iconos i{
+    cursor: pointer;
 }
 
 .material-icons.add{
@@ -215,4 +224,17 @@ i.ripple{
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#modal-visualizacion-imagen-nodo .modal-body{
+	width: 498px;
+	height: initial;
+	padding: 0.5rem 1rem;
+}
+
+#modal-visualizacion-imagen-nodo .modal-body img{
+	width: 100%;
+    margin: 10px 0px;
+    object-fit: contain;
+    object-position: center;
 }

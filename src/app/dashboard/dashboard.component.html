@@ -216,7 +216,10 @@
 								data-dismiss="modal"
 								*ngIf="problematicaSeleccionada.esInterventor" data-toggle="modal"
 								(click)="darInfoAlAvanzar()">
-								<span *ngIf="problematicaSeleccionada.fase < 4">Avanzar fase</span>
+								<span *ngIf="problematicaSeleccionada.fase === 0">Iniciar problematica</span>
+								<span *ngIf="0 < problematicaSeleccionada.fase && problematicaSeleccionada.fase < 4">
+									Avanzar fase
+								</span>
 								<span *ngIf="problematicaSeleccionada.fase === 4">Finalizar problematica</span>
 							</button>
 						</div>

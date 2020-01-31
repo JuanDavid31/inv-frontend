@@ -17,6 +17,7 @@ declare var $;
 
 export class FaseIndividualComponent implements OnInit {
 
+    nodoSeleccionado: any = {};
     nodos = [];
     nodoDe: any;
     nodoA: any;
@@ -27,6 +28,8 @@ export class FaseIndividualComponent implements OnInit {
     private menu = { agregarNodo: 'Agregar nodo', conectarNodos: 'Conectar nodos' };
 
     problematicaActual: number;
+    
+    modalVisualizacionImagenNodo: any;
 
     fotoFileInput: HTMLInputElement;
 
@@ -40,6 +43,7 @@ export class FaseIndividualComponent implements OnInit {
         this.fotoFileInput = (<HTMLInputElement>document.getElementById('customFileLang'));
         this.prepararOnChangeFileInput();
         this.iniciar();
+        this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
     }
 
     private prepararOnChangeFileInput() {
@@ -55,7 +59,7 @@ export class FaseIndividualComponent implements OnInit {
             .pipe(map(() => window.history.state))
             .subscribe(params => {
                 this.problematicaActual = params.idProblematica;
-                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard') }
+                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
 
                 this.nodoDe = {};
                 this.nodoA = {};
@@ -112,6 +116,10 @@ export class FaseIndividualComponent implements OnInit {
         this.cy.cxtmenu({
             selector: 'node',
             commands: [
+				{
+					content: '<span class="fa fa-eye fa-2x"></span>',
+					select: this.abrirModalImagenNodo.bind(this)
+				},
                 {
                     content: '<span class="fa fa-trash fa-2x"></span>',
                     select: this.eliminarPorId.bind(this)
@@ -162,8 +170,8 @@ export class FaseIndividualComponent implements OnInit {
     private dibujarNodos(nodos) {
         this.nodos = nodos;
         this.nodos.forEach(nodo => {
-            const { id, nombre } = nodo;
-            this.cy.add({ data: { id, nombre } });
+            const { id, nombre, urlFoto } = nodo;
+            this.cy.add({ data: { id, nombre, urlFoto} });
 
             this.cy.style()
                 .selector(`#${nodo.id}`)
@@ -237,7 +245,12 @@ export class FaseIndividualComponent implements OnInit {
         this.limpiarCamposNodo();
 
         this.nodos.push(nodo);
-        this.cy.add({ data: { id: nodo.id, nombre: nodo.nombre }, position: { x: this.cy.width() / 2, y: this.cy.height() / 2 } });
+        
+        this.cy.add({ 
+            data: { id: nodo.id, nombre: nodo.nombre, urlFoto: nodo.urlFoto }, 
+            position: { x: this.cy.width() / 2, y: this.cy.height() / 2 } 
+        });
+        
         this.cy.style()
             .selector(`#${nodo.id}`)
             .css({
@@ -404,5 +417,10 @@ export class FaseIndividualComponent implements OnInit {
     esAccionesConectarNodosVisible(){
         return this.menuVisible === this.menu.conectarNodos;
     }
+    
+	private abrirModalImagenNodo(elemento) {
+		this.nodoSeleccionado = elemento.data();
+		this.modalVisualizacionImagenNodo.modal('toggle');
+	}
 
 }

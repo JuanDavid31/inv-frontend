@@ -796,7 +796,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.cy.getElementById(edge.id()).remove();
 	}
 
-	cambioSolicitud(event) {
+	cambioSolicitud() {
 		//Cambio la solicitud de este usuario.
 		this.usuarios.find(solicitante => {
 			return solicitante.email === this.serviciosLocalStorage.darEmail()

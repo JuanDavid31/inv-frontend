@@ -27,7 +27,7 @@ export class ResultadosComponent implements OnInit {
 	grupos = [];
 	grupoSeleccionado;
 	escritos = [];
-	escritoSeleccionado = {};
+	escritoSeleccionado = {nombre: '', descripcion: ''};
 	
 	arregloGrupos: any[] = [];
 	arregloEscritos : any[] = [];
@@ -294,9 +294,9 @@ export class ResultadosComponent implements OnInit {
 			this.arreglodatosPdf[contador];
 			
 			const header = {
-				text: 'Grupo: '  + this.arregloGrupos[d].nombreGrupo + '\n\n',
+				text: [{text:'Grupo: ', style:'header', bold:true}, this.arregloGrupos[d].nombreGrupo + '\n\n'],
 				style: 'header',
-				bold:true
+				
 	        }
 	        
 	        this.arreglodatosPdf.push(header);
@@ -306,26 +306,28 @@ export class ResultadosComponent implements OnInit {
 				
 				this.arreglodatosPdf[contador];
 				
-				const headerAutor = {
-					text: 'Autor: ' + this.arregloGrupos[d].escritos[i].autor + '\n\n',
-					style: 'subheader',
-					bold:true
-		        };
+				
 		        	const headerTitulo = {
-					text:  this.arregloGrupos[d].escritos[i].nombre + '- ' + this.arregloGrupos[d].escritos[i].autor + '\n\n',
+					text: this.arregloGrupos[d].escritos[i].nombre  + '\n\n',
 					style: 'subheader',
 					bold:true
+				
 					
 		        };
 			
-				this.arreglodatosPdf.push(headerAutor);
+			
 				this.arreglodatosPdf.push(headerTitulo);
 				
-				const otroParrafo = this.arregloGrupos[d].escritos[i].descripcion ;
+			const descripcionGrupo = {
+					text: [this.arregloGrupos[d].escritos[i].descripcion + '. ',{text: ' Elaborado por ' + this.arregloGrupos[d].escritos[i].autor +'\n\n' , style:'parrafo', bold:true}],
+					style: 'parrafo',
+					
+		        };
 				
-				this.arreglodatosPdf.push(otroParrafo);
+				this.arreglodatosPdf.push(descripcionGrupo);
 			}
 		}
+		contador=0;
 		
 		return this.arreglodatosPdf;
 	}
@@ -333,7 +335,7 @@ export class ResultadosComponent implements OnInit {
 	
 	generatePdf() {
 
-		let documentDefinition = {
+		const escrito = {
 			info: {
 				title: 'Escritos problematicas\n\n',
 
@@ -345,9 +347,9 @@ export class ResultadosComponent implements OnInit {
 				
 				text: 'Resumen de escritos ',
 				bold: true,
-				fontSize: 20,
+				fontSize: 16,
 				alignment: 'center',
-				margin: [0, 0, 0, 20]
+				margin: [20, 20, 20, 20]
 			},
 			{
 				alignment: 'justify',
@@ -359,19 +361,23 @@ export class ResultadosComponent implements OnInit {
 			styles: {
 				header: {
 					fontSize: 14,
-					bold: true
+					
+					
 				},
 				subheader: {
-					fontSize: 12,
-					bold: true
+					fontSize: 13,
 					
+					
+				},
+				parrafo: {
+					fontSize: 11
 				}
 			}
 
 		}
 
-		console.log(documentDefinition);
-		pdfMake.createPdf(documentDefinition).open();
+		console.log(escrito);
+		pdfMake.createPdf(escrito).open();
 	}
 
 

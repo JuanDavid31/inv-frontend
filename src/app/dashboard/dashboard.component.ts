@@ -281,7 +281,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	avanzarFase() {
+	avanzarFase() { //TODO: Agregar a problematicas terminadas en caso de finalizar la misma.
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
 		const options = {
@@ -294,16 +294,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al avanzar la fase, intentelo de nuevo', 'danger');
 				} else {
-					this.avanzarFaseDeLaProblematicaActual();
+					this.avanzarFaseProblematica(this.problematicaSeleccionada.id);
 					this.serviciosToast.mostrarToast(undefined, 'Se avanzo a la siguiente fase');
 				}
 			})
 	}
 
-	private avanzarFaseDeLaProblematicaActual() {
+	private avanzarFaseProblematica(idProblematica) {
 		const problematica = this.problematicas
-			.find(problematica => problematica.id === this.problematicaSeleccionada.id);
+			.find(problematica => problematica.id === idProblematica);
 		problematica.fase++;
+		
+		//La problematica concluyo.
+		if(problematica.fase === 5){
+			this.problematicasTerminadas.push(problematica);
+		}
 	}
 
 	darFaseProblematica() {
