@@ -206,7 +206,7 @@
 						<p> {{darFaseProblematica()}} </p>
 					</div>
 					<div class="modal-footer">
-						<div *ngIf="problematicaSeleccionada.fase < 5">
+						<div *ngIf="problematicaSeleccionada.fase < 5" class="d-flex flex-wrap justify-content-end">
 							<button style="background:#0C5F97" class="btn btn-primary" (click)="participar()"
 								data-dismiss="modal" aria-label="Close"
 								*ngIf="0 < problematicaSeleccionada.fase">
@@ -218,9 +218,13 @@
 								(click)="darInfoAlAvanzar()">
 								<span *ngIf="problematicaSeleccionada.fase === 0">Iniciar problematica</span>
 								<span *ngIf="0 < problematicaSeleccionada.fase && problematicaSeleccionada.fase < 4">
-									Avanzar fase
+									Avanzar 
+									<span class="d-none d-sm-inline">fase</span>
 								</span>
-								<span *ngIf="problematicaSeleccionada.fase === 4">Finalizar problematica</span>
+								<span *ngIf="problematicaSeleccionada.fase === 4">
+									Finalizar 
+									<span class="d-none d-sm-inline">problematica</span>
+								</span>
 							</button>
 						</div>
 						<button class="btn"

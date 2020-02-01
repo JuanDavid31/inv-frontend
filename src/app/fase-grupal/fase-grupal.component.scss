@@ -1,3 +1,9 @@
+@media (max-width: 576px){
+	#modal-visualizacion-imagen-nodo div.modal-body{
+	    width: initial;
+    }
+}
+
 .main-content{
 	display: flex;
 	flex-direction: column;
