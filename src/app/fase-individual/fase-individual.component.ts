@@ -411,7 +411,7 @@ export class FaseIndividualComponent implements OnInit {
     }
         
     esAccionesAgregarNodoVisible(){
-        return this.menuVisible === this.menu.agregarNodo
+        return this.menuVisible === this.menu.agregarNodo;
     }
     
     esAccionesConectarNodosVisible(){

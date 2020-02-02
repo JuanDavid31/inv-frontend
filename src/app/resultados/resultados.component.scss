@@ -1,3 +1,20 @@
+@media (max-width: 576px){
+	#modal-visualizacion-imagen-nodo div.modal-body{
+	    width: initial;
+    }
+}
+
+@media (min-width: 768px){
+	div.main-content{
+		max-height: calc(100vh - 126px);
+	}
+
+	.div-nodos{
+		max-height: calc(100vh - (70px + 53px + 49px));
+	}
+}
+
+
 .main-content{
 	display: flex;
 	flex-direction: row;
@@ -6,7 +23,8 @@
 
 .div-nodos{
 	display: flex;
-    flex-direction: column;
+	flex-direction: column;
+	min-height: calc(100vh - (70px + 124px));
 }
 
 .ctrl{
@@ -55,12 +73,11 @@ h1{
 
 #modal-visualizacion-imagen-nodo .modal-body{
 	width: 498px;
-    height: 450px;
+    height: initial;
 }
 
 #modal-visualizacion-imagen-nodo .modal-body img{
 	width: 100%;
-    height: 95%;
     object-fit: contain;
     object-position: center;
 }

@@ -1,7 +1,72 @@
-<div class="main-content">
-	<div class="ctrl" style="background:#DCE3E8">
-		<div class="col-md-5 d-flex align-items-center div-conectar">
-			<div class="ml-3 mr-3 div-select">
+<div class="main-content mb-3">
+	<div class="ctrl d-block d-md-none" style="background:#DCE3E8">
+		<div class="iconos d-flex" [ngClass]="{'mb-3': hayMenuVisible()}">
+			<i class="fas fa-project-diagram ripple" (click)="alternarVisibilidadAccionesConectarGrupos()"></i>
+			<i class="material-icons ripple ml-2 mr-2" (click)="alternarVisibilidadAccionerOrdenarNodos()">
+				reorder
+			</i>
+			<div class="div-usuarios dropdown ml-auto">
+				<i class="fa fa-users ripple" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"></i>
+				<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+					<span class="dropdown-item" *ngFor="let usuario of usuarios">
+						{{usuario.nombre}}
+					</span>
+				</div>
+			</div>
+		</div>
+		<div *ngIf="esAccionesConectarGruposVisible()" class="conectar-nodos-responsive d-sm-flex">
+			<div class="col-12 col-sm-4 col-md-3 form-group div-conectar">
+				<div class="d-flex align-items-end pr-sm-2">
+					<label class="mb-0 mr-2" for="De">De</label>
+					<select class="form-control mt-0" name="De" id="De" [(ngModel)]="grupoDe">
+						<option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+						<option *ngFor="let grupo of darGruposIterables()" [ngValue]="grupo.data">
+							{{grupo.data.nombre}}
+						</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-12 col-sm-4 col-md-3 form-group div-conectar">
+				<div class="d-flex align-items-end pr-sm-2">
+					<label class="mb-0 mr-2" for="A">A</label>
+					<select class="form-control mt-0" name="A" id="A" [(ngModel)]="grupoA">
+						<option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
+						<option *ngFor="let grupo of darGruposIterables()" [ngValue]="grupo.data">
+							{{grupo.data.nombre}}
+						</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-12 col-sm-4 col-md-3">
+				<div class="form-group ml-auto d-flex flex-column">
+					<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()">
+				</div>
+			</div>
+		</div>
+		<div *ngIf="esAccionesOrdenarNodosVisible()"
+			class="noselect checkbox-solicitud d-flex ordenar-nodos-responsive">
+			<input class="d-block d-sm-none" type="checkbox" id="solicitarOrganizado"
+				[(ngModel)]="solicitandoOrganizacion" name="solicitarOrganizadoInput" (change)="cambioSolicitud()">
+			<label class="ml-1 text-dark d-block d-sm-none" for="solicitarOrganizado" data-tippy-content="Tooltip">
+				Solicitantes {{ darCantidadSolicitantes() }} / {{usuarios.length}}
+			</label>
+
+
+			<input class="d-none d-sm-block" type="checkbox" id="solicitarOrganizado"
+				[(ngModel)]="solicitandoOrganizacion" name="solicitarOrganizadoInput" (change)="cambioSolicitud()">
+			<label class="d-none d-sm-block ml-1" for="solicitarOrganizado" data-tippy-content="Tooltip">
+				¿Solicitar organizado?
+			</label>
+			<span class="d-none d-sm-block ml-1">
+				Solicitantes {{ darCantidadSolicitantes() }}/
+				{{usuarios.length}}
+			</span>
+		</div>
+	</div>
+	<div class="ctrl d-none d-md-flex" style="background:#DCE3E8">
+		<div class="d-flex align-items-center div-conectar">
+			<div class="mr-3 div-select">
 				<label class="mb-0 mr-2" for="De">De</label>
 				<select class="form-control mt-0" name="De" id="De" [(ngModel)]="grupoDe">
 					<option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
@@ -10,7 +75,7 @@
 					</option>
 				</select>
 			</div>
-			<div class="ml-3 mr-3 div-select">
+			<div class="mr-3 div-select">
 				<label class="mb-0 mr-2" for="A">A</label>
 				<select class="form-control mt-0" name="A" id="A" [(ngModel)]="grupoA">
 					<option [ngValue]="{}" disabled selected>Selecciona un nodo</option>
@@ -23,24 +88,32 @@
 				<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Conectar" (click)="conectar()">
 			</div>
 		</div>
-		<div class="col-md-4 solicitar-organizado">
-			<div class="noselect checkbox-solicitud">
-				<input type="checkbox" id="solicitarOrganizado" [(ngModel)]="solicitandoOrganizacion"
-					name="solicitarOrganizadoInput" (change)="cambioSolicitud()">
-				<label for="solicitarOrganizado" data-tippy-content="Tooltip">¿Solicitar organizado?</label>
-			</div>
-			<span>
+		<div class="noselect checkbox-solicitud d-flex solicitar-organizado pl-3">
+			<!-- Set 1. lg -->
+			<input class="d-block d-xl-none" type="checkbox" id="solicitarOrganizado"
+				[(ngModel)]="solicitandoOrganizacion" name="solicitarOrganizadoInput" (change)="cambioSolicitud()">
+			<label class="ml-1 text-dark d-block d-xl-none" for="solicitarOrganizado" data-tippy-content="Tooltip">
+				Solicitantes {{ darCantidadSolicitantes() }} / {{usuarios.length}}
+			</label>
+
+			<!-- Set 2. xl -->
+			<input class="d-none d-xl-block" type="checkbox" id="solicitarOrganizado"
+				[(ngModel)]="solicitandoOrganizacion" name="solicitarOrganizadoInput" (change)="cambioSolicitud()">
+			<label class="d-none d-xl-block ml-1" for="solicitarOrganizado" data-tippy-content="Tooltip">
+				¿Solicitar organizado?
+			</label>
+			<span class="d-none d-xl-block ml-1">
 				Solicitantes {{ darCantidadSolicitantes() }}/
 				{{usuarios.length}}
 			</span>
 		</div>
-		<div class="col-md-3 div-usuarios dropdown">
-			<div id="dropdownMenuButton" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-				aria-expanded="false">
+		<div class="div-usuarios ml-auto">
+			<div id="dropdownMenuButton" class="btn btn-sm dropdown-toggle d-xl-flex align-items-xl-center"
+				data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<i class="fa fa-users"></i>
-				<span class="ml-2">Usuarios</span>
+				<span class="ml-2 d-none d-xl-block">Usuarios</span>
 			</div>
-			<div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuButton">
+			<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 				<span class="dropdown-item" *ngFor="let usuario of usuarios">
 					{{usuario.nombre}}
 				</span>
