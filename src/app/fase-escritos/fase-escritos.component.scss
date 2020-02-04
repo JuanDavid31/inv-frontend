@@ -1,12 +1,20 @@
+@media (max-width: 576px){
+	#modal-visualizacion-imagen-nodo div.modal-body{
+	    width: initial;
+    }
+}
+
 .main-content{
 	display: flex;
 	flex-direction: row;
 	padding: 0px 15px;
+	flex-wrap:wrap;
 }
 
 .div-nodos{
 	display: flex;
-    flex-direction: column;
+	flex-direction: column;
+	min-height: calc(100vh - (70px + 124px));
 }
 
 .ctrl{
@@ -59,12 +67,11 @@ h1{
 
 #modal-visualizacion-imagen-nodo .modal-body{
 	width: 498px;
-    height: 450px;
+    height: initial;
 }
 
 #modal-visualizacion-imagen-nodo .modal-body img{
 	width: 100%;
-    height: 95%;
     object-fit: contain;
     object-position: center;
 }

@@ -13,12 +13,12 @@ declare var cytoscape;
 declare var $;
 
 @Component({
-  selector: 'app-resultados',
-  templateUrl: './resultados.component.html',
-  styleUrls: ['./resultados.component.scss']
+	selector: 'app-resultados',
+	templateUrl: './resultados.component.html',
+	styleUrls: ['./resultados.component.scss']
 })
 export class ResultadosComponent implements OnInit {
-	
+
 	cy: any = {};
 	problematicaActual: number;
 	modalVisualizacionImagenNodo: any;
@@ -27,11 +27,11 @@ export class ResultadosComponent implements OnInit {
 	grupos = [];
 	grupoSeleccionado;
 	escritos = [];
-	escritoSeleccionado = {nombre: '', descripcion: ''};
-	
+	escritoSeleccionado = { nombre: '', descripcion: '' };
+
 	arregloGrupos: any[] = [];
-	arregloEscritos : any[] = [];
-	arreglodatosPdf: any[]=[];
+	arregloEscritos: any[] = [];
+	arreglodatosPdf: any[] = [];
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
@@ -40,7 +40,7 @@ export class ResultadosComponent implements OnInit {
 		private activatedRoute: ActivatedRoute) { }
 
 	ngOnInit() {
-		// this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
+		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 		this.iniciar();
 	}
 
@@ -57,7 +57,7 @@ export class ResultadosComponent implements OnInit {
 				this.prepararEtiquetaHtmlEnNodos();
 				this.prepararMenuGrupos();
 				this.cargarArregloGrupos();
-				
+
 			})
 	}
 
@@ -258,81 +258,80 @@ export class ResultadosComponent implements OnInit {
 			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		}).run()
 	}
-	
-	actualizarListaEscritos(){
+
+	actualizarListaEscritos() {
 		this.escritos = this.grupoSeleccionado.escritos;
 	}
- 
-	cargarArregloGrupos(){
-		
+
+	cargarArregloGrupos() {
+
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
 		const options = {
 			headers: headers
 		}
 		this.http
-			.get('http://3.130.29.100:8080/problematicas/'+this.problematicaActual+'/escritos', options)
+			.get('http://3.130.29.100:8080/problematicas/' + this.problematicaActual + '/escritos', options)
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', 'danger');
 				} else {
 					this.arregloGrupos = res;
-					
+
 				}
 			})
 	}
-	
-	
-	cargarArregloEscritos ()
-	{
-		
-       let contador=0;
-		
-	  for (  let d in this.arregloGrupos ) {
-			
+
+
+	cargarArregloEscritos() {
+
+		let contador = 0;
+
+		for (let d in this.arregloGrupos) {
+
 			this.arreglodatosPdf[contador];
-			
+
 			const header = {
-				text: [{text:'Grupo: ', style:'header', bold:true}, this.arregloGrupos[d].nombreGrupo + '\n\n'],
+				text: [{ text: 'Grupo: ', style: 'header', bold: true }, this.arregloGrupos[d].nombreGrupo + '\n\n'],
 				style: 'header',
-				
-	        }
-	        
-	        this.arreglodatosPdf.push(header);
-	        
-	        
-			for (let i in this.arregloGrupos[d].escritos){
-				
+
+			}
+
+			this.arreglodatosPdf.push(header);
+
+
+			for (let i in this.arregloGrupos[d].escritos) {
+
 				this.arreglodatosPdf[contador];
-				
-				
-		        	const headerTitulo = {
-					text: this.arregloGrupos[d].escritos[i].nombre  + '\n\n',
+
+
+				const headerTitulo = {
+					text: this.arregloGrupos[d].escritos[i].nombre + '\n\n',
 					style: 'subheader',
-					bold:true
-				
-					
-		        };
-			
-			
+					bold: true
+
+
+				};
+
+
 				this.arreglodatosPdf.push(headerTitulo);
-				
-			const descripcionGrupo = {
-					text: [this.arregloGrupos[d].escritos[i].descripcion + '. ',{text: ' Elaborado por ' + this.arregloGrupos[d].escritos[i].autor +'\n\n' , style:'parrafo', bold:true}],
+
+				const descripcionGrupo = {
+					text: [this.arregloGrupos[d].escritos[i].descripcion + '. ', { text: ' Elaborado por ' + this.arregloGrupos[d].escritos[i].autor + '\n\n', style: 'parrafo', bold: true }],
 					style: 'parrafo',
-					
-		        };
-				
+
+				};
+
 				this.arreglodatosPdf.push(descripcionGrupo);
 			}
 		}
-		contador=0;
-		
+		contador = 0;
+
 		return this.arreglodatosPdf;
 	}
-	
-	
+
+
 	generatePdf() {
 
 		const escrito = {
@@ -340,11 +339,11 @@ export class ResultadosComponent implements OnInit {
 				title: 'Escritos problematicas\n\n',
 
 			},
-			
+
 			alignment: 'justify',
 
 			content: [{
-				
+
 				text: 'Resumen de escritos ',
 				bold: true,
 				fontSize: 16,
@@ -354,20 +353,20 @@ export class ResultadosComponent implements OnInit {
 			{
 				alignment: 'justify',
 				columns: [
-			    this.cargarArregloEscritos(),
-					
+					this.cargarArregloEscritos(),
+
 				]
 			}],
 			styles: {
 				header: {
 					fontSize: 14,
-					
-					
+
+
 				},
 				subheader: {
 					fontSize: 13,
-					
-					
+
+
 				},
 				parrafo: {
 					fontSize: 11
@@ -381,5 +380,8 @@ export class ResultadosComponent implements OnInit {
 	}
 
 
+	algo() {
+		console.log(this.escritoSeleccionado);
+	}
 
 }

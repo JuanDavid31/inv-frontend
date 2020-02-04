@@ -46,6 +46,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	modalCambioNombreGrupo: any
 	modalVisualizacionImagenNodo: any;
 
+	private menuVisible: String = '';
+
+	private menu = { conectarGrupos: 'Conectar grupos', ordenarNodos: 'Ordenar nodos' };
+
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private activatedRoute: ActivatedRoute,
 		private router: Router,
@@ -901,6 +905,34 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private onWebsocketError(err) {
 		this.serviciosToast.mostrarToast('Error', 'Un error inesperado ha ocurrido, por favor vuelve a ingresar.', 'danger');
 		this.router.navigateByUrl('/dashboard');
+	}
+
+	hayMenuVisible() {
+		return this.menuVisible !== '';
+	}
+
+	alternarVisibilidadAccionesConectarGrupos() {
+		if (this.menuVisible === this.menu.conectarGrupos) {
+			this.menuVisible = '';
+		} else {
+			this.menuVisible = this.menu.conectarGrupos;
+		}
+	}
+
+	esAccionesConectarGruposVisible() {
+		return this.menuVisible === this.menu.conectarGrupos;
+	}
+
+	alternarVisibilidadAccionerOrdenarNodos() {
+		if (this.menuVisible === this.menu.ordenarNodos) {
+			this.menuVisible = '';
+		} else {
+			this.menuVisible = this.menu.ordenarNodos;
+		}
+	}
+
+	esAccionesOrdenarNodosVisible() {
+		return this.menuVisible === this.menu.ordenarNodos;
 	}
 
 }

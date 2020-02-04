@@ -202,6 +202,8 @@ export class NavbarComponent implements OnInit {
 				return 'Notificaciones';
 			case '/fase-reacciones':
 				return 'Fase de reacciones';
+			case '/fase-escritos':
+				return 'Fase de escritos';
 			case '/resultados':
 				return 'Resultados';
 		}

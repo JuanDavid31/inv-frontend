@@ -1,5 +1,5 @@
 <div class="main-content">
-	<div class="col-lg-6 mb-5 div-nodos">
+	<div class="col-12 col-sm-12 col-md-6 p-0 pl-md-3 pr-md-3 mb-4 mb-md-5 div-nodos">
 		<div class="ctrl" style="background:#DCE3E8">
 			<input class="btn btn-default btn-sm mt-0 mb-0" type="submit" value="Organizar grupos"
 				(click)="organizar()">
@@ -7,7 +7,7 @@
 		<div id="cy">
 		</div>
 	</div>
-	<div class="col-lg-6 mb-5 div-escrito">
+	<div class="col-12 col-sm-12 col-md-6 p-0 pl-md-3 pr-md-3 mb-5 align-items-start align-items-md-center div-escrito">
 		<div [hidden]="grupoSeleccionado" class="modal-content modal-content-mensaje">Por favor seleccione un grupo.
 		</div>
 		<div [hidden]="!grupoSeleccionado" class="modal-content modal-content-form">
@@ -87,9 +87,11 @@
 				</div>
 				<!-- contenido de la ventana-->
 				<div class="modal-body">
-					{{nodoSeleccionado?.nombreCreador}}
 					<a [href]="nodoSeleccionado?.urlFoto" target="_blank">Abrir imagen en una pestaña nueva.</a>
-					<img src="{{nodoSeleccionado?.urlFoto}}" alt="Imagen nodo">
+					<img src="{{nodoSeleccionado?.urlFoto}}" class="mt-2 mb-2" alt="Imagen nodo">
+					<span>
+						<strong>Creador: </strong>{{nodoSeleccionado?.nombreCreador}}
+					</span>
 				</div>
 			</div>
 		</div>
