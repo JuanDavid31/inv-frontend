@@ -104,12 +104,14 @@ export class NavbarComponent implements OnInit {
 		}
 	}
 
-	private agregarNuevaInvitacion(datos){
-		console.log(datos);
+	private agregarNuevaInvitacion(invitacion){
+		this.serviciosToast.mostrarToast(undefined, 'Tienes una nueva invitación');
+		this.invitaciones.push(invitacion)
 	}
 	
 	private notificarSobreInvitacionRespondida(datos){
-		console.log(datos);
+		this.serviciosToast
+		.mostrarToast(undefined, `La invitación al usuario ${datos.emailDestinatario} fue respondida.`);
 	}
 	
 

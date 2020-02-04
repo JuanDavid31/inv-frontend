@@ -51,7 +51,8 @@ export class NotificationsComponent implements OnInit {
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
 		const options = {
-			headers: headers
+			headers: headers,
+			withCredentials: true
 		}
 
 		this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${decision}`, {
@@ -80,7 +81,8 @@ export class NotificationsComponent implements OnInit {
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
 		const options = {
-			headers: headers
+			headers: headers,
+			withCredentials: true
 		}
 
 		this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${this.decision}`, {

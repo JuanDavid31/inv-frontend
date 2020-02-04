@@ -222,7 +222,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
 
 		const options = {
-			headers: headers
+			headers: headers,
+			withCredentials: true
 		}
 
 		this.http.post('http://3.130.29.100:8080/invitaciones', {
@@ -298,7 +299,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	private avanzarFaseProblematica(idProblematica) {
 		const problematica = this.problematicas
 			.find(problematica => problematica.id === idProblematica);
-		problematica.fase++;
+
+		problematica.fase = problematica.fase + 1;
 		
 		//La problematica concluyo.
 		if(problematica.fase === 5){
