@@ -23,6 +23,8 @@ export class NavbarComponent implements OnInit {
 	location: Location;
 
 	invitaciones = [];
+	
+	servidor: EventSource;
 
 	constructor(private element: ElementRef,
 		private serviciosNotificaciones: NotificacionesService,
@@ -38,6 +40,7 @@ export class NavbarComponent implements OnInit {
 	ngOnInit() {
 		this.prepararObserverNotificaciones();
 		this.cargarInvitaciones();
+		this.prepararSse();
 
 		this.listTitles = ROUTES.filter(listTitle => listTitle);
 		const navbar: HTMLElement = this.element.nativeElement;
@@ -52,6 +55,10 @@ export class NavbarComponent implements OnInit {
 		});
 	}
 
+	/**
+	 * Se suscribe la los cambios emitidos cuando se acepta o rechaza una invitacón.
+	 * Cuando se emite un evento, se elimina la invitación involucrada.
+	 **/
 	prepararObserverNotificaciones() {
 		this.serviciosNotificaciones
 			.changeEmitted$
@@ -77,6 +84,34 @@ export class NavbarComponent implements OnInit {
 				}
 			})
 	}
+	
+	prepararSse(){
+		this.servidor = new EventSource('http://3.130.29.100:8080/eventos-notificaciones')
+		this.servidor.onmessage = this.recibirEvento.bind(this);
+	}
+	
+	private recibirEvento(datos: MessageEvent) {
+		const json: any = JSON.parse(datos.data);
+		switch (json.accion) {
+			case 'Invitacion recibida':
+				this.agregarNuevaInvitacion(json.invitacion);
+				break;
+			case 'Invitacion respondida':
+				this.notificarSobreInvitacionRespondida(json.invitacion);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private agregarNuevaInvitacion(datos){
+		console.log(datos);
+	}
+	
+	private notificarSobreInvitacionRespondida(datos){
+		console.log(datos);
+	}
+	
 
 	sidebarOpen() {
 		const toggleButton = this.toggleButton;
@@ -184,7 +219,7 @@ export class NavbarComponent implements OnInit {
 		this.router.navigateByUrl("/login");
 	}
 
-	mandarANotificaciones() {
+	mandarANotificaciones() { //TODO: mandar?
 		this.router.navigateByUrl("/notifications");
 	}
 }

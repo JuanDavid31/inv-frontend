@@ -234,7 +234,7 @@ export class FaseIndividualComponent implements OnInit {
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
-                    this.atenderErr(res.error);
+                    this.atenderErr(res.error.erros[0]);
                 } else {
                     this.atenderPOST(res);
                 }

@@ -53,9 +53,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
 
-		//this.servidor = new EventSource('http://3.130.29.100:8080/eventos-dashboard')
-		//this.servidor.onopen = function (event) { console.log('onOpenEventSource', event) };
-		//this.servidor.onmessage = this.recibirEvento.bind(this);
+		this.servidor = new EventSource('http://3.130.29.100:8080/eventos-dashboard')
+		this.servidor.onmessage = this.recibirEvento.bind(this);
 		//this.servidor.onclose = this.onCloseEventSource.bind(this);
 	}
 
@@ -160,10 +159,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			default:
 				break;
 		}
-	}
-
-	private onCloseEventSource(event) {
-		console.log('onCloseEventSource', event);
 	}
 
 	private cambioFaseProblematica(datos) {
@@ -443,6 +438,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy() {
-		//this.servidor.close();
+		this.servidor.close();
 	}
 }
