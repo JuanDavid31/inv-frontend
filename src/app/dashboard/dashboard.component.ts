@@ -53,7 +53,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
 
-		this.servidor = new EventSource('http://3.130.29.100:8080/eventos-dashboard')
+		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos-dashboard?email=${this.serviciosLocalStorage.darEmail()}`, {withCredentials: true})
 		this.servidor.onmessage = this.recibirEvento.bind(this);
 		//this.servidor.onclose = this.onCloseEventSource.bind(this);
 	}
@@ -283,7 +283,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 			headers: headers
 		}
 		this.http
-			.post(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?avanzar=${true}`, options)
+			.put(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?avanzar=${true}`, options, {withCredentials:true})
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {

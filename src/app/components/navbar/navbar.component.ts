@@ -86,7 +86,7 @@ export class NavbarComponent implements OnInit {
 	}
 	
 	prepararSse(){
-		this.servidor = new EventSource('http://3.130.29.100:8080/eventos-notificaciones')
+		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos-invitaciones?email=${this.serviciosLocalStorage.darEmail()}`, {withCredentials: true})
 		this.servidor.onmessage = this.recibirEvento.bind(this);
 	}
 	
