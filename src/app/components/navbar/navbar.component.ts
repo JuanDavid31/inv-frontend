@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { ROUTES } from '../sidebar/sidebar.component';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -32,7 +32,8 @@ export class NavbarComponent implements OnInit {
 		private serviciosToast: ToastService,
 		private router: Router,
 		private http: HttpClient,
-		location: Location) {
+		location: Location,
+		private changeDetector: ChangeDetectorRef) {
 		this.sidebarVisible = false;
 		this.location = location;
 	}
@@ -61,7 +62,7 @@ export class NavbarComponent implements OnInit {
 	 **/
 	prepararObserverNotificaciones() {
 		this.serviciosNotificaciones
-			.changeEmitted$
+			.eliminarNotificaciones$
 			.subscribe(idInvitacion => {
 				this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== idInvitacion);
 			})
@@ -106,12 +107,15 @@ export class NavbarComponent implements OnInit {
 
 	private agregarNuevaInvitacion(invitacion){
 		this.serviciosToast.mostrarToast(undefined, 'Tienes una nueva invitación');
-		this.invitaciones.push(invitacion)
+		this.invitaciones.push(invitacion);
+		//this.changeDetector.detectChanges(); //Por alfuna razón, la lineas anterior no actualiza el HTML.
+		this.serviciosNotificaciones.agregarInvitacionEnNotifications(invitacion);
 	}
 	
-	private notificarSobreInvitacionRespondida(datos){
+	private notificarSobreInvitacionRespondida(invitacion){
 		this.serviciosToast
-		.mostrarToast(undefined, `La invitación al usuario ${datos.emailDestinatario} fue respondida.`);
+			.mostrarToast(undefined, `La invitación al usuario ${invitacion.emailDestinatario} fue respondida.`);
+		this.serviciosNotificaciones.actualizarNotificacionEnDashboard(invitacion);
 	}
 	
 

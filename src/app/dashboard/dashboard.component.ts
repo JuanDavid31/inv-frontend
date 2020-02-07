@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
+import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 declare var $;
 
 @Component({
@@ -44,13 +45,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		private http: HttpClient,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
-		private router: Router) { }
+		private serviciosNotificaciones: NotificacionesService,
+		private router: Router,
+		private changeDetector: ChangeDetectorRef) { }
 
 	ngOnInit() {
 		this.cargarProblematicas();
 		this.cargarProblematicasTerminadas();
+		this.prepararObserverNotificacionesActualizadas();
 		this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
-			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
+				.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
 
 		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos-dashboard?email=${this.serviciosLocalStorage.darEmail()}`, {withCredentials: true})
@@ -73,6 +77,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 				} else {
 					this.problematicas = res;
 				}
+			})
+	}
+
+	/**
+	 * Si actualmente se estan viendo las invitaciones
+	 * de la problematica que contiene esta invitación 
+	 * 
+	 */
+	prepararObserverNotificacionesActualizadas() {
+		this.serviciosNotificaciones
+			.actualizarNotificacion$
+			.subscribe(invitacion => {
+				if(this.problematicaSeleccionada.id !== invitacion.idProblematica)return;
+				const index = this.invitaciones.findIndex(intivacion => invitacion.id === invitacion.id);
+				this.invitaciones[index] = invitacion;
+				//this.changeDetector.detectChanges();
 			})
 	}
 

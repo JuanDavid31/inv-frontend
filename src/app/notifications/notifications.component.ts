@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -20,10 +20,12 @@ export class NotificationsComponent implements OnInit {
 	constructor(private http: HttpClient,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosNotificaciones: NotificacionesService,
-		private serviciosToast: ToastService) { }
+		private serviciosToast: ToastService,
+		private changeDetector: ChangeDetectorRef) { }
 
 	ngOnInit() {
 		this.cargarInvitaciones();
+		this.prepararObserverNotificionAgregada();
 	}
 
 	cargarInvitaciones() {
@@ -42,6 +44,18 @@ export class NotificationsComponent implements OnInit {
 				} else {
 					this.invitaciones = res;
 				}
+			})
+	}
+
+	/**
+	 * Agrega la invitación cuando esta es notificada.
+	 */
+	prepararObserverNotificionAgregada(){
+		this.serviciosNotificaciones
+			.agregarNotificacion$
+			.subscribe(invitacion => {
+				this.invitaciones.push(invitacion);
+				//this.changeDetector.detectChanges();
 			})
 	}
 
@@ -67,6 +81,7 @@ export class NotificationsComponent implements OnInit {
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Invitación aceptada');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
+					//this.changeDetector.detectChanges();
 					this.eliminarNotificacion(res.id);
 				}
 			})
@@ -104,6 +119,6 @@ export class NotificationsComponent implements OnInit {
 
 	eliminarNotificacion(idInvitacion) {
 		this.serviciosNotificaciones
-			.emitChange(idInvitacion);
+			.eliminarNotificacionEnHeader(idInvitacion);
 	}
 }

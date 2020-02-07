@@ -6,16 +6,27 @@ import { Subject } from 'rxjs';
 })
 export class NotificacionesService {
 
-  // Observable string sources
-  private emitChangeSource = new Subject<any>();
+  private eliminarNotificacionSubject = new Subject<any>();
+  eliminarNotificaciones$ = this.eliminarNotificacionSubject.asObservable();
+
+  private actualizarNotificacionSubject = new Subject<any>();
+  actualizarNotificacion$ = this.actualizarNotificacionSubject.asObservable();
+
+  private agregarNotificacionSubject = new Subject<any>();
+  agregarNotificacion$ = this.agregarNotificacionSubject.asObservable();
 
   constructor() { }
 
-  // Observable string streams
-  changeEmitted$ = this.emitChangeSource.asObservable();
-
   // Service message commands
-  emitChange(change: any) {
-    this.emitChangeSource.next(change);
+  eliminarNotificacionEnHeader(change: any) {
+    this.eliminarNotificacionSubject.next(change);
+  }
+
+  actualizarNotificacionEnDashboard(change: any){
+    this.actualizarNotificacionSubject.next(change);
+  }
+
+  agregarInvitacionEnNotifications(change: any){
+    this.agregarNotificacionSubject.next(change);
   }
 }
