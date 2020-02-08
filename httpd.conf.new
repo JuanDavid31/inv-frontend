@@ -1,0 +1,26 @@
+#Nueva conf
+
+     <VirtualHost *:80>
+      #-BASIC-CONFIGURATION    
+         ServerName inv-frontend.com
+         ServerAdmin 2220151041@estudiantesunibague.edu.co
+         DocumentRoot "/usr/local/apache2/htdocs"
+   
+      #-SERVER-CONFIGURATION
+         RewriteEngine On
+   
+      #-DIRECTORY-CONFIGURATION
+         <Directory "/usr/local/apache2/htdocs">
+            RewriteBase /
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.html [L]
+            Options Indexes FollowSymLinks
+            AllowOverride None
+            Require all granted
+         </Directory>
+   
+      #-LOGGING
+         CustomLog "|/progs/apache_instance/bin/rotatelogs logs/my-log_log.%Y.%m.%d 86400" common
+    </VirtualHost>
