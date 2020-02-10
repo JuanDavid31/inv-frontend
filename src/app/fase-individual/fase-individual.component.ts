@@ -48,7 +48,8 @@ export class FaseIndividualComponent implements OnInit {
 
     private prepararOnChangeFileInput() {
         $('.custom-file-input').on('change', function () {
-            var fileName = (<HTMLInputElement>document.getElementById('customFileLang')).files[0].name;
+            let el: HTMLInputElement = <HTMLInputElement>document.getElementById('customFileLang');
+            var fileName = el.files[0].name;
             $(this).next('.custom-file-label').addClass("selected").html(fileName);
         })
     }
