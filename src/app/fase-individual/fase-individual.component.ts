@@ -32,6 +32,7 @@ export class FaseIndividualComponent implements OnInit {
     modalVisualizacionImagenNodo: any;
 
     fotoFileInput: HTMLInputElement;
+    nombreArchivo = 'Seleccionar archivo';
 
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
@@ -40,18 +41,22 @@ export class FaseIndividualComponent implements OnInit {
         private activatedRoute: ActivatedRoute) { }
 
     ngOnInit() {
-        this.fotoFileInput = (<HTMLInputElement>document.getElementById('customFileLang'));
         this.prepararOnChangeFileInput();
         this.iniciar();
         this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
     }
 
     private prepararOnChangeFileInput() {
-        $('.custom-file-input').on('change', function () {
-            let el: HTMLInputElement = <HTMLInputElement>document.getElementById('customFileLang');
-            var fileName = el.files[0].name;
-            $(this).next('.custom-file-label').addClass("selected").html(fileName);
-        })
+        // $('.custom-file-input').on('change', function () {
+        //     var fileName = this.fotoFileInput.files[0].name;
+        //     $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        // })
+    }
+    
+    cambioFileInput(){
+        this.fotoFileInput = (<HTMLInputElement>document.getElementById('customFileLang'));
+        var fileName = this.fotoFileInput.files[0].name;
+        this.nombreArchivo =fileName;
     }
 
     private iniciar() {
@@ -198,7 +203,7 @@ export class FaseIndividualComponent implements OnInit {
     }
 
     private atenderErr(err) {
-        this.serviciosToast.mostrarToast('Error', err.erros[0], 'danger');
+        this.serviciosToast.mostrarToast('Error', err.errors[0], 'danger');
     }
 
     agregar() {
@@ -216,6 +221,10 @@ export class FaseIndividualComponent implements OnInit {
 
         const arr = foto.name.split('.');
         const extensionFoto = arr[arr.length - 1];
+        
+        if(this.extensionValida(extensionFoto)){
+            this.serviciosToast.mostrarToast(undefined, 'Solo imagenes con extensión .PNG, .JPG o .JPEG son validas', 'danger');
+        }
 
         const form = new FormData();
         form.append('foto', foto);
@@ -235,11 +244,24 @@ export class FaseIndividualComponent implements OnInit {
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
-                    this.atenderErr(res.error.erros[0]);
+                    this.atenderErr(res.error);
                 } else {
+                    this.serviciosToast.mostrarToast(undefined, 'Se agrego El nodo', 'success');
                     this.atenderPOST(res);
                 }
             });
+    }
+    
+    private extensionValida(extension){
+        if(extension.contains('.')){
+            return false;
+        }
+        switch(extension.toUpperCase()){
+            case '.PNG': return true;
+            case '.JPG': return true;
+            case '.JPEG':return true;
+            default: return false;
+        }
     }
 
     atenderPOST(nodo) {
@@ -262,7 +284,7 @@ export class FaseIndividualComponent implements OnInit {
     private limpiarCamposNodo() {
         this.fotoFileInput.value = '';
         this.nombreNodo = '';
-        $('.custom-file-label').html('');
+        this.nombreArchivo = '';
     }
 
     eliminarPorId(nodo) {
@@ -279,6 +301,7 @@ export class FaseIndividualComponent implements OnInit {
                 if (res.error) {
                     this.atenderErr(res.error);
                 } else {
+                    this.serviciosToast.mostrarToast(undefined, 'Se elimino el nodo', 'success');
                     this.atenderDELETE(nodo);
                 }
             });

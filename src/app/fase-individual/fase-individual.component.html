@@ -12,8 +12,8 @@
         <div *ngIf="esAccionesAgregarNodoVisible()" class="agregar-nodo-responsive">
             <div class="col-12 col-sm-6 col-md-6 div-archivo">
                 <div class="custom-file">
-                    <input type="file" class="custom-file-input" id="customFileLang" lang="es">
-                    <label class="custom-file-label" for="customFileLang">Seleccionar Archivo</label>
+                    <input (change)="cambioFileInput()" type="file" class="custom-file-input" id="customFileLang" lang="es">
+                    <label class="custom-file-label" for="customFileLang">{{nombreArchivo}}</label>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-md-6 d-flex form-group">
@@ -27,7 +27,6 @@
                 <div class="d-flex align-items-end">
                     <label class="mb-0 mr-2" for="De">De</label>
                     <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe">
-                        <option disabled selected>Selecciona un nodo</option>
                         <option *ngFor="let nodo of nodos" [ngValue]="nodo">
                             {{nodo.nombre}}
                         </option>
@@ -38,7 +37,7 @@
                 <div class="d-flex align-items-end">
                     <label class="mb-0 mr-2" for="A">A</label>
                     <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA">
-                        <option disabled selected>Selecciona un nodo</option>
+                        <option selected></option>
                         <option *ngFor="let nodo of nodos" [ngValue]="nodo">
                             {{nodo.nombre}}
                         </option>
@@ -56,8 +55,8 @@
     <div class="ctrl d-none d-md-flex" style="background:#DCE3E8">
         <div class="col-12 col-sm-6 col-md-6 div-archivo">
             <div class="custom-file">
-                <input type="file" class="custom-file-input" id="customFileLang" lang="es">
-                <label class="custom-file-label" for="customFileLang">Seleccionar Archivo</label>
+                <input (change)="cambioFileInput()" type="file" class="custom-file-input" id="customFileLang" lang="es">
+                <label class="custom-file-label" for="customFileLang">{{nombreArchivo}}</label>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-6 d-flex form-group div-agregar-nodo">
@@ -69,7 +68,7 @@
             <div class="d-flex align-items-end">
                 <label class="mb-0 mr-2" for="De">De</label>
                 <select class="form-control mt-0" name="De" id="De" [(ngModel)]="nodoDe">
-                    <option disabled selected>Selecciona un nodo</option>
+                    <option selected></option>
                     <option *ngFor="let nodo of nodos" [ngValue]="nodo">
                         {{nodo.nombre}}
                     </option>
@@ -80,7 +79,7 @@
             <div class="d-flex align-items-end">
                 <label class="mb-0 mr-2" for="A">A</label>
                 <select class="form-control mt-0" name="A" id="A" [(ngModel)]="nodoA">
-                    <option disabled selected>Selecciona un nodo</option>
+                    <option selected></option>
                     <option *ngFor="let nodo of nodos" [ngValue]="nodo">
                         {{nodo.nombre}}
                     </option>
