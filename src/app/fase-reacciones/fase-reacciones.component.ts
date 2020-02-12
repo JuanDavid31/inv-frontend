@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 declare var cytoscape;
 
 @Component({
@@ -12,7 +13,7 @@ declare var cytoscape;
     templateUrl: './fase-reacciones.component.html',
     styleUrls: ['./fase-reacciones.component.css']
 })
-export class FaseReaccionesComponent implements OnInit {
+export class FaseReaccionesComponent implements OnInit, OnDestroy {
 
     nombreNodo = '';
     cy: any = {};
@@ -20,10 +21,11 @@ export class FaseReaccionesComponent implements OnInit {
     modalVisualizacionImagenNodo: any;
     nodoSeleccionado: any
 
-    problematicaActual: number;
+    idProblematicaActual: number;
 
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
+        private serviciosNotificaciones: NotificacionesService,
         private http: HttpClient,
         private router: Router,
         private activatedRoute: ActivatedRoute) { }
@@ -38,8 +40,10 @@ export class FaseReaccionesComponent implements OnInit {
             .paramMap
             .pipe(map(() => window.history.state))
             .subscribe(params => {
-                this.problematicaActual = params.idProblematica;
-                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+                this.idProblematicaActual = params.idProblematica;
+                if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+                
+                this.serviciosNotificaciones.suscribirseANotificaciones(this.idProblematicaActual, this.serviciosLocalStorage.darEmail());
 
                 this.prepararCytoscape();
                 this.cargarNodos();
@@ -105,7 +109,7 @@ export class FaseReaccionesComponent implements OnInit {
         const email = this.serviciosLocalStorage.darEmail(); if (!email) return;
 
         this.http
-            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos`, options)
+            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.idProblematicaActual}/grupos`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -225,7 +229,7 @@ export class FaseReaccionesComponent implements OnInit {
             return;
         } else {
             this.idGrupoSeleccionado = elemento.data().id;
-            const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
+            const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.idProblematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
             this.http
                 .post(url, { valor: valorReaccion }, options)
                 .pipe(catchError(err => of(err)))
@@ -245,5 +249,9 @@ export class FaseReaccionesComponent implements OnInit {
             nodeOverlap: 1,
             boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
         }).run()
+    }
+    
+    ngOnDestroy(){
+        this.serviciosNotificaciones.terminarSuscripcion();
     }
 }

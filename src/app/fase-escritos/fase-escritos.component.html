@@ -21,12 +21,12 @@
 						<label for="nombre-escrito">Titulo</label>
 						<input type="text" id="nombre-escrito" #nombreEscritoInput="ngModel" class="form-control"
 							[(ngModel)]="escritoSeleccionado.nombre" name="nombreNuevoEscritoInput" minlength="10"
-							maxlength="20" [disabled]="!grupoSeleccionado" required>
+							maxlength="40" [disabled]="!grupoSeleccionado" required>
 						<div *ngIf="nombreEscritoInput?.touched">
 							<div class="alert alert-danger" role="alert"
 								style="height:50px;text-align:center;background:#F08080"
 								*ngIf="nombreEscritoInput?.errors?.minlength">
-								<a>Debe tener entre 10 y 20 caracteres</a>
+								<a>Debe tener entre 10 y 40 caracteres</a>
 								<button type="button" class="close" data-dismiss="alert" aria-label="Close"
 									style="color:#FFFFFF">
 									<span aria-hidden="true">&times;</span>

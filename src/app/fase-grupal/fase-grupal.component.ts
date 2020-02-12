@@ -3,6 +3,7 @@ import { LocalStorageService } from 'app/services/localstorage/local-storage.ser
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
+import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 declare var cytoscape;
 declare var $;
 
@@ -53,24 +54,27 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private activatedRoute: ActivatedRoute,
 		private router: Router,
-		private serviciosToast: ToastService) { }
-
+		private serviciosToast: ToastService,
+		private serviciosNotificaciones: NotificacionesService) { }
+		
 	ngOnInit() {
 		this.activatedRoute
 			.paramMap
 			.pipe(map(() => window.history.state))
 			.subscribe(params => {
-				const { idProblematica } = params;
-				if (!idProblematica) {
+				const idProblematicaActual = params.idProblematica;
+				if (!idProblematicaActual) {
 					this.router.navigateByUrl('/dashboard')
 					return;
 				}
+				
+				this.serviciosNotificaciones.suscribirseANotificaciones(idProblematicaActual, this.serviciosLocalStorage.darEmail());
 
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
 
-				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematica}`);
+				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematicaActual}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 				this.socket.onerror = this.onWebsocketError.bind(this);
@@ -893,6 +897,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			this.cerradoNormal = true;
 			this.socket.close();
 		}
+		this.serviciosNotificaciones.terminarSuscripcion();
 	}
 
 	private onWebSocketClose(event) {

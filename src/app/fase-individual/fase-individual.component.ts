@@ -5,6 +5,7 @@ import { LocalStorageService } from 'app/services/localstorage/local-storage.ser
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 declare var cytoscape;
 
 declare var $;
@@ -15,7 +16,7 @@ declare var $;
     styleUrls: ['./fase-individual.component.css']
 })
 
-export class FaseIndividualComponent implements OnInit {
+export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     nodoSeleccionado: any = {};
     nodos = [];
@@ -27,7 +28,7 @@ export class FaseIndividualComponent implements OnInit {
     private menuVisible: String = '';
     private menu = { agregarNodo: 'Agregar nodo', conectarNodos: 'Conectar nodos' };
 
-    problematicaActual: number;
+    idProblematicaActual: number;
     
     modalVisualizacionImagenNodo: any;
 
@@ -38,19 +39,16 @@ export class FaseIndividualComponent implements OnInit {
         private serviciosToast: ToastService,
         private http: HttpClient,
         private router: Router,
-        private activatedRoute: ActivatedRoute) { }
+        private activatedRoute: ActivatedRoute,
+        private serviciosNotificaciones: NotificacionesService) { }
 
     ngOnInit() {
-        this.prepararOnChangeFileInput();
         this.iniciar();
         this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
     }
-
-    private prepararOnChangeFileInput() {
-        // $('.custom-file-input').on('change', function () {
-        //     var fileName = this.fotoFileInput.files[0].name;
-        //     $(this).next('.custom-file-label').addClass("selected").html(fileName);
-        // })
+    
+    ngOnDestroy(){
+        this.serviciosNotificaciones.terminarSuscripcion();
     }
     
     cambioFileInput(){
@@ -64,8 +62,10 @@ export class FaseIndividualComponent implements OnInit {
             .paramMap
             .pipe(map(() => window.history.state))
             .subscribe(params => {
-                this.problematicaActual = params.idProblematica;
-                if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+                this.idProblematicaActual = params.idProblematica;
+                if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+                
+                this.serviciosNotificaciones.suscribirseANotificaciones(this.idProblematicaActual, this.serviciosLocalStorage.darEmail());
 
                 this.nodoDe = {};
                 this.nodoA = {};
@@ -162,7 +162,7 @@ export class FaseIndividualComponent implements OnInit {
         const email = this.serviciosLocalStorage.darEmail();
 
         this.http
-            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.problematicaActual}/nodos`, options)
+            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.idProblematicaActual}/nodos`, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -240,7 +240,7 @@ export class FaseIndividualComponent implements OnInit {
         const email = this.serviciosLocalStorage.darEmail();
 
         this.http
-            .post(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/nodos`, form, options)
+            .post(`http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/${email}/nodos`, form, options)
             .pipe(catchError(err => of(err)))
             .subscribe(res => {
                 if (res.error) {
@@ -253,7 +253,7 @@ export class FaseIndividualComponent implements OnInit {
     }
     
     private extensionValida(extension){
-        if(extension.contains('.')){
+        if(extension.includes('.')){
             return false;
         }
         switch(extension.toUpperCase()){

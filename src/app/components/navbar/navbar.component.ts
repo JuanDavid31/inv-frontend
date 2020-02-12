@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { ROUTES } from '../sidebar/sidebar.component';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { ToastService } from 'app/services/toast/toast.service';
 	templateUrl: './navbar.component.html',
 	styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
 
 	mobile_menu_visible: any = 0;
 	private toggleButton: any;
@@ -230,4 +230,9 @@ export class NavbarComponent implements OnInit {
 	mandarANotificaciones() { //TODO: mandar?
 		this.router.navigateByUrl("/notifications");
 	}
+
+	ngOnDestroy(){
+		this.servidor.close();	
+	}	
+	
 }

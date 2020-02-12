@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren, AfterViewInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { map, catchError } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
 import { NgForm } from '@angular/forms';
+import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 
 declare var cytoscape;
 
@@ -14,10 +15,10 @@ declare var cytoscape;
 	templateUrl: './fase-escritos.component.html',
 	styleUrls: ['./fase-escritos.component.scss']
 })
-export class FaseEscritosComponent implements OnInit {
+export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	cy: any = {};
-	problematicaActual: number;
+	idProblematicaActual: number;
 	modalVisualizacionImagenNodo: any;
 	nodoSeleccionado: any;
 	escritos: any[] = [];
@@ -37,6 +38,7 @@ export class FaseEscritosComponent implements OnInit {
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
+		private serviciosNotificaciones: NotificacionesService,
 		private http: HttpClient,
 		private router: Router,
 		private activatedRoute: ActivatedRoute) { }
@@ -51,8 +53,10 @@ export class FaseEscritosComponent implements OnInit {
 			.paramMap
 			.pipe(map(() => window.history.state))
 			.subscribe(params => {
-				this.problematicaActual = params.idProblematica;
-				if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+				this.idProblematicaActual = params.idProblematica;
+				if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+				
+				this.serviciosNotificaciones.suscribirseANotificaciones(this.idProblematicaActual, this.serviciosLocalStorage.darEmail());
 
 				this.prepararCytoscape();
 				this.cargarNodosYEscritos();
@@ -152,7 +156,7 @@ export class FaseEscritosComponent implements OnInit {
 		}
 
 		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/reacciones`, options)
+			.get(`http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/reacciones`, options)
 			.pipe(catchError(err => of(err)))
 	}
 
@@ -165,7 +169,7 @@ export class FaseEscritosComponent implements OnInit {
 		if (!email) return;
 
 		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/${email}/escritos`, options)
+			.get(`http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/${email}/escritos`, options)
 			.pipe(catchError(err => of(err)))
 	}
 
@@ -295,7 +299,7 @@ export class FaseEscritosComponent implements OnInit {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
+		const url = `http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/` +
 			`${this.serviciosLocalStorage.darEmail()}/escritos`;
 
 		this.http
@@ -320,7 +324,7 @@ export class FaseEscritosComponent implements OnInit {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
+		const url = `http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/` +
 			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
 
 		this.http
@@ -345,7 +349,7 @@ export class FaseEscritosComponent implements OnInit {
 			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
 		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaActual}/personas/` +
+		const url = `http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/` +
 			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
 
 		this.http
@@ -364,6 +368,10 @@ export class FaseEscritosComponent implements OnInit {
 					this.grupoSeleccionado = undefined;
 				}
 			});
+	}
+	
+	ngOnDestroy(){
+		this.serviciosNotificaciones.terminarSuscripcion();
 	}
 
 }
