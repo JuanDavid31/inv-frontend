@@ -38,10 +38,25 @@ export class NavbarComponent implements OnInit {
 		this.location = location;
 	}
 
+	menuVisible: boolean = false;
+	ultimoTamanio: number;
+
 	ngOnInit() {
 		this.prepararObserverNotificaciones();
 		this.cargarInvitaciones();
 		this.prepararSse();
+
+		this.ultimoTamanio = window.innerWidth;
+		
+		window.onresize = (event) => {
+			const nuevoTamanio = window.innerWidth;
+			if(this.esMovil(this.ultimoTamanio) && this.esDesktop(nuevoTamanio) && this.menuVisible){
+				this.desbloquearDesplazamientoVertical();
+			}else if(this.esMovil(nuevoTamanio) && this.esDesktop(this.ultimoTamanio) && this.menuVisible){
+				this.bloquearDesplazamientoVertical();
+			}
+			this.ultimoTamanio = window.innerWidth;
+		}
 
 		this.listTitles = ROUTES.filter(listTitle => listTitle);
 		const navbar: HTMLElement = this.element.nativeElement;
@@ -51,9 +66,21 @@ export class NavbarComponent implements OnInit {
 			var $layer: any = document.getElementsByClassName('close-layer')[0];
 			if ($layer) {
 				$layer.remove();
+
+				this.menuVisible = false;
+				this.desbloquearDesplazamientoVertical();
+
 				this.mobile_menu_visible = 0;
 			}
 		});
+	}
+
+	private esMovil(tamanio){
+		return tamanio <= 991;
+	}
+
+	private esDesktop(tamanio){
+		return tamanio > 991;
 	}
 
 	/**
@@ -117,7 +144,6 @@ export class NavbarComponent implements OnInit {
 			.mostrarToast(undefined, `La invitación al usuario ${invitacion.emailDestinatario} fue respondida.`);
 		this.serviciosNotificaciones.actualizarNotificacionEnDashboard(invitacion);
 	}
-	
 
 	sidebarOpen() {
 		const toggleButton = this.toggleButton;
@@ -138,7 +164,10 @@ export class NavbarComponent implements OnInit {
 		body.classList.remove('nav-open');
 	};
 
-	sidebarToggle() {
+	sidebarToggle() { //* Solo se llama al oprimir el boton, no he encontrado otra manera de abrir el menu
+		this.menuVisible = true;
+		this.bloquearDesplazamientoVertical();
+
 		var $toggle = document.getElementsByClassName('navbar-toggler')[0];
 
 		if (this.sidebarVisible === false) {
@@ -148,10 +177,10 @@ export class NavbarComponent implements OnInit {
 		}
 		const body = document.getElementsByTagName('body')[0];
 
-		if (this.mobile_menu_visible == 1) {
+		if (this.mobile_menu_visible == 1) { //* No he encontrado un caso de uso donde esta condición suceda.
 			body.classList.remove('nav-open');
 			if ($layer) {
-				$layer.remove();
+				$layer.remove(); console.log('No se llama');
 			}
 			setTimeout(function () {
 				$toggle.classList.remove('toggled');
@@ -181,8 +210,13 @@ export class NavbarComponent implements OnInit {
 				body.classList.remove('nav-open');
 				this.mobile_menu_visible = 0;
 				$layer.classList.remove('visible');
+				const that = this;
 				setTimeout(function () {
 					$layer.remove();
+
+					that.menuVisible = false;
+					that.desbloquearDesplazamientoVertical();
+
 					$toggle.classList.remove('toggled');
 				}, 400);
 			}.bind(this);
@@ -192,6 +226,20 @@ export class NavbarComponent implements OnInit {
 
 		}
 	};
+
+	/**
+	 * Habilidad el desplazamiento o scrolling en toda la app.
+	 */
+	private bloquearDesplazamientoVertical(){
+		$('html, body').css({ overflow: 'hidden' });
+	}
+
+	/**
+	 * Inhabilita el desplazamiento o scrolling en toda la app.
+	 */
+	private desbloquearDesplazamientoVertical(){
+		$('html, body').css({ overflow: 'auto' });
+	}
 
 	getTitle() {
 		var titlee = this.location.prepareExternalUrl(this.location.path());
