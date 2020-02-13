@@ -231,14 +231,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	 * Habilidad el desplazamiento o scrolling en toda la app.
 	 */
 	private bloquearDesplazamientoVertical(){
-		$('html, body').css({ overflow: 'hidden' });
+		$('html, body').css({ overflow: 'hidden', height: '100%' });
 	}
 
 	/**
 	 * Inhabilita el desplazamiento o scrolling en toda la app.
 	 */
 	private desbloquearDesplazamientoVertical(){
-		$('html, body').css({ overflow: 'auto' });
+		$('html, body').css({ overflow: 'auto', height: 'auto' });
 	}
 
 	getTitle() {
