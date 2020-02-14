@@ -362,7 +362,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 					select: this.desconectar.bind(this)
 				},
 				{
-					content: 'Nada',
+					content: '<span class="fa fa-check fa-2x"></span>',
 					select: function (ele) { }
 				}
 			]
@@ -382,7 +382,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 					select: this.abrirModalImagenNodo.bind(this) //this.cambiarNombreGrupo.bind(this)
 				},
 				{
-					content: 'Nada',
+					content: '<span class="fa fa-trash fa-2x"></span>',
 					select: function (ele) { }
 				}
 			]
@@ -703,18 +703,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private alguienSeDesconecto({ email }) {
 
-		//Elimina el solicitante con el email dado.
-		let nombreUsuarioAElminar;
-		this.usuarios.some((usuario, indice) => {
+		const usuarioEliminado = this.usuarios.some((usuario, indice) => {
 			if (usuario.email === email && usuario.nombre.substr(usuario.nombre.length - 4) !== '(Tú)') {
-				nombreUsuarioAElminar = usuario.nombre;
+				this.serviciosToast.mostrarToast(undefined, `${usuario.nombre} se desconecto.`);
 				this.usuarios.splice(indice, 1);
 				return true;
 			}
 			return false;
 		})
 
-		this.serviciosToast.mostrarToast(undefined, `${nombreUsuarioAElminar} se desconecto.`);
+		if(usuarioEliminado && this.usuarios.length === 1){ this.solicitandoOrganizacion = false; }
 	}
 
 	conectar() {

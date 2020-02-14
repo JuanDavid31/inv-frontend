@@ -280,7 +280,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy(){
-		this.servidor.close();	
+		this.servidor.close();
+		$('html, body').css({ overflow: 'auto', height: '100%' });
 	}	
 	
 }

@@ -19,25 +19,24 @@ export class LoginComponent {
   mensaje: string = '';
   botonBloqueado: boolean = false;
 
-  constructor(private http: HttpClient,
-    private serviciosLocalStorage: LocalStorageService,
-    private router: Router) {
-  }
+	constructor(private http: HttpClient,
+				private serviciosLocalStorage: LocalStorageService,
+				private router: Router) { }
 
-  login() {
-    this.botonBloqueado = true;
-    this.http.post('http://3.130.29.100:8080/auth', {
-      email: this.email,
-      pass: this.password
-    }).pipe(catchError(err => of(err)))
-      .subscribe((res: any) => {
-        this.botonBloqueado = false;
-        if (res.error) {
-          this.mensaje = res.error.errors[0];
-        } else {
-          this.serviciosLocalStorage.guardarDatos(res);
-          this.router.navigateByUrl("/dashboard");
-        }
-      })
-  }
+	login() {
+		this.botonBloqueado = true;
+		this.http.post('http://3.130.29.100:8080/auth', {
+		email: this.email,
+		pass: this.password
+	}).pipe(catchError(err => of(err)))
+	.subscribe((res: any) => {
+			this.botonBloqueado = false;
+			if (res.error) {
+				this.mensaje = res.error.errors[0];
+			} else {
+				this.serviciosLocalStorage.guardarDatos(res);
+				this.router.navigateByUrl("/dashboard");
+			}
+		})
+	}
 }

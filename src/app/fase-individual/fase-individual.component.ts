@@ -131,7 +131,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                     select: this.eliminarPorId.bind(this)
                 },
                 {
-                    content: 'Nada',
+                    content: '<span class="fa fa-check fa-2x"></span>',
                     select: function () { }
                 }
             ]
@@ -147,7 +147,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                     select: this.desconectar.bind(this)
                 },
                 {
-                    content: 'Nada',
+                    content: '<span class="fa fa-check fa-2x"></span>',
                     select: function (ele) { }
                 }
             ]

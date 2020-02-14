@@ -12,12 +12,15 @@
 						</div>
 						<input type="text" name="nombresInput" id="nombres" class="form-control input_text"
 							#nombresInput="ngModel" autocomplete="new-password"
-							[ngClass]="{'is-invalid':nombresInput.invalid && nombresInput.dirty}" placeholder="Nombres"
-							[(ngModel)]="nombres" minlength="3" maxlength="40" required ngModel>
-						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.required">
+							[ngClass]="{'is-invalid':nombresInput.invalid && nombresInput.dirty}" 
+							placeholder="Nombres" [(ngModel)]="nombres" minlength="3" maxlength="40" 
+							required>
+						<div class="invalid-feedback" 
+							*ngIf="nombresInput?.dirty && nombresInput?.touched && nombresInput?.errors?.required">
 							<a>Nombres no puede estar vacio </a>
 						</div>
-						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.minlength">
+						<div class="invalid-feedback" 
+							*ngIf="nombresInput?.dirty && nombresInput?.touched && nombresInput?.errors?.minlength">
 							<a>El nombre debe contener al menos 3 caracteres</a>
 						</div>
 					</div>
@@ -28,12 +31,13 @@
 						<input type="text" name="apellidosInput" id="ape" class="form-control input_text"
 							#apellidosInput="ngModel" autocomplete="new-password"
 							[ngClass]="{'is-invalid':apellidosInput.invalid && apellidosInput.dirty}"
-							placeholder="Apellidos" [(ngModel)]="apellidos" minlength="3" maxlength="40" required
-							ngModel>
-						<div class="invalid-feedback" *ngIf="apellidosInput?.errors?.required">
+							placeholder="Apellidos" [(ngModel)]="apellidos" minlength="3" maxlength="40" required>
+						<div class="invalid-feedback" 
+							*ngIf="apellidosInput?.dirty && apellidosInput?.touched && apellidosInput?.errors?.required">
 							<a>Los apellidos no pueden estar vacios</a>
 						</div>
-						<div class="invalid-feedback" *ngIf="apellidosInput?.errors?.minlength">
+						<div class="invalid-feedback" 
+							*ngIf="apellidosInput?.dirty && apellidosInput?.touched && apellidosInput?.errors?.minlength">
 							<a>Los apellidos deben tener al menos 3 caracteres</a>
 						</div>
 					</div>
@@ -42,14 +46,12 @@
 							<span class="input-group-text"><i class="fas fa-envelope"></i></span>
 						</div>
 						<input type="email" id="email" name="emailInput" #emailInput="ngModel"
-							class="form-control input_text"
-							[ngClass]="{'is-invalid':emailInput.invalid && emailInput.dirty}"
-							placeholder="Correo electronico" [(ngModel)]="correo" minlength="8" maxlength="40" required
-							ngModel>
-						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.required">
+							class="form-control input_text" [ngClass]="{'is-invalid':emailInput.invalid && emailInput.dirty}"
+							placeholder="Correo electronico" [(ngModel)]="correo" minlength="8" maxlength="40" required>
+						<div class="invalid-feedback" *ngIf="emailInput?.touched && emailInput?.dirty && nombresInput?.errors?.required">
 							<a>El correo puede estar vacio </a>
 						</div>
-						<div class="invalid-feedback" *ngIf="nombresInput?.errors?.minlength">
+						<div class="invalid-feedback" *ngIf="emailInput?.touched && emailInput?.dirty && emailInput?.errors?.minlength">
 							<a>El correo debe contener al menos 8 caracteres</a>
 						</div>
 					</div>
@@ -60,11 +62,11 @@
 						<input type="password" name="pass" #passInput="ngModel" id="contra"
 							class="form-control input_text" autocomplete="new-password"
 							[ngClass]="{'is-invalid':passInput.invalid && passInput.dirty}" placeholder="Contraseña"
-							[(ngModel)]="password" minlength="8" maxlength="40" required ngModel>
-						<div class="invalid-feedback" *ngIf="passInput?.errors?.required">
+							[(ngModel)]="password" minlength="8" maxlength="40" required>
+						<div class="invalid-feedback" *ngIf="passInput?.touched && passInput?.dirty && passInput?.errors?.required">
 							<a>La contraseña no puede estar vacia</a>
 						</div>
-						<div class="invalid-feedback" *ngIf="passInput?.errors?.minlength">
+						<div class="invalid-feedback" *ngIf="passInput?.touched && passInput?.dirty && passInput?.errors?.minlength">
 							<a>La contraseña debe tener al menos 8 caracteres</a>
 						</div>
 					</div>
@@ -75,8 +77,8 @@
 						<input type="password" name="password2Input" id="password2" class="form-control input_text"
 							#password2Input="ngModel" autocomplete="new-password"
 							[ngClass]="{'is-invalid':password2Input.dirty && !esPassValido()}"
-							placeholder="Verificar contraseña" [(ngModel)]="password2" minlength="3" maxlength="40"
-							required ngModel>
+							placeholder="Verificar contraseña" [(ngModel)]="password2" minlength="8" 
+							maxlength="40" required>
 						<div class="invalid-feedback">
 							Las contraseñas deben coincidir
 						</div>

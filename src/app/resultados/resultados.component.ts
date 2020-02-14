@@ -233,7 +233,8 @@ export class ResultadosComponent implements OnInit {
 				select: this.abrirModalImagenNodo.bind(this)
 			},
 			{
-				content: 'Nada'
+				content: '<span class="fa fa-check fa-2x"></span>',
+				select: () => {}
 			}]
 		});
 	}
