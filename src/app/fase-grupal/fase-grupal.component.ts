@@ -2,9 +2,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { Subject } from 'rxjs';
 declare var cytoscape;
 declare var $;
 
@@ -13,7 +14,7 @@ declare var $;
 	templateUrl: './fase-grupal.component.html',
 	styleUrls: ['./fase-grupal.component.scss']
 })
-export class FaseGrupalComponent implements OnInit, OnDestroy{
+export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	idProblematicaActual: number;
 
@@ -54,13 +55,14 @@ export class FaseGrupalComponent implements OnInit, OnDestroy{
 
 	private menu = { conectarGrupos: 'Conectar grupos', ordenarNodos: 'Ordenar nodos' };
 
+	private componentDestroyed$: Subject<boolean> = new Subject()
+
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private activatedRoute: ActivatedRoute,
 		private router: Router,
 		private serviciosToast: ToastService,
-		private serviciosEventosSse: EventosSseService,
-		private serviciosNotificaciones: NotificacionesService) { }
-		
+		private serviciosEventosSse: EventosSseService) { }
+
 	ngOnInit() {
 		this.activatedRoute
 			.paramMap
@@ -71,8 +73,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy{
 					this.router.navigateByUrl('/dashboard')
 					return;
 				}
-				
-				this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
+
+				this.serviciosEventosSse.eventoCambioFaseProblematica$
+					.pipe(takeUntil(this.componentDestroyed$))
+					.subscribe(this.evaluarProblematicaActualizada.bind(this));
 
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
@@ -89,16 +93,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy{
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 	}
 
-    private evaluarProblematicaActualizada(datos){
-        const { idProblematica } = datos.data;
-		if(this.idProblematicaActual === idProblematica){
+	private evaluarProblematicaActualizada(datos) {
+		const { idProblematica } = datos;
+		if (this.idProblematicaActual === idProblematica) {
 			this.router.navigateByUrl('/dashboard');
-			this.serviciosToast.mostrarToast(undefined, 
-				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
+			this.serviciosToast.mostrarToast(undefined,
+				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.',
 				'info');
 		}
-    }
-    
+	}
+
 	private prepararCytoscape() {
 		this.cy = cytoscape({
 			container: document.getElementById('cy'),
@@ -726,7 +730,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy{
 			return false;
 		})
 
-		if(usuarioEliminado && this.usuarios.length === 1){ this.solicitandoOrganizacion = false; }
+		if (usuarioEliminado && this.usuarios.length === 1) { this.solicitandoOrganizacion = false; }
 	}
 
 	conectar() {
@@ -902,17 +906,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy{
 		this.modalVisualizacionImagenNodo.modal('toggle');
 	}
 
-	cerradoNormal = false;
-
-	ngOnDestroy() {
-		if (this.socket) {
-			this.cerradoNormal = true;
-			this.socket.close();
-		}
-	}
-
 	private onWebSocketClose(event) {
-		if (!this.cerradoNormal) {
+		if (!this.socket) {
 			this.serviciosToast.mostrarToast('Error', 'Fuiste expulsado dada tu inactividad.', 'danger');
 			this.router.navigateByUrl('/dashboard');
 		}
@@ -949,6 +944,15 @@ export class FaseGrupalComponent implements OnInit, OnDestroy{
 
 	esAccionesOrdenarNodosVisible() {
 		return this.menuVisible === this.menu.ordenarNodos;
+	}
+
+	ngOnDestroy() {
+		if (this.socket) {
+			this.socket.close();
+		}
+
+		this.componentDestroyed$.next(true)
+		this.componentDestroyed$.complete()
 	}
 
 }

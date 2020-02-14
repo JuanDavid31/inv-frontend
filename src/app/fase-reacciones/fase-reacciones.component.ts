@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { catchError, map } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
@@ -14,7 +14,7 @@ declare var cytoscape;
     templateUrl: './fase-reacciones.component.html',
     styleUrls: ['./fase-reacciones.component.css']
 })
-export class FaseReaccionesComponent implements OnInit{
+export class FaseReaccionesComponent implements OnInit, OnDestroy {
 
     nombreNodo = '';
     cy: any = {};
@@ -24,9 +24,10 @@ export class FaseReaccionesComponent implements OnInit{
 
     idProblematicaActual: number;
 
+    private componentDestroyed$: Subject<boolean> = new Subject()
+
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
-        private serviciosNotificaciones: NotificacionesService,
         private serviciosEventosSse: EventosSseService,
         private http: HttpClient,
         private router: Router,
@@ -44,8 +45,10 @@ export class FaseReaccionesComponent implements OnInit{
             .subscribe(params => {
                 this.idProblematicaActual = params.idProblematica;
                 if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
-                
-                this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
+
+                this.serviciosEventosSse.eventoCambioFaseProblematica$
+                    .pipe(takeUntil(this.componentDestroyed$))
+                    .subscribe(this.evaluarProblematicaActualizada.bind(this));
 
                 this.prepararCytoscape();
                 this.cargarNodos();
@@ -53,15 +56,15 @@ export class FaseReaccionesComponent implements OnInit{
                 this.prepararMenuGrupos()
             })
     }
-    
-    private evaluarProblematicaActualizada(datos){
-        const { idProblematica } = datos.data;
-		if(this.idProblematicaActual === idProblematica){
-			this.router.navigateByUrl('/dashboard');
-			this.serviciosToast.mostrarToast(undefined, 
-				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
-				'info');
-		}
+
+    private evaluarProblematicaActualizada(datos) {
+        const { idProblematica } = datos;
+        if (this.idProblematicaActual === idProblematica) {
+            this.router.navigateByUrl('/dashboard');
+            this.serviciosToast.mostrarToast(undefined,
+                'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.',
+                'info');
+        }
     }
 
     private prepararCytoscape() {
@@ -261,5 +264,10 @@ export class FaseReaccionesComponent implements OnInit{
             nodeOverlap: 1,
             boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
         }).run()
+    }
+
+    ngOnDestroy() {
+        this.componentDestroyed$.next(true)
+        this.componentDestroyed$.complete()
     }
 }

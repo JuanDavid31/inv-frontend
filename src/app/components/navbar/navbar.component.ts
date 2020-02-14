@@ -1,11 +1,11 @@
-import { Component, OnInit, ElementRef, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ChangeDetectorRef, OnDestroy, NgZone } from '@angular/core';
 import { ROUTES } from '../sidebar/sidebar.component';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { catchError, takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from '../../services/notificaciones/notificaciones.service';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { LocalStorageService } from '../../services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
 import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
@@ -24,8 +24,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	location: Location;
 
 	invitaciones = [];
-	
+
 	servidor: EventSource;
+
+	private componentDestroyed$: Subject<boolean> = new Subject()
 
 	constructor(private element: ElementRef,
 		private serviciosNotificaciones: NotificacionesService,
@@ -34,6 +36,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 		private serviciosToast: ToastService,
 		private router: Router,
 		private http: HttpClient,
+		private ngZone: NgZone,
 		location: Location) {
 		this.sidebarVisible = false;
 		this.location = location;
@@ -48,12 +51,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
 		this.prepararSse();
 
 		this.ultimoTamanio = window.innerWidth;
-		
+
 		window.onresize = (event) => {
 			const nuevoTamanio = window.innerWidth;
-			if(this.esMovil(this.ultimoTamanio) && this.esDesktop(nuevoTamanio) && this.menuVisible){
+			if (this.esMovil(this.ultimoTamanio) && this.esDesktop(nuevoTamanio) && this.menuVisible) {
 				this.desbloquearDesplazamientoVertical();
-			}else if(this.esMovil(nuevoTamanio) && this.esDesktop(this.ultimoTamanio) && this.menuVisible){
+			} else if (this.esMovil(nuevoTamanio) && this.esDesktop(this.ultimoTamanio) && this.menuVisible) {
 				this.bloquearDesplazamientoVertical();
 			}
 			this.ultimoTamanio = window.innerWidth;
@@ -76,11 +79,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	private esMovil(tamanio){
+	private esMovil(tamanio) {
 		return tamanio <= 991;
 	}
 
-	private esDesktop(tamanio){
+	private esDesktop(tamanio) {
 		return tamanio > 991;
 	}
 
@@ -91,6 +94,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	prepararObserverNotificaciones() {
 		this.serviciosNotificaciones
 			.eliminarNotificaciones$
+			.pipe(takeUntil(this.componentDestroyed$))
 			.subscribe(idInvitacion => {
 				this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== idInvitacion);
 			})
@@ -113,17 +117,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
 				}
 			})
 	}
-	
-	prepararSse(){
-		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos?email=${this.serviciosLocalStorage.darEmail()}`, 
-				{withCredentials: true});
+
+	prepararSse() {
+		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos?email=${this.serviciosLocalStorage.darEmail()}`,
+			{ withCredentials: true });
 		this.servidor.onmessage = this.recibirEvento.bind(this);
 	}
-	
+
 	private recibirEvento(datos: MessageEvent) {
 		const json: any = JSON.parse(datos.data);
 		switch (json.accion) {
-			case 'Cambio fase problematica':
+			case 'Cambio fase problematica': console.log('Cambio fase problematica');
 				this.actualizarFaseProblematica(json);
 				break;
 			case 'Invitacion recibida':
@@ -136,22 +140,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
 				break;
 		}
 	}
-	
-	private actualizarFaseProblematica(json){
+
+	private actualizarFaseProblematica(json) {
 		this.serviciosEventosSse.dispersarEventoCambioFaseProblematica(json);
 	}
 
-	private agregarNuevaInvitacion(invitacion){
+	private agregarNuevaInvitacion(invitacion) {
 		this.serviciosToast.mostrarToast(undefined, 'Tienes una nueva invitación');
-		this.invitaciones.push(invitacion);
-		//this.changeDetector.detectChanges(); //Por alfuna razón, la lineas anterior no actualiza el HTML.
+		this.ngZone.run(() => this.invitaciones.push(invitacion))
 		this.serviciosEventosSse.dispersarEventoInvitacionRecibida(invitacion);
 	}
-	
-	private notificarSobreInvitacionRespondida(invitacion){
+
+	private notificarSobreInvitacionRespondida(invitacion) {
 		this.serviciosToast
 			.mostrarToast(undefined, `La invitación al usuario ${invitacion.emailDestinatario} fue respondida.`);
-			
+
 		this.serviciosEventosSse.dispersarEventoInvitacionRespondida(invitacion);
 	}
 
@@ -240,14 +243,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	/**
 	 * Habilidad el desplazamiento o scrolling en toda la app.
 	 */
-	private bloquearDesplazamientoVertical(){
+	private bloquearDesplazamientoVertical() {
 		$('html, body').css({ overflow: 'hidden', height: '100%' });
 	}
 
 	/**
 	 * Inhabilita el desplazamiento o scrolling en toda la app.
 	 */
-	private desbloquearDesplazamientoVertical(){
+	private desbloquearDesplazamientoVertical() {
 		$('html, body').css({ overflow: 'auto', height: 'auto' });
 	}
 
@@ -289,9 +292,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
 		this.router.navigateByUrl("/notifications");
 	}
 
-	ngOnDestroy(){
+	ngOnDestroy() {
 		this.servidor.close();
 		$('html, body').css({ overflow: 'auto', height: '100%' });
-	}	
-	
+
+		this.componentDestroyed$.next(true)
+		this.componentDestroyed$.complete()
+	}
+
 }
