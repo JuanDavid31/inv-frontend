@@ -7,6 +7,7 @@ import { map, catchError } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
 import { NgForm } from '@angular/forms';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
+import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 
 declare var cytoscape;
 
@@ -15,7 +16,7 @@ declare var cytoscape;
 	templateUrl: './fase-escritos.component.html',
 	styleUrls: ['./fase-escritos.component.scss']
 })
-export class FaseEscritosComponent implements OnInit, OnDestroy {
+export class FaseEscritosComponent implements OnInit{
 
 	cy: any = {};
 	idProblematicaActual: number;
@@ -38,6 +39,7 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
+		private serviciosEventosSse: EventosSseService,
 		private serviciosNotificaciones: NotificacionesService,
 		private http: HttpClient,
 		private router: Router,
@@ -56,7 +58,7 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 				this.idProblematicaActual = params.idProblematica;
 				if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
 				
-				this.serviciosNotificaciones.suscribirseANotificaciones(this.idProblematicaActual, this.serviciosLocalStorage.darEmail());
+				this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
 
 				this.prepararCytoscape();
 				this.cargarNodosYEscritos();
@@ -65,6 +67,16 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 			})
 	}
 
+    private evaluarProblematicaActualizada(datos){
+        const { idProblematica } = datos.data;
+		if(this.idProblematicaActual === idProblematica){
+			this.router.navigateByUrl('/dashboard');
+			this.serviciosToast.mostrarToast(undefined, 
+				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
+				'info');
+		}
+    }
+    
 	private prepararCytoscape() {
 		this.cy = cytoscape({
 
@@ -370,9 +382,4 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 				}
 			});
 	}
-	
-	ngOnDestroy(){
-		this.serviciosNotificaciones.terminarSuscripcion();
-	}
-
 }

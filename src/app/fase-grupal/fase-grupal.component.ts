@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map } from 'rxjs/operators';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
+import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 declare var cytoscape;
 declare var $;
 
@@ -12,7 +13,9 @@ declare var $;
 	templateUrl: './fase-grupal.component.html',
 	styleUrls: ['./fase-grupal.component.scss']
 })
-export class FaseGrupalComponent implements OnInit, OnDestroy {
+export class FaseGrupalComponent implements OnInit, OnDestroy{
+
+	idProblematicaActual: number;
 
 	idNodoAgarrado: any;
 
@@ -55,6 +58,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		private activatedRoute: ActivatedRoute,
 		private router: Router,
 		private serviciosToast: ToastService,
+		private serviciosEventosSse: EventosSseService,
 		private serviciosNotificaciones: NotificacionesService) { }
 		
 	ngOnInit() {
@@ -62,19 +66,19 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			.paramMap
 			.pipe(map(() => window.history.state))
 			.subscribe(params => {
-				const idProblematicaActual = params.idProblematica;
-				if (!idProblematicaActual) {
+				this.idProblematicaActual = params.idProblematica;
+				if (!this.idProblematicaActual) {
 					this.router.navigateByUrl('/dashboard')
 					return;
 				}
 				
-				this.serviciosNotificaciones.suscribirseANotificaciones(idProblematicaActual, this.serviciosLocalStorage.darEmail());
+				this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
 
 				this.prepararCytoscape();
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
 
-				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${idProblematicaActual}`);
+				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${this.idProblematicaActual}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 				this.socket.onerror = this.onWebsocketError.bind(this);
@@ -85,6 +89,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
 	}
 
+    private evaluarProblematicaActualizada(datos){
+        const { idProblematica } = datos.data;
+		if(this.idProblematicaActual === idProblematica){
+			this.router.navigateByUrl('/dashboard');
+			this.serviciosToast.mostrarToast(undefined, 
+				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
+				'info');
+		}
+    }
+    
 	private prepararCytoscape() {
 		this.cy = cytoscape({
 			container: document.getElementById('cy'),
@@ -895,7 +909,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			this.cerradoNormal = true;
 			this.socket.close();
 		}
-		this.serviciosNotificaciones.terminarSuscripcion();
 	}
 
 	private onWebSocketClose(event) {

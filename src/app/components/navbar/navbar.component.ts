@@ -8,6 +8,7 @@ import { NotificacionesService } from '../../services/notificaciones/notificacio
 import { of } from 'rxjs';
 import { LocalStorageService } from '../../services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
+import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 
 @Component({
 	selector: 'app-navbar',
@@ -28,12 +29,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
 	constructor(private element: ElementRef,
 		private serviciosNotificaciones: NotificacionesService,
+		private serviciosEventosSse: EventosSseService,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private router: Router,
 		private http: HttpClient,
-		location: Location,
-		private changeDetector: ChangeDetectorRef) {
+		location: Location) {
 		this.sidebarVisible = false;
 		this.location = location;
 	}
@@ -114,13 +115,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	}
 	
 	prepararSse(){
-		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos-invitaciones?email=${this.serviciosLocalStorage.darEmail()}`, {withCredentials: true})
+		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos?email=${this.serviciosLocalStorage.darEmail()}`, 
+				{withCredentials: true});
 		this.servidor.onmessage = this.recibirEvento.bind(this);
 	}
 	
 	private recibirEvento(datos: MessageEvent) {
 		const json: any = JSON.parse(datos.data);
 		switch (json.accion) {
+			case 'Cambio fase problematica':
+				this.actualizarFaseProblematica(json);
+				break;
 			case 'Invitacion recibida':
 				this.agregarNuevaInvitacion(json.invitacion);
 				break;
@@ -131,18 +136,23 @@ export class NavbarComponent implements OnInit, OnDestroy {
 				break;
 		}
 	}
+	
+	private actualizarFaseProblematica(json){
+		this.serviciosEventosSse.dispersarEventoCambioFaseProblematica(json);
+	}
 
 	private agregarNuevaInvitacion(invitacion){
 		this.serviciosToast.mostrarToast(undefined, 'Tienes una nueva invitación');
 		this.invitaciones.push(invitacion);
 		//this.changeDetector.detectChanges(); //Por alfuna razón, la lineas anterior no actualiza el HTML.
-		this.serviciosNotificaciones.agregarInvitacionEnNotifications(invitacion);
+		this.serviciosEventosSse.dispersarEventoInvitacionRecibida(invitacion);
 	}
 	
 	private notificarSobreInvitacionRespondida(invitacion){
 		this.serviciosToast
 			.mostrarToast(undefined, `La invitación al usuario ${invitacion.emailDestinatario} fue respondida.`);
-		this.serviciosNotificaciones.actualizarNotificacionEnDashboard(invitacion);
+			
+		this.serviciosEventosSse.dispersarEventoInvitacionRespondida(invitacion);
 	}
 
 	sidebarOpen() {

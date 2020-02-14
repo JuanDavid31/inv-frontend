@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { ToastService } from 'app/services/toast/toast.service';
+import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 
 @Component({
 	selector: 'app-notifications',
@@ -20,12 +21,13 @@ export class NotificationsComponent implements OnInit {
 	constructor(private http: HttpClient,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosNotificaciones: NotificacionesService,
-		private serviciosToast: ToastService,
-		private changeDetector: ChangeDetectorRef) { }
+		private serviciosEventosSse: EventosSseService,
+		private serviciosToast: ToastService) { }
 
 	ngOnInit() {
 		this.cargarInvitaciones();
-		this.prepararObserverNotificionAgregada();
+		
+		this.serviciosEventosSse.eventoInvitacionRecibida$.subscribe(this.agregarInvitacion.bind(this));
 	}
 
 	cargarInvitaciones() {
@@ -50,13 +52,8 @@ export class NotificationsComponent implements OnInit {
 	/**
 	 * Agrega la invitación cuando esta es notificada.
 	 */
-	prepararObserverNotificionAgregada(){
-		this.serviciosNotificaciones
-			.agregarNotificacion$
-			.subscribe(invitacion => {
-				this.invitaciones.push(invitacion);
-				//this.changeDetector.detectChanges();
-			})
+	private agregarInvitacion(invitacion){
+		this.invitaciones.push(invitacion);
 	}
 
 	aceptarInvitacion(invitacion, decision: boolean) {

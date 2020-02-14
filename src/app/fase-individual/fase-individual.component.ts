@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
+import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 declare var cytoscape;
 
 declare var $;
@@ -16,7 +17,7 @@ declare var $;
     styleUrls: ['./fase-individual.component.css']
 })
 
-export class FaseIndividualComponent implements OnInit, OnDestroy {
+export class FaseIndividualComponent implements OnInit{
 
     nodoSeleccionado: any = {};
     nodos = [];
@@ -40,15 +41,12 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         private http: HttpClient,
         private router: Router,
         private activatedRoute: ActivatedRoute,
+        private serviciosEventosSse: EventosSseService,
         private serviciosNotificaciones: NotificacionesService) { }
 
     ngOnInit() {
         this.iniciar();
         this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
-    }
-    
-    ngOnDestroy(){
-        this.serviciosNotificaciones.terminarSuscripcion();
     }
     
     cambioFileInput(){
@@ -65,7 +63,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                 this.idProblematicaActual = params.idProblematica;
                 if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
                 
-                this.serviciosNotificaciones.suscribirseANotificaciones(this.idProblematicaActual, this.serviciosLocalStorage.darEmail());
+                this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
 
                 this.nodoDe = {};
                 this.nodoA = {};
@@ -74,6 +72,16 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                 this.prepararMenus();
                 this.cargarNodos();
             })
+    }
+    
+    private evaluarProblematicaActualizada(datos){
+        const { idProblematica } = datos.data;
+		if(this.idProblematicaActual === idProblematica){
+			this.router.navigateByUrl('/dashboard');
+			this.serviciosToast.mostrarToast(undefined, 
+				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
+				'info');
+		}
     }
 
     private prepararCytoscape() {
