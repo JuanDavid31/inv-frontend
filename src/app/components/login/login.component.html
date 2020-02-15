@@ -24,6 +24,7 @@
 							minlength="8" placeholder="Contraseña" [(ngModel)]="password" required>
 					</div>
 					<div class="alert alert-danger" role="alert" *ngIf="mensaje.length > 0">
+						{{mensaje}}
 						<button class="close" data-dismiss="alert" aria-label="Close" (click)="mensaje = ''">
 							<span aria-hidden="true">&times;</span>
 						</button>
