@@ -78,10 +78,9 @@
 								<input type="text" id="nombre-problematica" name="nombreProble" #nombreProble="ngModel"
 									class="form-control" [(ngModel)]="nombreNuevaProblematica"
 									name="nombreNuevaProblematicaInput" minlength="10" maxlength="40" required>
-								<div *ngIf="nombreProble?.touched">
-									<div class="alert alert-danger" role="alert"
-										style="height:50px;text-align:center;background:#F08080"
-										*ngIf="nombreProble?.errors?.minlength">
+								<div *ngIf="nombreProble.dirty && nombreProble.touched && nombreProble?.errors?.minlength">
+									<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert"
+										style="height:50px;text-align:center;background:#F08080" >
 										<a>Debe tener entre 10 y 40 caracteres</a>
 										<button type="button" class="close" data-dismiss="alert" aria-label="Close"
 											style="color:#FFFFFF">
@@ -96,10 +95,9 @@
 									class="form-control" [(ngModel)]="descripcionNuevaProblematica"
 									name="descripcionNuevaProblematicaInput" minlength="20" maxlength="500"
 									required></textarea>
-								<div *ngIf="descrip?.touched">
-									<div class="alert alert-danger" role="alert"
-										style="height:50px;text-align:center;background:#F08080"
-										*ngIf="descrip?.errors?.minlength">
+								<div *ngIf="descrip?.dirty && descrip?.touched && descrip?.errors?.minlength">
+									<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert"
+										style="height:50px;text-align:center;background:#F08080" >
 										<a>Debe tener minimo 20 caracteres</a>
 										<button type="button" class="close" data-dismiss="alert" aria-label="Close"
 											style="color:#FFFFFF">
