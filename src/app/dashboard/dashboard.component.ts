@@ -438,7 +438,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 	
 	cambioEscrito() {
-		console.log(this.escritoTerminado);
 		this.nombreNuevaProblematica = this.escritoTerminado.nombre;
 		this.descripcionNuevaProblematica = this.escritoTerminado.descripcion;
 	}
