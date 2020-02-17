@@ -63,10 +63,10 @@
 							</div>
 							<div class="form-group">
 								<label for="escritos">Escritos</label>
-								<select class="form-control" id="escritos"
-									(change)="cambioEscrito($event.target.value)">
-									<option disabled selected>Seleccione un escrito (Opcional)</option>
-									<option *ngFor="let escrito of escritos" [value]="escrito">
+								<select class="form-control" id="escritos" (change)="cambioEscrito()"
+									[(ngModel)]="escritoTerminado" name="escritoTerminadoSelect">
+									<option selected disabled>Seleccione un escrito (Opcional)</option>
+									<option *ngFor="let escrito of escritos" [ngValue]="escrito">
 										{{escrito.nombre}}
 									</option>
 								</select>

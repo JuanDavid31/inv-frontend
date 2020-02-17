@@ -26,6 +26,8 @@ export class DashboardComponent implements OnInit{
 	invitacionParaInterventor: boolean = false;
 	problematicaSeleccionada: any = {};
 	datosProblematica: any = {};
+	
+	escritoTerminado: any;
 
 	autoCompletadoUsuariosAInvitar: any;
 	resultadosCb: any;
@@ -428,11 +430,11 @@ export class DashboardComponent implements OnInit{
 				}
 			})
 	}
-
-	cambioEscrito(escrito) {
-		const { nombre, descripcion } = escrito;
-		this.nombreNuevaProblematica = nombre;
-		this.descripcionNuevaProblematica = descripcion;
+	
+	cambioEscrito() {
+		console.log(this.escritoTerminado);
+		this.nombreNuevaProblematica = this.escritoTerminado.nombre;
+		this.descripcionNuevaProblematica = this.escritoTerminado.descripcion;
 	}
 	
 	verResultados(){
