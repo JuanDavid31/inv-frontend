@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { ToastService } from 'app/services/toast/toast.service';
@@ -12,13 +12,16 @@ import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service'
 	templateUrl: './notifications.component.html',
 	styleUrls: ['./notifications.component.css']
 })
-export class NotificationsComponent implements OnInit {
+export class NotificationsComponent implements OnInit, OnDestroy {
 
 	invitaciones = [];
 	decision: boolean;
 	idProblematica;
 
+	private componentDestroyed$: Subject<boolean> = new Subject()
+
 	constructor(private http: HttpClient,
+		private ngZone: NgZone,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosNotificaciones: NotificacionesService,
 		private serviciosEventosSse: EventosSseService,
@@ -26,8 +29,10 @@ export class NotificationsComponent implements OnInit {
 
 	ngOnInit() {
 		this.cargarInvitaciones();
-		
-		this.serviciosEventosSse.eventoInvitacionRecibida$.subscribe(this.agregarInvitacion.bind(this));
+
+		this.serviciosEventosSse.eventoInvitacionRecibida$
+			.pipe(takeUntil(this.componentDestroyed$))
+			.subscribe(this.agregarInvitacion.bind(this));
 	}
 
 	cargarInvitaciones() {
@@ -52,8 +57,8 @@ export class NotificationsComponent implements OnInit {
 	/**
 	 * Agrega la invitación cuando esta es notificada.
 	 */
-	private agregarInvitacion(invitacion){
-		this.invitaciones.push(invitacion);
+	private agregarInvitacion(invitacion) {
+		this.ngZone.run(() => this.invitaciones.push(invitacion));
 	}
 
 	aceptarInvitacion(invitacion, decision: boolean) {
@@ -118,4 +123,10 @@ export class NotificationsComponent implements OnInit {
 		this.serviciosNotificaciones
 			.eliminarNotificacionEnHeader(idInvitacion);
 	}
+
+	ngOnDestroy() {
+		this.componentDestroyed$.next(true)
+		this.componentDestroyed$.complete()
+	}
+
 }

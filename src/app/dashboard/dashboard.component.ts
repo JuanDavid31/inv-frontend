@@ -1,11 +1,10 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { catchError, takeUntil } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { LocalStorageService } from '../services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
-import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 declare var $;
 
@@ -14,7 +13,7 @@ declare var $;
 	templateUrl: './dashboard.component.html',
 	styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit{
+export class DashboardComponent implements OnInit, OnDestroy {
 
 	problematicas = [];
 	problematicasTerminadas = [];
@@ -36,6 +35,8 @@ export class DashboardComponent implements OnInit{
 	modal: any;
 	ventanaMensajes: any;
 
+	private componentDestroyed$: Subject<boolean> = new Subject()
+
 	estadosInvitacion = {
 		PENDIENTE: 'Pendiente',
 		ACEPTADA: 'Aceptada',
@@ -44,6 +45,7 @@ export class DashboardComponent implements OnInit{
 
 	constructor(
 		private http: HttpClient,
+		private ngZone: NgZone,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private serviciosEventosSse: EventosSseService,
@@ -53,11 +55,15 @@ export class DashboardComponent implements OnInit{
 		this.cargarProblematicas();
 		this.cargarProblematicasTerminadas();
 		this.autoCompletadoUsuariosAInvitar = $(document.getElementById('pac-input'))
-				.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
+			.typeahead({ source: this.activateAutoCompletadoUsuariosAInvitar.bind(this), minLength: 4 })
 		this.modal = $('#mi-modal');
 
-		this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.cambioFaseProblematica.bind(this));
-		this.serviciosEventosSse.eventoInvitacionRespondida$.subscribe(this.actualizarInvitacion.bind(this));
+		this.serviciosEventosSse.eventoCambioFaseProblematica$
+			.pipe(takeUntil(this.componentDestroyed$))
+			.subscribe(this.cambioFaseProblematica.bind(this));
+		this.serviciosEventosSse.eventoInvitacionRespondida$
+			.pipe(takeUntil(this.componentDestroyed$))
+			.subscribe(this.actualizarInvitacion.bind(this));
 	}
 
 	cargarProblematicas() {
@@ -83,10 +89,9 @@ export class DashboardComponent implements OnInit{
 	 * de la problematica que contiene esta invitación 
 	 */
 	actualizarInvitacion(nuevaInvitacion) {
-		if(this.problematicaSeleccionada.id !== nuevaInvitacion.idProblematica)return;
+		if (this.problematicaSeleccionada.id !== nuevaInvitacion.idProblematica) return;
 		const index = this.invitaciones.findIndex(invitacion => invitacion.id === invitacion.id);
-		this.invitaciones[index] = nuevaInvitacion;
-		//this.changeDetector.detectChanges();
+		this.ngZone.run(() => this.invitaciones[index] = nuevaInvitacion);
 	}
 
 	cargarProblematicasTerminadas() {
@@ -95,7 +100,7 @@ export class DashboardComponent implements OnInit{
 		const options = {
 			headers: headers
 		}
-		
+
 		const url = `http://3.130.29.100:8080/personas/${this.serviciosLocalStorage.darEmail()}/problematicas?fase=5`;
 
 		this.http.get(url, options)
@@ -104,7 +109,7 @@ export class DashboardComponent implements OnInit{
 				if (res.error) {
 					this.serviciosToast.mostrarToast(
 						'Error',
-						'Ocurrió un error al buscar las problematicas terminadas, intentelo de nuevo.', 
+						'Ocurrió un error al buscar las problematicas terminadas, intentelo de nuevo.',
 						'danger');
 				} else {
 					this.problematicasTerminadas = res;
@@ -164,6 +169,7 @@ export class DashboardComponent implements OnInit{
 	}
 
 	private cambioFaseProblematica(datos) {
+		console.log('dasboard cambio fase problematica.')
 		const { idProblematica } = datos;
 
 		const problematica = this.problematicas.find(problematica => problematica.id === idProblematica);
@@ -262,10 +268,10 @@ export class DashboardComponent implements OnInit{
 				}
 			})
 	}
-	
-	sePuedeAvanzarFase(){
+
+	sePuedeAvanzarFase() {
 		const { fase } = this.problematicaSeleccionada;
-		switch(fase){
+		switch (fase) {
 			case 1:
 				return this.datosProblematica.cantidadNodos >= 2;
 			case 2:
@@ -274,7 +280,7 @@ export class DashboardComponent implements OnInit{
 				return this.datosProblematica.cantidadReacciones >= 1;
 			case 4:
 				return this.datosProblematica.cantidadEscritos >= 1;
-			default: 
+			default:
 				return true;
 		}
 	}
@@ -286,7 +292,7 @@ export class DashboardComponent implements OnInit{
 			headers: headers
 		}
 		this.http
-			.put(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?avanzar=${true}`, options, {withCredentials:true})
+			.put(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?avanzar=${true}`, options, { withCredentials: true })
 			.pipe(catchError(err => of(err)))
 			.subscribe(res => {
 				if (res.error) {
@@ -303,9 +309,9 @@ export class DashboardComponent implements OnInit{
 			.find(problematica => problematica.id === idProblematica);
 
 		problematica.fase = problematica.fase + 1;
-		
+
 		//La problematica concluyo.
-		if(problematica.fase === 5){
+		if (problematica.fase === 5) {
 			this.problematicasTerminadas.push(problematica);
 		}
 	}
@@ -436,8 +442,14 @@ export class DashboardComponent implements OnInit{
 		this.nombreNuevaProblematica = this.escritoTerminado.nombre;
 		this.descripcionNuevaProblematica = this.escritoTerminado.descripcion;
 	}
-	
-	verResultados(){
+
+	verResultados() {
 		this.router.navigateByUrl("/resultados", { state: { idProblematica: this.problematicaSeleccionada.id } });
 	}
+
+	ngOnDestroy() {
+		this.componentDestroyed$.next(true);
+		this.componentDestroyed$.complete();
+	}
+
 }

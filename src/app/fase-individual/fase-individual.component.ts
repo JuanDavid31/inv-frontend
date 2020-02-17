@@ -1,11 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { catchError, map } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 declare var cytoscape;
 
@@ -17,7 +16,7 @@ declare var $;
     styleUrls: ['./fase-individual.component.css']
 })
 
-export class FaseIndividualComponent implements OnInit{
+export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     nodoSeleccionado: any = {};
     nodos = [];
@@ -25,34 +24,35 @@ export class FaseIndividualComponent implements OnInit{
     nodoA: any;
     nombreNodo = '';
     cy: any = {};
-    
+
     private menuVisible: String = '';
     private menu = { agregarNodo: 'Agregar nodo', conectarNodos: 'Conectar nodos' };
 
     idProblematicaActual: number;
-    
+
     modalVisualizacionImagenNodo: any;
 
     fotoFileInput: HTMLInputElement;
     nombreArchivo = 'Seleccionar archivo';
+
+    private componentDestroyed$: Subject<boolean> = new Subject()
 
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
         private http: HttpClient,
         private router: Router,
         private activatedRoute: ActivatedRoute,
-        private serviciosEventosSse: EventosSseService,
-        private serviciosNotificaciones: NotificacionesService) { }
+        private serviciosEventosSse: EventosSseService) { }
 
     ngOnInit() {
         this.iniciar();
         this.modalVisualizacionImagenNodo = $('#modal-visualizacion-imagen-nodo');
     }
-    
-    cambioFileInput(){
+
+    cambioFileInput() {
         this.fotoFileInput = (<HTMLInputElement>document.getElementById('customFileLang'));
         var fileName = this.fotoFileInput.files[0].name;
-        this.nombreArchivo =fileName;
+        this.nombreArchivo = fileName;
     }
 
     private iniciar() {
@@ -62,8 +62,10 @@ export class FaseIndividualComponent implements OnInit{
             .subscribe(params => {
                 this.idProblematicaActual = params.idProblematica;
                 if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
-                
-                this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
+
+                this.serviciosEventosSse.eventoCambioFaseProblematica$
+                    .pipe(takeUntil(this.componentDestroyed$))
+                    .subscribe(this.evaluarProblematicaActualizada.bind(this));
 
                 this.nodoDe = {};
                 this.nodoA = {};
@@ -73,15 +75,15 @@ export class FaseIndividualComponent implements OnInit{
                 this.cargarNodos();
             })
     }
-    
-    private evaluarProblematicaActualizada(datos){
-        const { idProblematica } = datos.data;
-		if(this.idProblematicaActual === idProblematica){
-			this.router.navigateByUrl('/dashboard');
-			this.serviciosToast.mostrarToast(undefined, 
-				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
-				'info');
-		}
+
+    private evaluarProblematicaActualizada(datos) {
+        const { idProblematica } = datos;
+        if (this.idProblematicaActual === idProblematica) {
+            this.router.navigateByUrl('/dashboard');
+            this.serviciosToast.mostrarToast(undefined,
+                'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.',
+                'info');
+        }
     }
 
     private prepararCytoscape() {
@@ -130,10 +132,10 @@ export class FaseIndividualComponent implements OnInit{
         this.cy.cxtmenu({
             selector: 'node',
             commands: [
-				{
-					content: '<span class="fa fa-eye fa-2x"></span>',
-					select: this.abrirModalImagenNodo.bind(this)
-				},
+                {
+                    content: '<span class="fa fa-eye fa-2x"></span>',
+                    select: this.abrirModalImagenNodo.bind(this)
+                },
                 {
                     content: '<span class="fa fa-trash fa-2x"></span>',
                     select: this.eliminarPorId.bind(this)
@@ -185,7 +187,7 @@ export class FaseIndividualComponent implements OnInit{
         this.nodos = nodos;
         this.nodos.forEach(nodo => {
             const { id, nombre, urlFoto } = nodo;
-            this.cy.add({ data: { id, nombre, urlFoto} });
+            this.cy.add({ data: { id, nombre, urlFoto } });
 
             this.cy.style()
                 .selector(`#${nodo.id}`)
@@ -229,8 +231,8 @@ export class FaseIndividualComponent implements OnInit{
 
         const arr = foto.name.split('.');
         const extensionFoto = arr[arr.length - 1];
-        
-        if(this.extensionValida(extensionFoto)){
+
+        if (this.extensionValida(extensionFoto)) {
             this.serviciosToast.mostrarToast(undefined, 'Solo imagenes con extensión .PNG, .JPG o .JPEG son validas', 'danger');
         }
 
@@ -259,15 +261,15 @@ export class FaseIndividualComponent implements OnInit{
                 }
             });
     }
-    
-    private extensionValida(extension){
-        if(extension.includes('.')){
+
+    private extensionValida(extension) {
+        if (extension.includes('.')) {
             return false;
         }
-        switch(extension.toUpperCase()){
+        switch (extension.toUpperCase()) {
             case '.PNG': return true;
             case '.JPG': return true;
-            case '.JPEG':return true;
+            case '.JPEG': return true;
             default: return false;
         }
     }
@@ -276,12 +278,12 @@ export class FaseIndividualComponent implements OnInit{
         this.limpiarCamposNodo();
 
         this.nodos.push(nodo);
-        
-        this.cy.add({ 
-            data: { id: nodo.id, nombre: nodo.nombre, urlFoto: nodo.urlFoto }, 
-            position: { x: this.cy.width() / 2, y: this.cy.height() / 2 } 
+
+        this.cy.add({
+            data: { id: nodo.id, nombre: nodo.nombre, urlFoto: nodo.urlFoto },
+            position: { x: this.cy.width() / 2, y: this.cy.height() / 2 }
         });
-        
+
         this.cy.style()
             .selector(`#${nodo.id}`)
             .css({
@@ -421,38 +423,43 @@ export class FaseIndividualComponent implements OnInit{
     private atenderPUTDesapadrinar(id) {
         this.cy.getElementById(id).remove();
     }
-    
-    hayMenuVisible(){
+
+    hayMenuVisible() {
         return this.menuVisible !== '';
     }
-    
-    alternarVisibilidadAccionesAgregarNodo(){
-        if(this.menuVisible === this.menu.agregarNodo){
+
+    alternarVisibilidadAccionesAgregarNodo() {
+        if (this.menuVisible === this.menu.agregarNodo) {
             this.menuVisible = '';
-        }else{
+        } else {
             this.menuVisible = this.menu.agregarNodo;
         }
     }
-    
-    alternarVisibilidadAccionesConectarNodos(){
-        if(this.menuVisible === this.menu.conectarNodos){
+
+    alternarVisibilidadAccionesConectarNodos() {
+        if (this.menuVisible === this.menu.conectarNodos) {
             this.menuVisible = '';
-        }else{
+        } else {
             this.menuVisible = this.menu.conectarNodos;
         }
     }
-        
-    esAccionesAgregarNodoVisible(){
+
+    esAccionesAgregarNodoVisible() {
         return this.menuVisible === this.menu.agregarNodo;
     }
-    
-    esAccionesConectarNodosVisible(){
+
+    esAccionesConectarNodosVisible() {
         return this.menuVisible === this.menu.conectarNodos;
     }
-    
-	private abrirModalImagenNodo(elemento) {
-		this.nodoSeleccionado = elemento.data();
-		this.modalVisualizacionImagenNodo.modal('toggle');
-	}
+
+    private abrirModalImagenNodo(elemento) {
+        this.nodoSeleccionado = elemento.data();
+        this.modalVisualizacionImagenNodo.modal('toggle');
+    }
+
+    ngOnDestroy() {
+        this.componentDestroyed$.next(true)
+        this.componentDestroyed$.complete()
+    }
 
 }

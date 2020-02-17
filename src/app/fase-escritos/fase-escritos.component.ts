@@ -3,8 +3,8 @@ import { LocalStorageService } from 'app/services/localstorage/local-storage.ser
 import { ToastService } from 'app/services/toast/toast.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
-import { map, catchError } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
+import { map, catchError, takeUntil } from 'rxjs/operators';
+import { of, forkJoin, Subject } from 'rxjs';
 import { NgForm } from '@angular/forms';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
@@ -16,7 +16,7 @@ declare var cytoscape;
 	templateUrl: './fase-escritos.component.html',
 	styleUrls: ['./fase-escritos.component.scss']
 })
-export class FaseEscritosComponent implements OnInit{
+export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	cy: any = {};
 	idProblematicaActual: number;
@@ -32,6 +32,8 @@ export class FaseEscritosComponent implements OnInit{
 
 	private formEscrito: NgForm;
 
+	private componentDestroyed$: Subject<boolean> = new Subject()
+
 	@ViewChild('formEscrito', { static: false }) //No funciona si esta dentro de un *ngIf
 	set form(content: NgForm) {
 		this.formEscrito = content;
@@ -40,7 +42,6 @@ export class FaseEscritosComponent implements OnInit{
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private serviciosEventosSse: EventosSseService,
-		private serviciosNotificaciones: NotificacionesService,
 		private http: HttpClient,
 		private router: Router,
 		private activatedRoute: ActivatedRoute) { }
@@ -57,8 +58,10 @@ export class FaseEscritosComponent implements OnInit{
 			.subscribe(params => {
 				this.idProblematicaActual = params.idProblematica;
 				if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
-				
-				this.serviciosEventosSse.eventoCambioFaseProblematica$.subscribe(this.evaluarProblematicaActualizada.bind(this));
+
+				this.serviciosEventosSse.eventoCambioFaseProblematica$
+					.pipe(takeUntil(this.componentDestroyed$))
+					.subscribe(this.evaluarProblematicaActualizada.bind(this));
 
 				this.prepararCytoscape();
 				this.cargarNodosYEscritos();
@@ -67,16 +70,16 @@ export class FaseEscritosComponent implements OnInit{
 			})
 	}
 
-    private evaluarProblematicaActualizada(datos){
-        const { idProblematica } = datos.data;
-		if(this.idProblematicaActual === idProblematica){
+	private evaluarProblematicaActualizada(datos) {
+		const { idProblematica } = datos;
+		if (this.idProblematicaActual === idProblematica) {
 			this.router.navigateByUrl('/dashboard');
-			this.serviciosToast.mostrarToast(undefined, 
-				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.', 
+			this.serviciosToast.mostrarToast(undefined,
+				'Ya no puedes modificar esta fase porque la problematica ahora avanzo a una nueva fase.',
 				'info');
 		}
-    }
-    
+	}
+
 	private prepararCytoscape() {
 		this.cy = cytoscape({
 
@@ -277,7 +280,7 @@ export class FaseEscritosComponent implements OnInit{
 			},
 			{
 				content: '<span class="fa fa-check fa-2x"></span>',
-				select: () => {}
+				select: () => { }
 			}
 			]
 		});
@@ -381,5 +384,10 @@ export class FaseEscritosComponent implements OnInit{
 					this.grupoSeleccionado = undefined;
 				}
 			});
+	}
+
+	ngOnDestroy() {
+		this.componentDestroyed$.next(true)
+		this.componentDestroyed$.complete()
 	}
 }
