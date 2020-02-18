@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { LocalStorageService } from '../../services/localstorage/local-storage.service';
-
+import { LocalStorageService } from '@services/localstorage/local-storage.service';
+import { PublicService } from '@app/services/public.service';
 
 @Component({
   selector: 'app-login',
@@ -19,17 +19,14 @@ export class LoginComponent {
   mensaje: string = '';
   botonBloqueado: boolean = false;
 
-	constructor(private http: HttpClient,
+	constructor(private serviciosPublicos: PublicService,
 				private serviciosLocalStorage: LocalStorageService,
 				private router: Router) { }
 
 	login() {
 		this.botonBloqueado = true;
-		this.http.post('http://3.130.29.100:8080/auth', {
-		email: this.email,
-		pass: this.password
-	}).pipe(catchError(err => of(err)))
-	.subscribe((res: any) => {
+		this.serviciosPublicos.login(this.email, this.password)
+		.subscribe((res: any) => {
 			this.botonBloqueado = false;
 			if (res.error) {
 				this.mensaje = res.error.errors[0];

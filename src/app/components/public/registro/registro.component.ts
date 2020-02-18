@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
+import { PublicService } from '@app/services/public.service';
 
 @Component({
 	selector: 'app-registro',
@@ -21,18 +22,14 @@ export class RegistroComponent {
 	mensaje: string = '';
 	botonBloqueado: boolean = false;
 
-	constructor(private http: HttpClient,
+	constructor(private serviciosPublicos: PublicService,
 		private serviciosLocalStorage: LocalStorageService,
 		private router: Router) { }
 
 	register() {
 		this.botonBloqueado = true;
-		this.http.post('http://3.130.29.100:8080/personas', {
-			nombres: this.nombres,
-			apellidos: this.apellidos,
-			email: this.correo,
-			pass: this.password,
-		}).pipe(catchError(err => of(err)))
+		this.serviciosPublicos
+			.registrar(this.nombres, this.apellidos, this.correo, this.password)
 			.subscribe((data: any) => {
 				this.botonBloqueado = false;
 				if (data.error) {

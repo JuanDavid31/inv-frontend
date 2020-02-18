@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { PublicService } from '@app/services/public.service';
 
 @Component({
   selector: 'app-recuperar',
@@ -16,12 +17,11 @@ export class RecuperarComponent implements OnInit {
   mensaje = '';
   esMensajeExito = false;
 
-  constructor(private http: HttpClient) { }
+  constructor(private serviciosPublicos: PublicService) { }
 
   recuperar() {
     this.botonBloqueado = true;
-    this.http.post(`http://3.130.29.100:8080/auth/pass?email=${this.correo}`, {})
-      .pipe(catchError(error => of(error)))
+    this.serviciosPublicos.recuperarPass(this.correo)
       .subscribe((data: any) => {
         this.botonBloqueado = false;
         if (data.error) {
