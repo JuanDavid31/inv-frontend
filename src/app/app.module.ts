@@ -14,10 +14,10 @@ import {
   AgmCoreModule
 } from '@agm/core';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
-import { LoginComponent } from './components/login/login.component';
+import { LoginComponent } from '@app/components/public/login/login.component';
 import { HttpClientModule } from '@angular/common/http';
-import { RegistroComponent } from './components/registro/registro.component';
-import { RecuperarComponent } from './components/recuperar/recuperar.component';
+import { RegistroComponent } from '@app/components/public/registro/registro.component';
+import { RecuperarComponent } from '@app/components/public/recuperar/recuperar.component';
 
 @NgModule({
   imports: [

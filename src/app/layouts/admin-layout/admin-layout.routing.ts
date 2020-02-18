@@ -1,13 +1,13 @@
 import { Routes } from '@angular/router';
 
-import { DashboardComponent } from '../../dashboard/dashboard.component';
-import { UserProfileComponent } from '../../user-profile/user-profile.component';
-import { FaseReaccionesComponent } from '../../fase-reacciones/fase-reacciones.component';
-import { FaseIndividualComponent } from '../../fase-individual/fase-individual.component';
-import { FaseGrupalComponent } from '../../fase-grupal/fase-grupal.component';
-import { NotificationsComponent } from '../../notifications/notifications.component';
-import { FaseEscritosComponent } from 'app/fase-escritos/fase-escritos.component';
-import { ResultadosComponent } from 'app/resultados/resultados.component';
+import { DashboardComponent } from '@app/components/admin/dynamic/dashboard/dashboard.component';
+import { UserProfileComponent } from '@app/components/admin/dynamic/user-profile/user-profile.component';
+import { FaseReaccionesComponent } from '@app/components/admin/dynamic/fase-reacciones/fase-reacciones.component';
+import { FaseIndividualComponent } from '@app/components/admin/dynamic/fase-individual/fase-individual.component';
+import { FaseGrupalComponent } from '@app/components/admin/dynamic/fase-grupal/fase-grupal.component';
+import { NotificationsComponent } from '@app/components/admin/dynamic/notifications/notifications.component';
+import { FaseEscritosComponent } from '@app/components/admin/dynamic/fase-escritos/fase-escritos.component';
+import { ResultadosComponent } from '@app/components/admin/dynamic/resultados/resultados.component';
 
 export const AdminLayoutRoutes: Routes = [
     // {

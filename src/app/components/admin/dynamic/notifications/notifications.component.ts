@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, NgZone, OnDestroy } from '@angula
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
-import { LocalStorageService } from '../services/localstorage/local-storage.service';
+import { LocalStorageService } from '@services/localstorage/local-storage.service';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { ToastService } from 'app/services/toast/toast.service';
 import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';

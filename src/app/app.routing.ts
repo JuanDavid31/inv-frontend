@@ -4,9 +4,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
-import { LoginComponent } from './components/login/login.component';
-import { RegistroComponent } from './components/registro/registro.component';
-import { RecuperarComponent } from './components/recuperar/recuperar.component';
+import { LoginComponent } from '@app/components/public/login/login.component';
+import { RegistroComponent } from '@app/components/public/registro/registro.component';
+import { RecuperarComponent } from '@app/components/public/recuperar/recuperar.component';
 
 import { PublicoGuard } from './guards/publico.guard';
 import { PrivadoGuard } from './guards/privado.guard';

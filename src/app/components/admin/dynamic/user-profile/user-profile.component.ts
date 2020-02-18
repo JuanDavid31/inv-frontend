@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LocalStorageService } from '../services/localstorage/local-storage.service';
+import { LocalStorageService } from '@services/localstorage/local-storage.service';
 
 @Component({
   selector: 'app-user-profile',

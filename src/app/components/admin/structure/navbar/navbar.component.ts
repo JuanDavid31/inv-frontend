@@ -4,11 +4,11 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, takeUntil } from 'rxjs/operators';
-import { NotificacionesService } from '../../services/notificaciones/notificaciones.service';
+import { NotificacionesService } from '@services/notificaciones/notificaciones.service';
+import { LocalStorageService } from '@services/localstorage/local-storage.service';
+import { ToastService } from '@services/toast/toast.service';
+import { EventosSseService } from '@services/eventos-sse/eventos-sse.service';
 import { of, Subject } from 'rxjs';
-import { LocalStorageService } from '../../services/localstorage/local-storage.service';
-import { ToastService } from 'app/services/toast/toast.service';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
 
 @Component({
 	selector: 'app-navbar',
