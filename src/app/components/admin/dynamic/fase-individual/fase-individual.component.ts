@@ -5,7 +5,9 @@ import { LocalStorageService } from 'app/services/localstorage/local-storage.ser
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
+import { PersonaProblematicaService } from '@app/services/http/persona-problematica/persona-problematica.service';
+import { NodoService } from '@app/services/http/nodo/nodo.service';
 declare var cytoscape;
 
 declare var $;
@@ -39,6 +41,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
+        private serviciosPersonaProblematica: PersonaProblematicaService,
+        private serviciosNodo: NodoService,
         private http: HttpClient,
         private router: Router,
         private activatedRoute: ActivatedRoute,
@@ -165,15 +169,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     }
 
     private cargarNodos() {
-        const options = {
-            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-        }
-
-        const email = this.serviciosLocalStorage.darEmail();
-
-        this.http
-            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.idProblematicaActual}/nodos`, options)
-            .pipe(catchError(err => of(err)))
+        this.serviciosPersonaProblematica.darNodos(this.idProblematicaActual)
             .subscribe(res => {
                 if (res.error) {
                     this.atenderErr(res.error);
@@ -239,19 +235,9 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         const form = new FormData();
         form.append('foto', foto);
         form.append('nombre', this.nombreNodo);
-
-        const options = {
-            headers: new HttpHeaders({
-                'Authorization': this.serviciosLocalStorage.darToken(),
-                'extension': extensionFoto
-            })
-        }
-
-        const email = this.serviciosLocalStorage.darEmail();
-
-        this.http
-            .post(`http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/${email}/nodos`, form, options)
-            .pipe(catchError(err => of(err)))
+            
+        this.serviciosPersonaProblematica
+            .agregarNodo(this.idProblematicaActual, form, extensionFoto)
             .subscribe(res => {
                 if (res.error) {
                     this.atenderErr(res.error);
@@ -298,15 +284,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
     }
 
     eliminarPorId(nodo) {
-        const id = nodo.id();
-
-        const options = {
-            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-        }
-
-        this.http
-            .delete(`http://3.130.29.100:8080/nodos/${id}`, options)
-            .pipe(catchError(err => of(err)))
+        this.serviciosNodo.eliminarNodo(nodo.id())
             .subscribe(res => {
                 if (res.error) {
                     this.atenderErr(res.error);
@@ -337,13 +315,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         if (this.yaExisteRelacion(idPadre, id)) return;
         if (this.tieneOtroPadre(id)) return;
 
-        const options = {
-            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-        }
-
-        this.http
-            .put(`http://3.130.29.100:8080/nodos/${id}?id-padre=${idPadre}&apadrinar=true`, options)
-            .pipe(catchError(err => of(err)))
+        this.serviciosNodo.conectarNodos(id, idPadre)
             .subscribe(res => {
                 if (res.error) {
                     this.atenderErr(res.error);
@@ -404,13 +376,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         const idNodo = edge.target().id();
         const idPadre = edge.source().id();
 
-        const options = {
-            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-        }
-
-        this.http
-            .put(`http://3.130.29.100:8080/nodos/${idNodo}?id-padre=${idPadre}&apadrinar=false`, options)
-            .pipe(catchError(err => of(err)))
+        this.serviciosNodo.desconectarNodos(idNodo, idPadre)
             .subscribe(res => {
                 if (res.error) {
                     this.atenderErr(res.error);

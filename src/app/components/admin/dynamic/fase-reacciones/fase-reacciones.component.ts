@@ -5,8 +5,7 @@ import { LocalStorageService } from 'app/services/localstorage/local-storage.ser
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 declare var cytoscape;
 
 @Component({

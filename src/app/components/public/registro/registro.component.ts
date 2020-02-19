@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
-import { PublicService } from '@app/services/public.service';
+import { PublicService } from '@services/http/public/public.service';
 
 @Component({
 	selector: 'app-registro',

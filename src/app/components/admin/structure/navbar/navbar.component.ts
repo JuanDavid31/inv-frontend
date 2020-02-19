@@ -7,7 +7,7 @@ import { catchError, takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from '@services/notificaciones/notificaciones.service';
 import { LocalStorageService } from '@services/localstorage/local-storage.service';
 import { ToastService } from '@services/toast/toast.service';
-import { EventosSseService } from '@services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 import { of, Subject } from 'rxjs';
 
 @Component({

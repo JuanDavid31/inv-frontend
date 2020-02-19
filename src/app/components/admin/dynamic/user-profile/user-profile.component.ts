@@ -14,8 +14,8 @@ export class UserProfileComponent implements OnInit {
   constructor(private serviciosLocalStorage: LocalStorageService) { }
 
   ngOnInit() {
-    this.nombreUsuario=this.serviciosLocalStorage.darNombres();
-    this.apellido=" "+this.serviciosLocalStorage.darApellidos();
+    this.nombreUsuario = this.serviciosLocalStorage.darNombres();
+    this.apellido = " " + this.serviciosLocalStorage.darApellidos();
     
   }
   

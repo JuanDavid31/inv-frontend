@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map, takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 import { Subject } from 'rxjs';
 declare var cytoscape;
 declare var $;

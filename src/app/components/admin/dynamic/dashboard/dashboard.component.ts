@@ -1,11 +1,14 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { of, Subject } from 'rxjs';
-import { LocalStorageService } from '@services/localstorage/local-storage.service';
+import { Subject } from 'rxjs';
 import { ToastService } from 'app/services/toast/toast.service';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from 'app/services/http/eventos-sse/eventos-sse.service';
+import { PersonaProblematicaService } from '@app/services/http/persona-problematica/persona-problematica.service';
+import { ProblematicaPersonaService } from '@app/services/http/problematica-persona/problematica-persona.service';
+import { InvitacionService } from '@app/services/http/invitacion/invitacion.service';
+import { ProblematicaService } from '@app/services/http/problematica/problematica.service';
+import { ProblematicaEscritoService } from '@app/services/http/problematica-escrito/problematica-escrito.service';
+import { takeUntil } from 'rxjs/operators';
 declare var $;
 
 @Component({
@@ -44,9 +47,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	constructor(
-		private http: HttpClient,
 		private ngZone: NgZone,
-		private serviciosLocalStorage: LocalStorageService,
+		private serviciosPersonaProblematica: PersonaProblematicaService,
+		private serviciosProblematicaPersona: ProblematicaPersonaService,
+		private serviciosProblematicaEscrito: ProblematicaEscritoService,
+		private serviciosInvitaciones: InvitacionService,
+		private serviciosProblematica: ProblematicaService,
 		private serviciosToast: ToastService,
 		private serviciosEventosSse: EventosSseService,
 		private router: Router) { }
@@ -67,14 +73,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	cargarProblematicas() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http
-			.get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/problematicas', options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosPersonaProblematica.darProblematicas()
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', 'danger');
@@ -95,16 +94,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	cargarProblematicasTerminadas() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-
-		const url = `http://3.130.29.100:8080/personas/${this.serviciosLocalStorage.darEmail()}/problematicas?fase=5`;
-
-		this.http.get(url, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosPersonaProblematica.darProblematicasTerminadas()
 			.subscribe((res: any) => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast(
@@ -124,18 +114,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 	buscarUsuarios(patron) {
 		if (patron.length < 5) return;
-
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-
-		const url = `http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}/personas` +
-			`?email=${patron}&email-remitente=${this.serviciosLocalStorage.darEmail()}`;
-
-		this.http.get(url, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematicaPersona
+			.darUsuariosPorPatron(patron, this.problematicaSeleccionada.id)
 			.subscribe((res: any) => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al buscar los usuarios, intentelo de nuevo.', 'danger');
@@ -183,14 +163,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	cargarInvitados(problematica) {
 		const { id } = problematica;
 
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http
-			.get(`http://3.130.29.100:8080/problematicas/${id}/personas/${this.serviciosLocalStorage.darEmail()}/invitaciones`, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematicaPersona.darInvitados(id)
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error alcargar los invitados, intentelo de nuevo.', 'danger');
@@ -206,15 +179,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	crearProblematica() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http.post(`http://3.130.29.100:8080/personas/${this.serviciosLocalStorage.darEmail()}/problematicas`, {
-			nombre: this.nombreNuevaProblematica,
-			descripcion: this.descripcionNuevaProblematica
-		}, options).pipe(catchError(err => of(err)))
+		this.serviciosPersonaProblematica
+			.crearProblematica(this.nombreNuevaProblematica, this.descripcionNuevaProblematica)
 			.subscribe((res: any) => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al agregar la problematica, intentelo de nuevo.', 'danger');
@@ -227,19 +193,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	invitar() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers,
-			withCredentials: true
-		}
-
-		this.http.post('http://3.130.29.100:8080/invitaciones', {
-			idProblematica: this.problematicaSeleccionada.id,
-			emailRemitente: this.serviciosLocalStorage.darEmail(),
-			emailDestinatario: this.correoAInvitar,
-			paraInterventor: this.invitacionParaInterventor
-		}, options).pipe(catchError(err => of(err)))
+		this.serviciosInvitaciones
+			.invitar(this.problematicaSeleccionada.id, this.correoAInvitar, this.invitacionParaInterventor)
 			.subscribe((res: any) => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al invitar, intentelo de nuevo.', 'danger');
@@ -252,13 +207,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	eliminarInvitacion(id) {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http.delete(`http://3.130.29.100:8080/invitaciones/${id}`, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosInvitaciones.eliminarInvitacion(id)
 			.subscribe((res: any) => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al eliminar la invitación, intentelo de nuevo.', 'danger');
@@ -285,15 +234,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	avanzarFase() { //TODO: Agregar a problematicas terminadas en caso de finalizar la misma.
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http
-			.put(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?avanzar=${true}`, options, { withCredentials: true })
-			.pipe(catchError(err => of(err)))
+	avanzarFase() {
+		this.serviciosProblematica.avanzarFase(this.problematicaSeleccionada.id)
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al avanzar la fase, intentelo de nuevo', 'danger');
@@ -397,14 +339,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	darInfoAlAvanzar() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaSeleccionada.id}?estado=true`, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematica.darInfoProblematica(this.problematicaSeleccionada.id)
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar la información de la problematica, intentelo de nuevo', 'danger');
@@ -415,15 +350,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	buscarEscritosPorProblematica(idProblematica) {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-
-		this.http
-			.get(`http://3.130.29.100:8080/problematicas/${idProblematica}/escritos`, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematicaEscrito.darEscritosPorProblematica(idProblematica)
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast(

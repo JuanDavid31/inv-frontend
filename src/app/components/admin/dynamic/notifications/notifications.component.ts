@@ -1,11 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 import { LocalStorageService } from '@services/localstorage/local-storage.service';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { ToastService } from 'app/services/toast/toast.service';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
+import { PersonaInvitacionService } from '@app/services/http/persona-invitacion/persona-invitacion.service';
+import { InvitacionService } from '@app/services/http/invitacion/invitacion.service';
 
 @Component({
 	selector: 'app-notifications',
@@ -25,6 +27,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosNotificaciones: NotificacionesService,
 		private serviciosEventosSse: EventosSseService,
+		private serviciosPersonaInvitacion: PersonaInvitacionService,
+		private serviciosInvitacion: InvitacionService,
 		private serviciosToast: ToastService) { }
 
 	ngOnInit() {
@@ -36,15 +40,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 	}
 
 	cargarInvitaciones() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-
-		this.http
-			.get(`http://3.130.29.100:8080/personas/${this.serviciosLocalStorage.darEmail()}/invitaciones`, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosPersonaInvitacion
+			.darInvitacionesVigentesRecibidas()
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar las invitaciones, intentelo de nuevo.', 'danger');
@@ -62,52 +59,21 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 	}
 
 	aceptarInvitacion(invitacion, decision: boolean) {
-		const { idInvitacion, idProblematica, emailRemitente, paraInterventor } = invitacion;
 
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers,
-			withCredentials: true
-		}
-
-		this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${decision}`, {
-			idProblematica,
-			emailRemitente,
-			emailDestinatario: this.serviciosLocalStorage.darEmail(),
-			paraInterventor
-		}, options).pipe(catchError(err => of(err)))
+		this.serviciosInvitacion.responderInvitacion(invitacion, decision)
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al aceptar la invitación, intentelo de nuevo.', 'danger')
 				} else {
 					this.serviciosToast.mostrarToast(undefined, 'Invitación aceptada');
 					this.invitaciones = this.invitaciones.filter(invitacion => invitacion.idInvitacion !== res.id);
-					//this.changeDetector.detectChanges();
 					this.eliminarNotificacion(res.id);
 				}
 			})
 	}
 
 	rechazarInvitacion(invitacion) {
-
-		this.decision = false;
-
-		const { idInvitacion, idProblematica, emailRemitente, paraInterventor } = invitacion;
-
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers,
-			withCredentials: true
-		}
-
-		this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${this.decision}`, {
-			idProblematica,
-			emailRemitente,
-			emailDestinatario: this.serviciosLocalStorage.darEmail(),
-			paraInterventor
-		}, options).pipe(catchError(err => of(err)))
+		this.serviciosInvitacion.responderInvitacion(invitacion, false)
 			.subscribe((res: any) => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al rechazar la invitación, intentelo de nuevo.', 'danger')

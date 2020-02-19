@@ -6,8 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 import { of, forkJoin, Subject } from 'rxjs';
 import { NgForm } from '@angular/forms';
-import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
-import { EventosSseService } from 'app/services/eventos-sse/eventos-sse.service';
+import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 
 declare var cytoscape;
 
