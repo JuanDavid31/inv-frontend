@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from '@environment/environment';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root'
 })
 export class InvitacionService {
 	
@@ -27,14 +27,14 @@ export class InvitacionService {
 	}
 	
 	eliminarInvitacion(idInvitacion: number){
-		return this.http.delete(`http://3.130.29.100:8080/invitaciones/${idInvitacion}`)
+		return this.http.delete(`${this.url}/${idInvitacion}`)
 			.pipe(catchError(err => of(err)))
 	}
 	
 	responderInvitacion(invitacion: InvitacionRespondida, decision: boolean){
 		const { idInvitacion, idProblematica, emailRemitente, paraInterventor } = invitacion;
 		
-		return this.http.put(`http://3.130.29.100:8080/invitaciones/${idInvitacion}?aceptar=${decision}`, {
+		return this.http.put(`${this.url}/${idInvitacion}?aceptar=${decision}`, {
 			idProblematica,
 			emailRemitente,
 			emailDestinatario: this.serviciosLocalStorage.darEmail(),

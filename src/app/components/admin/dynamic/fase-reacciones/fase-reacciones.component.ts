@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
+import { PersonaProblematicaService } from '@app/services/http/persona-problematica/persona-problematica.service';
 declare var cytoscape;
 
 @Component({
@@ -28,6 +29,7 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
     constructor(private serviciosLocalStorage: LocalStorageService,
         private serviciosToast: ToastService,
         private serviciosEventosSse: EventosSseService,
+        private serviciosPersonaProblematica: PersonaProblematicaService,
         private http: HttpClient,
         private router: Router,
         private activatedRoute: ActivatedRoute) { }
@@ -112,19 +114,11 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
             minZoom: 0.1,
             maxZoom: 2
         });
-        this.cy.on('data', event => console.log('data', event.target.data().reaccion))
     }
 
     private cargarNodos() {
-        const options = {
-            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-        }
-
-        const email = this.serviciosLocalStorage.darEmail(); if (!email) return;
-
-        this.http
-            .get(`http://3.130.29.100:8080/personas/${email}/problematicas/${this.idProblematicaActual}/grupos`, options)
-            .pipe(catchError(err => of(err)))
+        this.serviciosPersonaProblematica
+            .darGrupos(this.idProblematicaActual)
             .subscribe(res => {
                 if (res.error) {
                     this.atenderErr(res.error);
@@ -231,22 +225,14 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
     }
 
     private reaccionar(valorReaccion, elemento) {
-
-        const options = {
-            headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-        }
-
-        const email = this.serviciosLocalStorage.darEmail();
-
         if (!elemento.data().esGrupo) {
             this.serviciosToast.mostrarToast('Error', 'Solo se puede reaccionar sobre un grupo.', 'danger')
             return;
         } else {
             this.idGrupoSeleccionado = elemento.data().id;
-            const url = `http://3.130.29.100:8080/personas/${email}/problematicas/${this.idProblematicaActual}/grupos/${this.idGrupoSeleccionado}/reacciones`;
-            this.http
-                .post(url, { valor: valorReaccion }, options)
-                .pipe(catchError(err => of(err)))
+            
+            this.serviciosPersonaProblematica
+                .reaccionar(this.idProblematicaActual, this.idGrupoSeleccionado, valorReaccion)
                 .subscribe(res => {
                     if (res.error) {
                         this.atenderErr(res.error);

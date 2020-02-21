@@ -24,7 +24,7 @@
 					<div class="form-group">
 						<label for="escritos">Escritos (Titulo)</label>
 						<select class="form-control" id="escritos" [(ngModel)]="escritoSeleccionado"
-							name="escritoSeleccionadoSelect" (change)="algo()">
+							name="escritoSeleccionadoSelect">
 							<option></option>
 							<option *ngFor="let escrito of escritos" [ngValue]="escrito">
 								{{escrito.nombre}}

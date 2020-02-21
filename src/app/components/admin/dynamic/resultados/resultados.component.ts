@@ -1,12 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
+import { Component, OnInit } from '@angular/core';
 import { ToastService } from 'app/services/toast/toast.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
-import { map, catchError } from 'rxjs/operators';
-import { forkJoin, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { Escrito } from '@app/classes/Escrito';
+import { ProblematicaEscritoService } from '@app/services/http/problematica-escrito/problematica-escrito.service';
+import { ProblematicaReaccionService } from '@app/services/http/problematica-reaccion/problematica-reaccion.service';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 declare var cytoscape;
@@ -20,22 +21,19 @@ declare var $;
 export class ResultadosComponent implements OnInit {
 
 	cy: any = {};
-	problematicaActual: number;
+	idProblematicaActual: number;
+	nombreProblematica: string;
 	modalVisualizacionImagenNodo: any;
 	nodoSeleccionado: any;
 
 	grupos = [];
 	grupoSeleccionado;
-	escritos = [];
-	escritoSeleccionado = { nombre: '', descripcion: '' };
+	escritos: Escrito[] = [];
+	escritoSeleccionado: Escrito = new Escrito();
 
-	arregloGrupos: any[] = [];
-	arregloEscritos: any[] = [];
-	arreglodatosPdf: any[] = [];
-
-	constructor(private serviciosLocalStorage: LocalStorageService,
-		private serviciosToast: ToastService,
-		private http: HttpClient,
+	constructor(private serviciosToast: ToastService,
+		private serviciosProblematicaReaccion: ProblematicaReaccionService,
+		private serviciosProblematicaEscrito: ProblematicaEscritoService,
 		private router: Router,
 		private activatedRoute: ActivatedRoute) { }
 
@@ -49,15 +47,14 @@ export class ResultadosComponent implements OnInit {
 			.paramMap
 			.pipe(map(() => window.history.state))
 			.subscribe(params => {
-				this.problematicaActual = params.idProblematica;
-				if (!this.problematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
+				this.idProblematicaActual = params.idProblematica;
+				this.nombreProblematica = params.nombreProblematica;
+				if (!this.idProblematicaActual) { this.router.navigateByUrl('/dashboard'); return; }
 
 				this.prepararCytoscape();
 				this.cargarNodosYEscritos();
 				this.prepararEtiquetaHtmlEnNodos();
 				this.prepararMenuGrupos();
-				this.cargarArregloGrupos();
-
 			})
 	}
 
@@ -110,37 +107,14 @@ export class ResultadosComponent implements OnInit {
 	}
 
 	private cargarNodosYEscritos() {
-		const requestNodos = this.darRequestNodos();
-		const requestEscritos = this.darRequestEscritos();
+		const requestNodos = this.serviciosProblematicaReaccion.darGruposConReacciones(this.idProblematicaActual);//darRequestNodos();
+		const requestEscritos = this.serviciosProblematicaEscrito.darEscritosPorProblematica(this.idProblematicaActual); //darRequestEscritos();
 
 		forkJoin([requestNodos, requestEscritos])
 			.subscribe(res => {
 				this.atenderRequestNodos(res[0]);
 				this.atenderRequestEscritos(res[1]);
 			})
-	}
-
-	private darRequestNodos() {
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
-
-		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/reacciones`, options)
-			.pipe(catchError(err => of(err)))
-	}
-
-	private darRequestEscritos() {
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
-
-		const email = this.serviciosLocalStorage.darEmail();
-		if (!email) return;
-
-		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.problematicaActual}/escritos`, options)
-			.pipe(catchError(err => of(err)))
 	}
 
 	private atenderRequestNodos(res) {
@@ -264,88 +238,50 @@ export class ResultadosComponent implements OnInit {
 		this.escritos = this.grupoSeleccionado.escritos;
 	}
 
-	cargarArregloGrupos() {
 
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http
-			.get('http://3.130.29.100:8080/problematicas/' + this.problematicaActual + '/escritos', options)
-			.pipe(catchError(err => of(err)))
-			.subscribe(res => {
-				if (res.error) {
-					this.serviciosToast.mostrarToast('Error', 'Ocurrió un error al cargar las problematicas, intentelo de nuevo.', 'danger');
-				} else {
-					this.arregloGrupos = res;
-
-				}
-			})
-	}
-
-
-	cargarArregloEscritos() {
-
-		let contador = 0;
-
-		for (let d in this.arregloGrupos) {
-
-			this.arreglodatosPdf[contador];
+	darDatosPdf() {
+		
+		const datosPdf = [];
+		
+		this.grupos.forEach(grupo => {
 
 			const header = {
-				text: [{ text: 'Grupo: ', style: 'header', bold: true }, this.arregloGrupos[d].nombreGrupo + '\n\n'],
+				text: [{ text: 'Grupo: ', style: 'header', bold: true }, grupo.nombreGrupo + '\n\n'],
 				style: 'header',
-
 			}
 
-			this.arreglodatosPdf.push(header);
-
-
-			for (let i in this.arregloGrupos[d].escritos) {
-
-				this.arreglodatosPdf[contador];
-
-
+			datosPdf.push(header);
+			
+			grupo.escritos.forEach(escrito => {
 				const headerTitulo = {
-					text: this.arregloGrupos[d].escritos[i].nombre + '\n\n',
+					text: escrito.nombre + '\n\n',
 					style: 'subheader',
 					bold: true
-
-
 				};
 
-
-				this.arreglodatosPdf.push(headerTitulo);
+				datosPdf.push(headerTitulo);
 
 				const descripcionGrupo = {
-					text: [this.arregloGrupos[d].escritos[i].descripcion + '. ', { text: ' Elaborado por ' + this.arregloGrupos[d].escritos[i].autor + '\n\n', style: 'parrafo', bold: true }],
+					text: [escrito.descripcion + '. ', { text: ' Elaborado por ' + escrito.autor + '\n\n', style: 'parrafo', bold: true }],
 					style: 'parrafo',
-
 				};
 
-				this.arreglodatosPdf.push(descripcionGrupo);
-			}
-		}
-		contador = 0;
-
-		return this.arreglodatosPdf;
+				datosPdf.push(descripcionGrupo);
+			})
+			
+		});
+		return datosPdf;
 	}
 
 
 	generatePdf() {
-
 		const escrito = {
 			info: {
 				title: 'Escritos problematicas\n\n',
-
 			},
-
 			alignment: 'justify',
-
 			content: [{
-
-				text: 'Resumen de escritos ',
+				text: this.nombreProblematica,
 				bold: true,
 				fontSize: 16,
 				alignment: 'center',
@@ -354,35 +290,22 @@ export class ResultadosComponent implements OnInit {
 			{
 				alignment: 'justify',
 				columns: [
-					this.cargarArregloEscritos(),
-
+					this.darDatosPdf(),
 				]
 			}],
 			styles: {
 				header: {
 					fontSize: 14,
-
-
 				},
 				subheader: {
 					fontSize: 13,
-
-
 				},
 				parrafo: {
 					fontSize: 11
 				}
 			}
-
 		}
 
-		console.log(escrito);
 		pdfMake.createPdf(escrito).open();
 	}
-
-
-	algo() {
-		console.log(this.escritoSeleccionado);
-	}
-
 }

@@ -10,13 +10,13 @@ import { of } from 'rxjs';
 })
 export class PersonaInvitacionService {
 
-	url: string = `${environment.apiUrl}/personas`;
+	url: string = `${environment.apiUrl}/personas/${this.serviciosLocalStorage.darEmail()}/invitaciones`;
 
 	constructor(private http: HttpClient,
 				private serviciosLocalStorage: LocalStorageService) { }
 	
 	darInvitacionesVigentesRecibidas(){
-		return this.http.get(`${this.url}/${this.serviciosLocalStorage.darEmail()}/invitaciones`)
+		return this.http.get(`${this.url}`)
 			.pipe(catchError(err => of(err)));
 	}
 }

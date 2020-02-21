@@ -370,7 +370,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 	}
 
 	verResultados() {
-		this.router.navigateByUrl("/resultados", { state: { idProblematica: this.problematicaSeleccionada.id } });
+		this.router.navigateByUrl("/resultados", { 
+			state: { 
+				idProblematica: this.problematicaSeleccionada.id, 
+				nombreProblematica: this.problematicaSeleccionada.nombre 
+			}
+		});
 	}
 
 	ngOnDestroy() {

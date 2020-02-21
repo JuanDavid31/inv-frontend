@@ -6,6 +6,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 import { Subject } from 'rxjs';
+import { environment } from '@environment/environment';
 declare var cytoscape;
 declare var $;
 
@@ -82,7 +83,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
 
-				this.socket = new WebSocket(`ws://3.130.29.100:8080/colaboracion?idProblematica=${this.idProblematicaActual}`);
+				this.socket = new WebSocket(`ws://${environment.apiUrl}/colaboracion?idProblematica=${this.idProblematicaActual}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 				this.socket.onerror = this.onWebsocketError.bind(this);

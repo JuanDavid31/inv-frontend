@@ -2,13 +2,15 @@ import { Component, OnInit, ElementRef, ChangeDetectorRef, OnDestroy, NgZone } f
 import { ROUTES } from '../sidebar/sidebar.component';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from '@services/notificaciones/notificaciones.service';
 import { LocalStorageService } from '@services/localstorage/local-storage.service';
 import { ToastService } from '@services/toast/toast.service';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 import { of, Subject } from 'rxjs';
+import { environment } from '@environment/environment';
+import { PersonaInvitacionService } from '@app/services/http/persona-invitacion/persona-invitacion.service';
 
 @Component({
 	selector: 'app-navbar',
@@ -32,6 +34,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	constructor(private element: ElementRef,
 		private serviciosNotificaciones: NotificacionesService,
 		private serviciosEventosSse: EventosSseService,
+		private serviciosPersonaInvitacion: PersonaInvitacionService,
 		private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private router: Router,
@@ -101,14 +104,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	}
 
 	cargarInvitaciones() {
-		const headers = new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() });
-
-		const options = {
-			headers: headers
-		}
-		this.http
-			.get('http://3.130.29.100:8080/personas/' + this.serviciosLocalStorage.darEmail() + '/invitaciones', options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosPersonaInvitacion
+			.darInvitacionesVigentesRecibidas()
 			.subscribe(res => {
 				if (res.error) {
 					this.serviciosToast.mostrarToast('Error', 'Hubo un error al cargar las notificaciones, intentelo de nuveo.', 'danger');
@@ -119,7 +116,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 	}
 
 	prepararSse() {
-		this.servidor = new EventSource(`http://3.130.29.100:8080/eventos?email=${this.serviciosLocalStorage.darEmail()}`,
+		this.servidor = new EventSource(`${environment.apiUrl}/eventos?email=${this.serviciosLocalStorage.darEmail()}`,
 			{ withCredentials: true });
 		this.servidor.onmessage = this.recibirEvento.bind(this);
 	}

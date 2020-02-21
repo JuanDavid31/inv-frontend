@@ -22,10 +22,9 @@
 						<input type="text" id="nombre-escrito" #nombreEscritoInput="ngModel" class="form-control"
 							[(ngModel)]="escritoSeleccionado.nombre" name="nombreNuevoEscritoInput" minlength="10"
 							maxlength="40" [disabled]="!grupoSeleccionado" required>
-						<div *ngIf="nombreEscritoInput?.touched">
-							<div class="alert alert-danger" role="alert"
-								style="height:50px;text-align:center;background:#F08080"
-								*ngIf="nombreEscritoInput?.errors?.minlength">
+						<div *ngIf="nombreEscritoInput?.dirty && nombreEscritoInput?.touched && nombreEscritoInput?.errors?.minlength">
+							<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert"
+								style="height:50px;text-align:center;background:#F08080">
 								<a>Debe tener entre 10 y 40 caracteres</a>
 								<button type="button" class="close" data-dismiss="alert" aria-label="Close"
 									style="color:#FFFFFF">
@@ -40,10 +39,9 @@
 							class="form-control" [(ngModel)]="escritoSeleccionado.descripcion"
 							name="descripcionEscritoInput" minlength="20" maxlength="500"
 							[disabled]="!grupoSeleccionado" required></textarea>
-						<div *ngIf="descripcionEscritoInput?.touched">
-							<div class="alert alert-danger" role="alert"
-								style="height:50px;text-align:center;background:#F08080"
-								*ngIf="descripcionEscritoInput?.errors?.minlength">
+						<div *ngIf="descripcionEscritoInput?.dirty && descripcionEscritoInput?.touched && descripcionEscritoInput?.errors?.minlength">
+							<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert"
+								style="height:50px;text-align:center;background:#F08080">
 								<a>Debe tener minimo 20 caracteres</a>
 								<button type="button" class="close" data-dismiss="alert" aria-label="Close"
 									style="color:#FFFFFF">

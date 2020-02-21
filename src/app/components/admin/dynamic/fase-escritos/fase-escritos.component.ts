@@ -1,12 +1,15 @@
-import { Component, OnInit, ViewChild, ViewChildren, AfterViewInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { ToastService } from 'app/services/toast/toast.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
-import { map, catchError, takeUntil } from 'rxjs/operators';
-import { of, forkJoin, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import { forkJoin, Subject } from 'rxjs';
 import { NgForm } from '@angular/forms';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
+import { ProblematicaReaccionService } from '@app/services/http/problematica-reaccion/problematica-reaccion.service';
+import { ProblematicaPersonaService } from '@app/services/http/problematica-persona/problematica-persona.service';
+import { Escrito } from '@app/classes/Escrito';
 
 declare var cytoscape;
 
@@ -21,13 +24,13 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 	idProblematicaActual: number;
 	modalVisualizacionImagenNodo: any;
 	nodoSeleccionado: any;
-	escritos: any[] = [];
+	escritos: Escrito[] = [];
 
 	nombreEscrito = '';
 	descripcionEscrito = '';
 
 	grupoSeleccionado = undefined;
-	escritoSeleccionado: any = {};
+	escritoSeleccionado: Escrito = new Escrito();
 
 	private formEscrito: NgForm;
 
@@ -41,6 +44,8 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 	constructor(private serviciosLocalStorage: LocalStorageService,
 		private serviciosToast: ToastService,
 		private serviciosEventosSse: EventosSseService,
+		private serviciosProblematicaPersona: ProblematicaPersonaService,
+		private serviciosProblematicaReaccion: ProblematicaReaccionService,
 		private http: HttpClient,
 		private router: Router,
 		private activatedRoute: ActivatedRoute) { }
@@ -143,48 +148,24 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 			//Hay escrito, muestro boton de editar y eliminar. Editar solo es esta habilitado si el formulario es valido.
 			//Eliminar estara habilitado siempre que exista el escrito.
 		}
-		else { //No hay escrito. Muestro crear.
+		else { //No hay escrito. Muestro el boton de crear.
 			this.existeEscrito = false;
-			this.escritoSeleccionado = {
-				nombre: '',
-				descripcion: '',
-				idGrupo: +this.grupoSeleccionado.id
-			}
+			this.escritoSeleccionado = new Escrito()
+			this.escritoSeleccionado.idGrupo = +this.grupoSeleccionado.id;
 		}
 	}
 
 	private cargarNodosYEscritos() {
-		const requestNodos = this.darRequestNodos();
-		const requestEscritos = this.darRequestEscritos();
+		const requestNodos = this.serviciosProblematicaReaccion
+				.darGruposConReacciones(this.idProblematicaActual);
+		const requestEscritos = this.serviciosProblematicaPersona
+				.darEscritosPorProblematicaYPersona(this.idProblematicaActual);
 
 		forkJoin([requestNodos, requestEscritos])
 			.subscribe(res => {
 				this.atenderRequestNodos(res[0]);
 				this.atenderRequestEscritos(res[1]);
 			})
-	}
-
-	private darRequestNodos() {
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
-
-		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/reacciones`, options)
-			.pipe(catchError(err => of(err)))
-	}
-
-	private darRequestEscritos() {
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
-
-		const email = this.serviciosLocalStorage.darEmail();
-		if (!email) return;
-
-		return this.http
-			.get(`http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/${email}/escritos`, options)
-			.pipe(catchError(err => of(err)))
 	}
 
 	private atenderRequestNodos(res) {
@@ -310,16 +291,9 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	crearEscrito() {
 		this.getOPutEnProceso = true;
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail()}/escritos`;
-
-		this.http
-			.post(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematicaPersona
+			.agregarEscrito(this.idProblematicaActual, this.escritoSeleccionado)
 			.subscribe(res => {
 				this.getOPutEnProceso = false;
 				if (res.error) {
@@ -335,16 +309,9 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	editarEscrito() {
 		this.getOPutEnProceso = true;
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
-
-		this.http
-			.put(url, this.escritoSeleccionado, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematicaPersona
+			.actualizarEscrito(this.idProblematicaActual, this.escritoSeleccionado)
 			.subscribe(res => {
 				this.getOPutEnProceso = false;
 				if (res.error) {
@@ -360,16 +327,9 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	eliminarEscrito() {
 		this.deleteEnProceso = true;
-		const options = {
-			headers: new HttpHeaders({ 'Authorization': this.serviciosLocalStorage.darToken() })
-		}
 
-		const url = `http://3.130.29.100:8080/problematicas/${this.idProblematicaActual}/personas/` +
-			`${this.serviciosLocalStorage.darEmail()}/escritos/${this.escritoSeleccionado.id}`;
-
-		this.http
-			.delete(url, options)
-			.pipe(catchError(err => of(err)))
+		this.serviciosProblematicaPersona
+			.eliminarEscrito(this.idProblematicaActual, this.escritoSeleccionado.id)
 			.subscribe(res => {
 				this.deleteEnProceso = false;
 				if (res.error) {

@@ -42,4 +42,26 @@ export class PersonaProblematicaService {
         return this.http.post(`${this.url}/${idProblematica}/nodos`, form, options)
         		.pipe(catchError(err => of(err)));
 	}
+	
+	darGrupos(idProblematica: number){
+		return this.http
+            .get(`${this.url}/${idProblematica}/grupos`)
+            .pipe(catchError(err => of(err)))
+	}
+	
+	reaccionar(idProblematica: number, idGrupo: number, valorReaccion: number){
+        return this.http.post(`${this.url}/${idProblematica}/grupos/${idGrupo}/reacciones`, new Reaccion(valorReaccion))
+            .pipe(catchError(err => of(err)))
+	}
+	
+}
+
+class Reaccion{
+    valor: number
+    idGrupo: number
+    idPersonaProblematica: string
+    
+    constructor(valor: number){
+    	this.valor = valor;
+    }
 }
