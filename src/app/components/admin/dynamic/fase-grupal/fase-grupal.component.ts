@@ -83,7 +83,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
 
-				this.socket = new WebSocket(`ws://${environment.apiUrl}/colaboracion?idProblematica=${this.idProblematicaActual}`);
+				this.socket = new WebSocket(`ws://${environment.rawApiUrlWithPort}/colaboracion?idProblematica=${this.idProblematicaActual}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 				this.socket.onerror = this.onWebsocketError.bind(this);
