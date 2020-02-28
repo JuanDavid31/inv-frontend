@@ -10,25 +10,23 @@ import { environment } from '@environment/environment';
 })
 export class PersonaProblematicaService {
 	
-	url : string = `${environment.apiUrl}/personas/${this.serviciosLocalStorage.darEmail()}/problematicas`;
-
 	constructor(private http: HttpClient,
 				private serviciosLocalStorage: LocalStorageService) { }
 	
 	darProblematicas(){
-		return this.http.get(this.url).pipe(catchError(err => of(err)));
+		return this.http.get(this.darUrl()).pipe(catchError(err => of(err)));
 	}
 	
 	darProblematicasTerminadas(){
-		return this.http.get(`${this.url}?fase=5`).pipe(catchError(err => of(err)));
+		return this.http.get(`${this.darUrl()}?fase=5`).pipe(catchError(err => of(err)));
 	}
 	
 	crearProblematica(nombre: string, descripcion: string){
-		return this.http.post(this.url, { nombre, descripcion }).pipe(catchError(err => of(err)));
+		return this.http.post(this.darUrl(), { nombre, descripcion }).pipe(catchError(err => of(err)));
 	}
 	
 	darNodos(idProblematica: number){
-		return this.http.get(`${this.url}/${idProblematica}/nodos`)
+		return this.http.get(`${this.darUrl()}/${idProblematica}/nodos`)
             .pipe(catchError(err => of(err)))
 	}
 	
@@ -39,21 +37,24 @@ export class PersonaProblematicaService {
             })
         }
         
-        return this.http.post(`${this.url}/${idProblematica}/nodos`, form, options)
+        return this.http.post(`${this.darUrl()}/${idProblematica}/nodos`, form, options)
         		.pipe(catchError(err => of(err)));
 	}
 	
 	darGrupos(idProblematica: number){
 		return this.http
-            .get(`${this.url}/${idProblematica}/grupos`)
+            .get(`${this.darUrl()}/${idProblematica}/grupos`)
             .pipe(catchError(err => of(err)))
 	}
 	
 	reaccionar(idProblematica: number, idGrupo: number, valorReaccion: number){
-        return this.http.post(`${this.url}/${idProblematica}/grupos/${idGrupo}/reacciones`, new Reaccion(valorReaccion))
+        return this.http.post(`${this.darUrl()}/${idProblematica}/grupos/${idGrupo}/reacciones`, new Reaccion(valorReaccion))
             .pipe(catchError(err => of(err)))
 	}
 	
+	private darUrl(){
+		return `${environment.apiUrl}/personas/${this.serviciosLocalStorage.darEmail()}/problematicas`;
+	}
 }
 
 class Reaccion{
