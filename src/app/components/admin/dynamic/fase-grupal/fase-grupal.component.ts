@@ -83,7 +83,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				this.prepararMenuEdges();
 				this.prepararMenuGrupos();
 
-				this.socket = new WebSocket(`ws://${environment.apiUrl}/colaboracion?idProblematica=${this.idProblematicaActual}`);
+				this.socket = new WebSocket(`ws://${environment.rawApiUrl}/colaboracion?idProblematica=${this.idProblematicaActual}`);
 				this.socket.onopen = this.onopenEvent.bind(this);
 				this.socket.onmessage = this.onmessageEvent.bind(this);
 				this.socket.onerror = this.onWebsocketError.bind(this);
@@ -377,7 +377,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			selector: 'edge',
 			commands: [
 				{
-					content: '<span class="fa fa-trash fa-2x"></span>',
+					content: '<span class="fa fa-check fa-2x"></span>',
 					select: this.desconectar.bind(this)
 				},
 				{
@@ -401,7 +401,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 					select: this.abrirModalImagenNodo.bind(this) //this.cambiarNombreGrupo.bind(this)
 				},
 				{
-					content: '<span class="fa fa-trash fa-2x"></span>',
+					content: '<span class="fa fa-check fa-2x"></span>',
 					select: function (ele) { }
 				}
 			]
@@ -474,6 +474,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	 * @param {any[]} solicitantes usuarios que contienen a este mismo usuario.
 	 */
 	private cargarNodos({ nodos, solicitantes }) {
+		console.log(nodos, solicitantes);
 		this.gruposYEdges = nodos.filter(nodo => nodo.data.esGrupo);
 		const nodosCytoscape = this.cy.nodes();
 

@@ -3,12 +3,12 @@ import { ROUTES } from '../sidebar/sidebar.component';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { NotificacionesService } from '@services/notificaciones/notificaciones.service';
 import { LocalStorageService } from '@services/localstorage/local-storage.service';
 import { ToastService } from '@services/toast/toast.service';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
-import { of, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { environment } from '@environment/environment';
 import { PersonaInvitacionService } from '@app/services/http/persona-invitacion/persona-invitacion.service';
 
