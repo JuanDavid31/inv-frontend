@@ -132,11 +132,12 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
         this.dibujarNodosPadre(nodos);
         this.dibujarNodosHijo(nodos);
 
-        this.cy.layout({
-            name: 'cose',
-            nodeOverlap: 1,
-            boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-        }).run()
+        // this.cy.layout({
+        //     name: 'cose',
+        //     nodeOverlap: 1,
+        //     boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+        // }).run()
+        this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
     }
 
     private dibujarNodosPadre(nodos) {
@@ -230,7 +231,7 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
             return;
         } else {
             this.idGrupoSeleccionado = elemento.data().id;
-            
+
             this.serviciosPersonaProblematica
                 .reaccionar(this.idProblematicaActual, this.idGrupoSeleccionado, valorReaccion)
                 .subscribe(res => {
@@ -244,11 +245,12 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
     }
 
     organizar() {
-        this.cy.layout({
-            name: 'cose',
-            nodeOverlap: 1,
-            boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-        }).run()
+        // this.cy.layout({
+        //     name: 'cose',
+        //     nodeOverlap: 1,
+        //     boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+        // }).run()
+        this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
     }
 
     ngOnDestroy() {

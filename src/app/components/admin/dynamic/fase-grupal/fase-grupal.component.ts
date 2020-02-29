@@ -419,8 +419,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private onmessageEvent(event) {
 		const json = JSON.parse(event.data);
-		console.log(`Llego un evento  -> ${json.accion}`);
-		console.log(json);
+		console.log(`Llego un evento  -> ${json.accion}`, json);
 		switch (json.accion) {
 			case 'Conectarse':
 				this.alguienSeConecto(json);
@@ -474,7 +473,11 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	 * @param {any[]} solicitantes usuarios que contienen a este mismo usuario.
 	 */
 	private cargarNodos({ nodos, solicitantes }) {
-		console.log(nodos, solicitantes);
+		// nodos = nodos.map(nodo => {
+		// 	delete nodo.data.parent;
+		// 	return nodo;
+		// })
+		console.log(nodos);
 		this.gruposYEdges = nodos.filter(nodo => nodo.data.esGrupo);
 		const nodosCytoscape = this.cy.nodes();
 
@@ -530,11 +533,12 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	 * El layout cose asigna posiciones a nodos normales y compuestos
 	 */
 	private activarLayoutCose() {
-		this.cy.layout({
-			name: 'cose',
-			nodeOverlap: 1,
-			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-		}).run();
+		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
+		// this.cy.layout({
+		// 	name: 'cose',
+		// 	nodeOverlap: 1,
+		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+		// }).run();
 		this.enviarActualizacionDePosiciones()
 	}
 

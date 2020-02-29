@@ -129,11 +129,12 @@ export class ResultadosComponent implements OnInit {
 	private dibujarNodos(nodos) {
 		this.dibujarNodosPadre(nodos);
 		this.dibujarNodosHijo(nodos);
-		this.cy.layout({
-			name: 'cose',
-			nodeOverlap: 1,
-			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-		}).run()
+		// this.cy.layout({
+		// 	name: 'cose',
+		// 	nodeOverlap: 1,
+		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+		// }).run()
+		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
 	}
 
 	private dibujarNodosPadre(nodos) {
@@ -227,11 +228,12 @@ export class ResultadosComponent implements OnInit {
 	}
 
 	organizar() {
-		this.cy.layout({
-			name: 'cose',
-			nodeOverlap: 1,
-			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-		}).run()
+		// this.cy.layout({
+		// 	name: 'cose',
+		// 	nodeOverlap: 1,
+		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+		// }).run()
+		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
 	}
 
 	actualizarListaEscritos() {
@@ -240,9 +242,9 @@ export class ResultadosComponent implements OnInit {
 
 
 	darDatosPdf() {
-		
+
 		const datosPdf = [];
-		
+
 		this.grupos.forEach(grupo => {
 
 			const header = {
@@ -251,7 +253,7 @@ export class ResultadosComponent implements OnInit {
 			}
 
 			datosPdf.push(header);
-			
+
 			grupo.escritos.forEach(escrito => {
 				const headerTitulo = {
 					text: escrito.nombre + '\n\n',
@@ -268,7 +270,7 @@ export class ResultadosComponent implements OnInit {
 
 				datosPdf.push(descripcionGrupo);
 			})
-			
+
 		});
 		return datosPdf;
 	}

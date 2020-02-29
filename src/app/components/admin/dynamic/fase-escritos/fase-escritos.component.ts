@@ -157,9 +157,9 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 
 	private cargarNodosYEscritos() {
 		const requestNodos = this.serviciosProblematicaReaccion
-				.darGruposConReacciones(this.idProblematicaActual);
+			.darGruposConReacciones(this.idProblematicaActual);
 		const requestEscritos = this.serviciosProblematicaPersona
-				.darEscritosPorProblematicaYPersona(this.idProblematicaActual);
+			.darEscritosPorProblematicaYPersona(this.idProblematicaActual);
 
 		forkJoin([requestNodos, requestEscritos])
 			.subscribe(res => {
@@ -180,11 +180,12 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 	private dibujarNodos(nodos) {
 		this.dibujarNodosPadre(nodos);
 		this.dibujarNodosHijo(nodos);
-		this.cy.layout({
-			name: 'cose',
-			nodeOverlap: 1,
-			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-		}).run()
+		// this.cy.layout({
+		// 	name: 'cose',
+		// 	nodeOverlap: 1,
+		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+		// }).run()
+		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
 	}
 
 	private dibujarNodosPadre(nodos) {
@@ -280,11 +281,12 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 	}
 
 	organizar() {
-		this.cy.layout({
-			name: 'cose',
-			nodeOverlap: 1,
-			boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
-		}).run()
+		// this.cy.layout({
+		// 	name: 'cose',
+		// 	nodeOverlap: 1,
+		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
+		// }).run()
+		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
 	}
 
 	getOPutEnProceso = false;
