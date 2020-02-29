@@ -40,9 +40,9 @@
               "src/assets/js/cytoscape-cxtmenu.js",
               "src/assets/js/cytoscape-compound-drag-and-drop.js",
               "src/assets/js/cytoscape-node-html-label.js",
-              "assets/js/shim.min.js",
-              "assets/js/layout-base.js",
-              "assets/js/cose-base.js",
+              "src/assets/js/shim.min.js",
+              "src/assets/js/layout-base.js",
+              "src/assets/js/cose-base.js",
               "src/assets/js/cytoscape-cose-bilkent.js"
             ]
           },
