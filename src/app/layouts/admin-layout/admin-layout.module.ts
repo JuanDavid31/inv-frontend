@@ -20,8 +20,6 @@ import {
   MatTooltipModule,
   MatSelectModule
 } from '@angular/material';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { TokenInterceptor } from '@app/interceptors/token.interceptor';
 
 @NgModule({
   imports: [
@@ -46,7 +44,7 @@ import { TokenInterceptor } from '@app/interceptors/token.interceptor';
     NotificationsComponent,
     ResultadosComponent
   ],
-  providers: [{provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true}]
+  providers: []
 })
 
 export class AdminLayoutModule { }

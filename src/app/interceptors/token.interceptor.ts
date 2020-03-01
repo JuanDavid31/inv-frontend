@@ -4,11 +4,11 @@ import { Observable } from 'rxjs/Observable';
 import { LocalStorageService } from '@app/services/localstorage/local-storage.service';
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
-    
-  constructor(public serviciosLocalStorage: LocalStorageService) {}
-  
+
+  constructor(public serviciosLocalStorage: LocalStorageService) { }
+
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    
+    console.log('Interceptando');
     request = request.clone({
       setHeaders: {
         Authorization: `${this.serviciosLocalStorage.darToken()}`

@@ -15,9 +15,10 @@ import {
 } from '@agm/core';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from '@app/components/public/login/login.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RegistroComponent } from '@app/components/public/registro/registro.component';
 import { RecuperarComponent } from '@app/components/public/recuperar/recuperar.component';
+import { TokenInterceptor } from './interceptors/token.interceptor';
 
 @NgModule({
   imports: [
@@ -40,7 +41,7 @@ import { RecuperarComponent } from '@app/components/public/recuperar/recuperar.c
     RegistroComponent,
     RecuperarComponent
   ],
-  providers: [],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
