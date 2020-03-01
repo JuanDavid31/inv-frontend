@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { catchError, map, takeUntil } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 import { PersonaProblematicaService } from '@app/services/http/persona-problematica/persona-problematica.service';
 import { NodoService } from '@app/services/http/nodo/nodo.service';
+import { ProblematicaPersonaService } from '@app/services/http/problematica-persona/problematica-persona.service';
 declare var cytoscape;
 
 declare var $;
@@ -39,11 +40,10 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
 
     private componentDestroyed$: Subject<boolean> = new Subject()
 
-    constructor(private serviciosLocalStorage: LocalStorageService,
-        private serviciosToast: ToastService,
+    constructor(private serviciosToast: ToastService,
         private serviciosPersonaProblematica: PersonaProblematicaService,
+        private serviciosProblematicaPersona: ProblematicaPersonaService,
         private serviciosNodo: NodoService,
-        private http: HttpClient,
         private router: Router,
         private activatedRoute: ActivatedRoute,
         private serviciosEventosSse: EventosSseService) { }
@@ -162,7 +162,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                 },
                 {
                     content: '<span class="fa fa-check fa-2x"></span>',
-                    select: function (ele) { }
+                    select: function () { }
                 }
             ]
         });
@@ -235,8 +235,8 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         const form = new FormData();
         form.append('foto', foto);
         form.append('nombre', this.nombreNodo);
-            
-        this.serviciosPersonaProblematica
+
+        this.serviciosProblematicaPersona
             .agregarNodo(this.idProblematicaActual, form, extensionFoto)
             .subscribe(res => {
                 if (res.error) {
@@ -320,7 +320,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
                 if (res.error) {
                     this.atenderErr(res.error);
                 } else {
-                    this.atenderPUTApadrinar(res);
+                    this.atenderPUTApadrinar();
                 }
             });
 
@@ -356,7 +356,7 @@ export class FaseIndividualComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    private atenderPUTApadrinar(res) {
+    private atenderPUTApadrinar() {
         let idDesde = this.nodoDe.id;
         let idA = this.nodoA.id;
         let ob = this.cy.getElementById(`${idDesde}${idA}`);
