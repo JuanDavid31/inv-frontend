@@ -39,7 +39,7 @@ export class ProblematicaPersonaService {
 			headers: new HttpHeaders({ 'extension': extensionFoto })
 		}
 
-		return this.http.post(`${this.darUrl(idProblematica)}/nodos`, form, options)
+		return this.http.post(`${this.darUrl(idProblematica)}/${this.serviciosLocalStorage.darEmail()}/nodos`, form, options)
 			.pipe(catchError(err => of(err)));
 	}
 
