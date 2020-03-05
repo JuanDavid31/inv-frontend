@@ -3,7 +3,6 @@ import { LocalStorageService } from 'app/services/localstorage/local-storage.ser
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from 'app/services/toast/toast.service';
 import { map, takeUntil } from 'rxjs/operators';
-import { NotificacionesService } from 'app/services/notificaciones/notificaciones.service';
 import { EventosSseService } from '@services/http/eventos-sse/eventos-sse.service';
 import { Subject } from 'rxjs';
 import { environment } from '@environment/environment';
@@ -24,7 +23,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	/**
 	 * Contiene grupos y edges.
 	 */
-	gruposYEdges: any[] = [];
+	gruposYNodos: any[] = [];
 
 	grupoDe: any;
 	grupoA: any;
@@ -32,14 +31,16 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	nodoSeleccionado: any;
 
 	grupoSeleccionado: any;
-	nuevoNombreGrupo: String = '';
+	nuevoNombreGrupo = '';
 
 	cy: any = {};
 	cdnd: any = {};
 
-	solicitandoOrganizacion: boolean = false;
+	solicitandoOrganizacion = false;
 
-	ejecucionEnMensajeRecibido: boolean = false;
+	ejecucionEnMensajeRecibido = false;
+
+	bloqueo = false;
 
 	usuarios: any[] = [{
 		nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
@@ -175,7 +176,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			grabbedNode: node => true, // filter function to specify which nodes are valid to grab and drop into other nodes
 			dropTarget: node => true, // filter function to specify which parent nodes are valid drop targets
 			dropSibling: node => true, // filter function to specify which orphan nodes are valid drop siblings
-			newParentNode: (grabbedNode, dropSibling) => ({ data: { esGrupo: true, nombre: `Nombre - ${Math.ceil(Math.random() * 10000)}` } }), // specifies element json for parent nodes added by dropping an orphan node on another orphan (a drop sibling)
+			newParentNode: (grabbedNode, dropSibling) => {
+				return ({ data: { esGrupo: true, nombre: `Nombre - ${Math.ceil(Math.random() * 10000)}` } })
+			}, // specifies element json for parent nodes added by dropping an orphan node on another orphan (a drop sibling)
 			overThreshold: 10, // make dragging over a drop target easier by expanding the hit area by this amount on all sides
 			outThreshold: 30 // make dragging out of a drop target a bit harder by expanding the hit area by this amount on all sides
 		};
@@ -263,10 +266,10 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	 * con el id pasado por parametro.
 	 **/
 	private eliminar(id) {
-		this.gruposYEdges
+		this.gruposYNodos
 			.some((grupo, indice) => { //ForEach que si retorna true entonces termina.
 				if (grupo.data.id === id) {
-					this.gruposYEdges.splice(indice, 1)
+					this.gruposYNodos.splice(indice, 1);
 					return true;
 				}
 				return false;
@@ -355,9 +358,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	/**
 	 * Workaround para bug. Cuando hay 2 o 3 grupos de nodos conectados por 1 o 2 edges
-	 * respectivamente, si seleccionanos un nodo hijo de alguno de los grupos; 
+	 * respectivamente, si seleccionanos un nodo hijo de alguno de los grupos;
 	 * lo movemos libremente y extraemos del grupo (Siempre y cuando este grupo tenga 3 o más
-	 * nodos. Si el grupo se elimina entonces el bug no sera visible) 
+	 * nodos. Si el grupo se elimina entonces el bug no sera visible)
 	 * entonces los edges no se refrescaran de manera visual. Esto se ve fatal para el usuario.
 	 */
 	private refrescarEdgesQueEstuvieronEnMovimiento(idNodoPadre) {
@@ -462,8 +465,6 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	bloqueo = false;
-
 	private alguienSeConecto({ nombre, email, solicitandoOrganizacion }) {
 		this.usuarios.push({ nombre, email, solicitandoOrganizacion });
 		this.serviciosToast.mostrarToast(undefined, `${nombre} se ha conectado.`);
@@ -478,7 +479,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		// 	return nodo;
 		// })
 		console.log(nodos);
-		this.gruposYEdges = nodos.filter(nodo => nodo.data.esGrupo);
+		this.gruposYNodos = nodos.filter(nodo => !nodo.data.source);
 		const nodosCytoscape = this.cy.nodes();
 
 		this.bloqueo = true;
@@ -575,7 +576,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			this.router.navigateByUrl('/dashboard');
 		} else {
 			solicitantes = solicitantes
-				.filter(solicitante => solicitante.email != this.serviciosLocalStorage.darEmail());
+				.filter(solicitante => solicitante.email !== this.serviciosLocalStorage.darEmail());
 			this.usuarios = this.usuarios.concat(solicitantes);
 		}
 	}
@@ -586,7 +587,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private moverElemento(json) {
-		const { elemento } = json
+		const { elemento } = json;
 		this.bloqueo = true;
 		this.cy.getElementById(elemento.data.id)
 			.move({
@@ -743,13 +744,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		const idPadre = this.grupoDe ? this.grupoDe.id : undefined;
 		const id = this.grupoA ? this.grupoA.id : undefined;
 
-		if (!this.nodosValidos(idPadre, id)) return;
-		if (!this.nodosDiferentes(idPadre, id)) return;
-		if (!this.existeGrupo(idPadre) || !this.existeGrupo(id)) return;
-		if (this.yaExisteRelacion(idPadre, id)) return;
-		if (this.tieneOtroPadre(id)) return;
-		if (this.tieneOtroHijo(idPadre)) return;
-		if (this.esConexion(idPadre, id)) return;
+		if (!this.nodosValidos(idPadre, id)) {return; }
+		if (!this.nodosDiferentes(idPadre, id)) {return; }
+		if (!this.existeNodo(idPadre) || !this.existeNodo(id)) {return; }
+		if (this.yaExisteRelacion(idPadre, id)) {return; }
+		if (this.tieneOtroPadre(id)) {return; }
+		if (this.tieneOtroHijo(idPadre)) {return; }
+		if (this.esConexion(idPadre, id)) {return; }
 
 		this.crearEdge(id, idPadre);
 	}
@@ -764,13 +765,13 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private nodosDiferentes(idPadre, id) {
 		if (idPadre !== id) { return true; }
-		this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'danger')
+		this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'danger');
 		return false;
 	}
 
-	private existeGrupo(id) {
+	private existeNodo(id) {
 		const nodo = this.cy.getElementById(id);
-		const existe = nodo.length > 0 && nodo.isParent();;
+		const existe = nodo.length > 0;
 		if (!existe) {
 			this.serviciosToast.mostrarToast('Error', 'Debe seleccionar 2 nodos diferentes', 'danger')
 		}
@@ -786,12 +787,12 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private esEdge(id) {
-		let posibleEdge = this.cy.getElementById(id);
+		const posibleEdge = this.cy.getElementById(id);
 		return posibleEdge.length > 0 && posibleEdge.isEdge();
 	}
 
 	private tieneOtroPadre(idNodo) {
-		const tieneOtroPadre = this.gruposYEdges.find(grupo => this.esEdge(`${grupo.data.id}${idNodo}`)) !== undefined
+		const tieneOtroPadre = this.gruposYNodos.find(grupo => this.esEdge(`${grupo.data.id}${idNodo}`)) !== undefined;
 		if (tieneOtroPadre) {
 			this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 padres.', 'danger');
 			return true;
@@ -800,7 +801,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private tieneOtroHijo(idPadre) {
-		const tieneOtroHijo = this.gruposYEdges.find(grupo => this.esEdge(`${idPadre}${grupo.id}`)) !== undefined
+		const tieneOtroHijo = this.gruposYNodos.find(grupo => this.esEdge(`${idPadre}${grupo.id}`)) !== undefined;
 		if (tieneOtroHijo) {
 			this.serviciosToast.mostrarToast('Error', 'Un nodo no puede tener 2 hijos.', 'danger');
 			return true;
@@ -809,7 +810,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	private esConexion(idPadre, id) {
-		let ob = this.cy.getElementById(`${idPadre}${id}`);
+		const ob = this.cy.getElementById(`${idPadre}${id}`);
 		if (ob.length > 0 && ob[0].isEdge()) {
 			this.serviciosToast.mostrarToast('Error', 'Ya existe la conexión', 'danger');
 			return true;
@@ -840,7 +841,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	cambiarNombreGrupo(id, nuevoNombre) {
-		this.gruposYEdges
+		this.gruposYNodos
 			.find(grupo => grupo.data.id === id)
 			.data.nombre = nuevoNombre;
 
@@ -864,8 +865,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	cambioUnNombre(datos) {
 		const { id, nombre } = datos.grupo.data;
 
-		const nodoEncontrado = this.gruposYEdges
-			.find(grupo => grupo.data.id === id)
+		const nodoEncontrado = this.gruposYNodos.find(grupo => grupo.data.id === id);
 		const nombreAntiguo = nodoEncontrado.data.nombre;
 		nodoEncontrado.data.nombre = nombre;
 		const nodoCy = this.cy.getElementById(id);
@@ -882,21 +882,21 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	}
 
 	darGruposIterables() {
-		return this.gruposYEdges.length > 0 ? this.gruposYEdges.filter(grupo => grupo.data.esGrupo) : [];
+		return this.gruposYNodos;
 	}
 
 	/**
 	 * Recibe un objeto tipo nodo o edge de cytoscape.
 	 */
 	private agregarAGruposYEdges(grupoOEdge) {
-		const elementoEncontrado = this.gruposYEdges.find(nodo => nodo.data.id === grupoOEdge.data().id);
-		if (elementoEncontrado) return;
-		this.gruposYEdges.push({ data: grupoOEdge.data() });
+		const elementoEncontrado = this.gruposYNodos.find(nodo => nodo.data.id === grupoOEdge.data().id);
+		if (elementoEncontrado) {return; }
+		this.gruposYNodos.push({ data: grupoOEdge.data() });
 	}
 
 	private abrirModalCambioNombreGrupo(elemento) {
 		if (!elemento.data().esGrupo) {
-			this.serviciosToast.mostrarToast('Error', 'El cambio de nombre es solo para grupos.', 'danger')
+			this.serviciosToast.mostrarToast('Error', 'El cambio de nombre es solo para grupos.', 'danger');
 			return;
 		}
 		this.grupoSeleccionado = elemento.data();
@@ -905,7 +905,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	private abrirModalImagenNodo(elemento) {
 		if (elemento.data().esGrupo || !elemento.isNode()) {
-			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'danger')
+			this.serviciosToast.mostrarToast('Error', 'Solo se pueden visualizar las imagenes de los nodos o individuales.', 'danger');
 			return;
 		}
 		this.nodoSeleccionado = elemento.data();
