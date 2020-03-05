@@ -134,7 +134,7 @@ export class ResultadosComponent implements OnInit {
 		// 	nodeOverlap: 1,
 		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		// }).run()
-		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
+		this.cy.layout({ name: 'cose-bilkent', nodeRepulsion: 1500, idealEdgeLength: 150, animationDuration: 400 }).run();
 	}
 
 	private dibujarNodosPadre(nodos) {
@@ -233,7 +233,7 @@ export class ResultadosComponent implements OnInit {
 		// 	nodeOverlap: 1,
 		// 	boundingBox: { x1: 0, y1: 0, w: 800, h: 1500 }
 		// }).run()
-		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
+		this.cy.layout({ name: 'cose-bilkent', nodeRepulsion: 1500, idealEdgeLength: 150, animationDuration: 400 }).run();
 	}
 
 	actualizarListaEscritos() {

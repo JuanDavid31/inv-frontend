@@ -42,6 +42,8 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 
 	bloqueo = false;
 
+	msInicioAnimacion = 400;
+
 	usuarios: any[] = [{
 		nombre: `${this.serviciosLocalStorage.darNombres()} ${this.serviciosLocalStorage.darApellidos()} (Tú)`,
 		email: this.serviciosLocalStorage.darEmail(),
@@ -120,7 +122,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 						'border-color': '#2980b9',
 						'border-width': 3,
 						'border-opacity': 0.5,
-						'label': 'data(id)'
+						'label': 'data(nombre)'
 					}
 				},
 				{
@@ -201,7 +203,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private addEvent(event) {
 		console.log('add');
 		const elemento = event.target;
-		this.agregarAGruposYEdges(elemento);
+		this.agregarAGruposYNodos(elemento);
 
 		if (this.bloqueo) {
 			this.bloqueo = false;
@@ -316,6 +318,9 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	private positionEvent(event) {
 		console.log('position');
 		const nodo = event.target;
+		if (nodo.data().esGrupo) {
+			this.refrescarEdges();
+		}
 		if (this.bloqueo) {
 			this.bloqueo = false;
 			return;
@@ -328,6 +333,17 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		} else {
 			this.enviarMover(nodo);
 		}
+	}
+
+	private refrescarEdges() {
+		const edges = this.cy.edges();
+		edges.forEach(edge => {
+			const data = edge.data();
+			this.bloqueo = true;
+			edge.remove();
+			this.bloqueo = true;
+			this.cy.add({ data });
+		})
 	}
 
 	private enviarMoverPadre(nodo) {
@@ -380,7 +396,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			selector: 'edge',
 			commands: [
 				{
-					content: '<span class="fa fa-check fa-2x"></span>',
+					content: '<span class="fa fa-trash fa-2x"></span>',
 					select: this.desconectar.bind(this)
 				},
 				{
@@ -479,7 +495,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		// 	return nodo;
 		// })
 		console.log(nodos);
-		this.gruposYNodos = nodos.filter(nodo => !nodo.data.source);
+		this.gruposYNodos = nodos.filter(nodo => nodo.data.source === undefined);
 		const nodosCytoscape = this.cy.nodes();
 
 		this.bloqueo = true;
@@ -534,7 +550,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	 * El layout cose asigna posiciones a nodos normales y compuestos
 	 */
 	private activarLayoutCose() {
-		this.cy.layout({ name: 'cose-bilkent', animationDuration: 400 }).run();
+		this.cy.layout({ name: 'cose-bilkent', nodeRepulsion: 2000, idealEdgeLength: 150, animationDuration: this.msInicioAnimacion }).run();
 		// this.cy.layout({
 		// 	name: 'cose',
 		// 	nodeOverlap: 1,
@@ -553,7 +569,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 				accion: 'Actualizar posiciones',
 				nodos: nodos.jsons()
 			}));
-		}, 0);
+		}, this.msInicioAnimacion + 1);
 	}
 
 	/**
@@ -632,7 +648,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			nodoBloqueado.style({
 				'border-color': 'purple',
 				'border-width': 10,
-				'label': `${nombreUsuario} - ${nodoBloqueado.data().id}`
+				'label': `${nombreUsuario} - ${nodoBloqueado.data().nombre}`
 			});
 		})
 	}
@@ -675,7 +691,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			nodoBloqueado.style({
 				'border-color': '#2980b9',
 				'border-width': 3,
-				'label': nodoBloqueado.data().id
+				'label': nodoBloqueado.data().nombre
 			});
 		})
 	}
@@ -888,10 +904,12 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 	/**
 	 * Recibe un objeto tipo nodo o edge de cytoscape.
 	 */
-	private agregarAGruposYEdges(grupoOEdge) {
-		const elementoEncontrado = this.gruposYNodos.find(nodo => nodo.data.id === grupoOEdge.data().id);
-		if (elementoEncontrado) {return; }
-		this.gruposYNodos.push({ data: grupoOEdge.data() });
+	private agregarAGruposYNodos(elemento) {
+		const existe = this.gruposYNodos.find(nodo => nodo.data.id === elemento.data().id);
+		const esEdge = elemento.data().source !== undefined;
+		if (existe) {return; }
+		if (esEdge) {return; }
+		this.gruposYNodos.push({ data: elemento.data() });
 	}
 
 	private abrirModalCambioNombreGrupo(elemento) {
