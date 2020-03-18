@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { catchError, map, takeUntil } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { LocalStorageService } from 'app/services/localstorage/local-storage.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from 'app/services/toast/toast.service';
@@ -114,6 +114,24 @@ export class FaseReaccionesComponent implements OnInit, OnDestroy {
             minZoom: 0.1,
             maxZoom: 2
         });
+        this.cy.on('position', this.positionEvent.bind(this));
+    }
+
+    private positionEvent(event) {
+        console.log('position');
+        const nodo = event.target;
+        if (nodo.data().esGrupo) {
+            this.refrescarEdges();
+        }
+    }
+
+    private refrescarEdges() {
+        const edges = this.cy.edges();
+        edges.forEach(edge => {
+            const data = edge.data();
+            edge.remove();
+            this.cy.add({ data });
+        })
     }
 
     private cargarNodos() {

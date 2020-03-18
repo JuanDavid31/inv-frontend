@@ -130,7 +130,25 @@ export class FaseEscritosComponent implements OnInit, OnDestroy {
 			minZoom: 0.1,
 			maxZoom: 2
 		});
+		this.cy.on('position', this.positionEvent.bind(this));
 		this.cy.on('select', this.visualizarEscrito.bind(this))
+	}
+
+	private positionEvent(event) {
+		console.log('position');
+		const nodo = event.target;
+		if (nodo.data().esGrupo) {
+			this.refrescarEdges();
+		}
+	}
+
+	private refrescarEdges() {
+		const edges = this.cy.edges();
+		edges.forEach(edge => {
+			const data = edge.data();
+			edge.remove();
+			this.cy.add({ data });
+		})
 	}
 
 	existeEscrito = false;
