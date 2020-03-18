@@ -767,6 +767,7 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 		if (this.tieneOtroPadre(id)) {return; }
 		if (this.tieneOtroHijo(idPadre)) {return; }
 		if (this.esConexion(idPadre, id)) {return; }
+		if (this.sonGrupoYNodo(idPadre, id)) { return; }
 
 		this.crearEdge(id, idPadre);
 	}
@@ -832,6 +833,27 @@ export class FaseGrupalComponent implements OnInit, OnDestroy {
 			return true;
 		}
 		return false;
+	}
+
+	private sonGrupoYNodo(idPadre, id){
+		const grupoEsPadre = this.esGrupo(idPadre);
+		const nodoEsHijo = this.esNodo(id);
+		const nodoEsPadre = this.esNodo(idPadre);
+		const grupoEsHijo = this.esGrupo(id);
+		if ((grupoEsPadre && nodoEsHijo) || (nodoEsPadre && grupoEsHijo)) {
+			this.serviciosToast.mostrarToast('Error', 'No se puede conectar un grupo con un nodo', 'danger');
+			return true;
+		}
+	}
+
+	private esGrupo(id: string) {
+		const idString = id + "";
+		return idString.length >= 5; //* 10000 tiene 5 digitos y los ids autogenerados tienen mñas de 5.
+	}
+	
+	private esNodo(id: string) {
+		const idString = id + "";
+		return idString.length < 5;
 	}
 
 	private crearEdge(idNodo, idPadre) {
