@@ -75,3 +75,24 @@ h1{
     object-fit: contain;
     object-position: center;
 }
+
+form.escrito-actual{
+	height: 100%;
+    margin-bottom: 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+form.escrito-actual > .descripcion-escrito{
+	flex-grow: 1;
+	display: flex;
+    flex-direction: column;
+}
+
+form.escrito-actual > .descripcion-escrito > textarea{
+	flex-grow: 1;
+}
+
+form.escrito-actual > button{
+	width: min-content;
+}

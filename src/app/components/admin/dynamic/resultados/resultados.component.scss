@@ -61,6 +61,28 @@ h1{
     align-items: center;
 }
 
+.div-escrito .modal-body{
+	display: flex;
+    flex-direction: column;
+}
+
+.div-escrito .modal-body > form.mb-0{
+	flex-grow: 1;
+	display: flex;
+}
+
+.div-escrito .modal-body > form.mb-0 > div{
+	flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.div-escrito .modal-body > form.mb-0 textarea{
+	flex-grow: 1;
+}
+
+
+
 .modal-content-mensaje{
 	padding: 20px;
 }
